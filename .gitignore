@@ -1,34 +1,116 @@
-# Gradle files
+# === GLOBAL ===
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# === NODE / REACT.JS ===
+node_modules/
+build/
+dist/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.env
+.env.*.local
+.vscode/
+
+# === JAVA / SPRING BOOT ===
+target/
+out/
+*.iml
+*.class
+*.jar
+*.war
+*.ear
+*.log
+.idea/
+*.iws
+*.ipr
+*.bak
+*.tmp
+.settings/
+.project
+.classpath
+.springBeans
+mvnw
+mvnw.cmd
+/.mvn/
+
+# === GRADLE (Android + Spring Boot) ===
 .gradle/
 build/
+!gradle-wrapper.jar
+gradle-app.setting
+gradle-wrapper.properties
+gradle-wrapper.jar
+**/local.properties
 
-# Local configuration file (sdk path, etc)
-local.properties
+# === ANDROID ===
+*.apk
+*.ap_
+*.dex
+*.class
+*.so
+*.keystore
+*.jks
+*.db
+captures/
+.cxx/
+.externalNativeBuild/
+.idea/
+*.hprof
 
-# Log/OS Files
+# Android Studio
+*.iml
+.idea
+/.idea/*
+/*.iml
+.gradle
+/local.properties
+/.settings/
 *.log
 
-# Android Studio generated files and folders
-captures/
-.externalNativeBuild/
-.cxx/
-*.aab
-*.apk
-output-metadata.json
+# === PYTHON / PYTORCH / ML ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.spec
+*.ipynb_checkpoints/
+.env
+.venv/
+venv/
+ENV/
+env/
+pip-wheel-metadata/
+.cache/
+.mypy_cache/
+.pytest_cache/
+.dvc/
+wandb/
+checkpoints/
+runs/
+*.ckpt
+*.pt
+*.pth
+*.h5
+models/
+logs/
 
-# IntelliJ
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
+# Jupyter Notebook outputs
+*.nbconvert.ipynb
+.ipynb_checkpoints/
 
-# Keystore files
-*.jks
-*.keystore
+# VSCode Python
+.vscode/
+*.code-workspace
 
-# Google Services (e.g. APIs or Firebase)
-google-services.json
-
-# Android Profiling
-*.hprof

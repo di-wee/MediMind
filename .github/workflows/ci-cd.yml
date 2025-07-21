@@ -1,0 +1,67 @@
+name: Full Stack CI/CD with SAST & SCA
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        language: [java, javascript, python]
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # --------- SAST: CodeQL ---------
+      - name: 🛡️ Init CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: ⚙️ Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: 🔍 Analyze with CodeQL
+        uses: github/codeql-action/analyze@v3
+
+      # --------- Java: Build Spring Boot ---------
+      - name: ☕ Build Spring Boot (Maven)
+        if: matrix.language == 'java'
+        run: |
+          cd backend  # adjust if your spring folder is elsewhere
+          mvn clean install
+
+      # --------- JS: Build React Frontend ---------
+      - name: ⚛️ Build React Frontend
+        if: matrix.language == 'javascript'
+        run: |
+          cd frontend  # adjust if your react folder is elsewhere
+          npm install
+          npm run build
+
+      # --------- Python: ML Model Lint/Test ---------
+      - name: 🐍 Check Python ML Code
+        if: matrix.language == 'python'
+        run: |
+          cd ml  # adjust to your ML folder
+          pip install -r requirements.txt
+          python -m unittest discover
+
+      # --------- Android: Build Kotlin App ---------
+      - name: 📱 Build Android App
+        run: |
+          cd android  # adjust if needed
+          ./gradlew build
+
+      # --------- SCA (Optional): Snyk Scan ---------
+      - name: 🔒 Snyk Dependency Scan
+        uses: snyk/actions/${{ matrix.language }}@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+
