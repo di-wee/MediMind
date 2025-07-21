@@ -1,4 +1,4 @@
-name: Full Stack CI/CD with SAST & SCA
+name: Full Stack CI/CD with SAST
 
 on:
   push:
@@ -8,10 +8,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        language: [java, javascript, python]
-
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -20,7 +16,7 @@ jobs:
       - name: 🛡️ Init CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: ${{ matrix.language }}
+          languages: java,javascript,python
 
       - name: ⚙️ Autobuild
         uses: github/codeql-action/autobuild@v3
@@ -28,40 +24,46 @@ jobs:
       - name: 🔍 Analyze with CodeQL
         uses: github/codeql-action/analyze@v3
 
-      # --------- Java: Build Spring Boot ---------
-      - name: ☕ Build Spring Boot (Maven)
-        if: matrix.language == 'java'
-        run: |
-          cd backend  # adjust if your spring folder is elsewhere
-          mvn clean install
-
-      # --------- JS: Build React Frontend ---------
+      # --------- React Frontend ---------
       - name: ⚛️ Build React Frontend
-        if: matrix.language == 'javascript'
+        working-directory: ./frontend  # Adjust if needed
         run: |
-          cd frontend  # adjust if your react folder is elsewhere
           npm install
           npm run build
 
-      # --------- Python: ML Model Lint/Test ---------
-      - name: 🐍 Check Python ML Code
-        if: matrix.language == 'python'
+      # --------- Spring Boot Backend ---------
+      - name: ☕ Build Spring Boot
+        working-directory: ./backend  # Adjust if needed
         run: |
-          cd ml  # adjust to your ML folder
+          mvn clean install
+
+      # --------- Python ML ---------
+      - name: 🐍 Run Python ML Tests
+        working-directory: ./ml  # Adjust if needed
+        run: |
           pip install -r requirements.txt
           python -m unittest discover
 
-      # --------- Android: Build Kotlin App ---------
+      # --------- Android ---------
       - name: 📱 Build Android App
+        working-directory: ./android  # Adjust if needed
         run: |
-          cd android  # adjust if needed
           ./gradlew build
 
-      # --------- SCA (Optional): Snyk Scan ---------
-      - name: 🔒 Snyk Dependency Scan
-        uses: snyk/actions/${{ matrix.language }}@master
+      # --------- (Optional) SCA: Snyk Scan ---------
+      - name: 🔒 Snyk Scan (React)
+        uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
+          args: --file=frontend/package.json
+
+      - name: 🔒 Snyk Scan (Java)
+        uses: snyk/actions/maven@master
+        env:
+          SNYK_TOKEN: ${{ secrets/SNYK_TOKEN }}
+        with:
+          command: test
+          args: --file=backend/pom.xml
 

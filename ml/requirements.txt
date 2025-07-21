@@ -1,0 +1,12 @@
+torch==2.1.0        # or the version you're using
+torchvision         # if using image data
+numpy
+pandas
+scikit-learn
+matplotlib          # if you're plotting
+jupyter             # optional for notebooks
+seaborn
+opencv-python       # if processing images
+transformers        # for HuggingFace models
+requests
+tqdm                # for progress bars
