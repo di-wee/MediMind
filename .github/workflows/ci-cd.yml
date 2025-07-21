@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true  # ✅ auto-cancels earlier runs on same branch
+
 jobs:
   build:
     runs-on: ubuntu-latest
