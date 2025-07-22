@@ -30,13 +30,17 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
+      
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+      
+      - name: Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+      
+      - name: Snyk Scan (Java Maven - Spring Boot)
+        working-directory: ./backend
+        run: snyk test
 
-      - name: Snyk Spring Boot Scan
-        uses: snyk/actions/maven@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --file=backend/pom.xml
 
       # -------- Python (ML) --------
       - name: Install Python dependencies
