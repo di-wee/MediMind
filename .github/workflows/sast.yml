@@ -17,6 +17,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create artifact folder
+        run: mkdir -p artifacts/sast
+
       - name: Set up Java 21
         uses: actions/setup-java@v3
         with:
@@ -35,8 +38,13 @@ jobs:
       - name: Analyze with CodeQL
         uses: github/codeql-action/analyze@v3
 
-      # Optional: Android Lint
+      # Android Lint (SAST context)
       - name: Android Lint
         working-directory: ./android
         run: ./gradlew lint
 
+      - name: Upload Android Lint Report (SAST)
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-lint-report-sast
+          path: android/app/build/reports/lint-results.html
