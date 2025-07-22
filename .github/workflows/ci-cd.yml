@@ -21,25 +21,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # SAST: CodeQL Init
+      # Set up Java 21 for Spring Boot project
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      # Initialize CodeQL (SAST)
       - name: Init CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: java,javascript,python
 
-      # Java Backend: Build + Unit Test
+      # Build and test Java Spring Boot backend
       - name: Build & Test Spring Boot (Maven)
         working-directory: ./backend
         run: |
           mvn clean install
 
-      # Manual Build for CodeQL (Java)
+      # Manual build required for CodeQL Java analysis
       - name: Manual Build for CodeQL (Java)
         working-directory: ./backend
         run: |
           mvn clean compile
 
-      # React Frontend: Build & Test
+      # Build and test React frontend
       - name: Build & Test React Frontend
         working-directory: ./frontend
         run: |
@@ -47,24 +54,24 @@ jobs:
           npm run test -- --watchAll=false
           npm run build
 
-      # Python ML: Install & Unit Test
+      # Install and test Python ML code
       - name: Install & Test Python ML
         working-directory: ./ml
         run: |
           pip install -r requirements.txt
           python -m unittest discover
 
-      # Android App Build
+      # Build Android Kotlin app
       - name: Build Android App
         working-directory: ./android
         run: |
           ./gradlew build
 
-      # SAST: CodeQL Analyze
+      # Run CodeQL analysis
       - name: Analyze with CodeQL
         uses: github/codeql-action/analyze@v3
 
-      # SCA: Snyk Scan (React)
+      # Snyk Scan for React dependencies
       - name: Snyk Scan (React)
         uses: snyk/actions/node@master
         env:
@@ -73,7 +80,7 @@ jobs:
           command: test
           args: --file=frontend/package.json
 
-      # SCA: Snyk Scan (Java)
+      # Snyk Scan for Java dependencies
       - name: Snyk Scan (Java)
         uses: snyk/actions/maven@master
         env:
