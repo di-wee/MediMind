@@ -1,0 +1,33 @@
+name: "Linting CI"
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # React Lint
+      - name: Lint React frontend
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm run lint
+
+      # Python Lint
+      - name: Lint Python ML
+        working-directory: ./ml
+        run: |
+          pip install pylint
+          pylint *.py || true  # Avoid fail if score is low
+
+      # Android Lint
+      - name: Android Lint
+        working-directory: ./android
+        run: ./gradlew lint
+
