@@ -12,6 +12,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create artifact folder
+        run: mkdir -p artifacts/sca
+
       ##################################
       # React (Node.js) - Snyk SCA
       ##################################
@@ -27,7 +30,13 @@ jobs:
 
       - name: Snyk Scan (React - Node.js)
         working-directory: ./frontend
-        run: snyk test --file=package.json || true
+        run: snyk test --file=package.json --json-file-output=../../artifacts/sca/snyk-node-report.json || true
+
+      - name: Upload Snyk Node Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-node-report
+          path: artifacts/sca/snyk-node-report.json
 
       ##################################
       # Java (Spring Boot) - Snyk SCA
@@ -40,7 +49,13 @@ jobs:
 
       - name: Snyk Scan (Java Maven - Spring Boot)
         working-directory: ./backend
-        run: snyk test --file=pom.xml || true
+        run: snyk test --file=pom.xml --json-file-output=../artifacts/sca/snyk-java-report.json || true
+
+      - name: Upload Snyk Java Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-java-report
+          path: artifacts/sca/snyk-java-report.json
 
       ##################################
       # Python (ML) - pip-audit SCA
@@ -58,4 +73,10 @@ jobs:
         working-directory: ./ml
         run: |
           pip install pip-audit
-          pip-audit -r requirements.txt || true
+          pip-audit -r requirements.txt -f json -o ../artifacts/sca/pip-audit-report.json || true
+
+      - name: Upload pip-audit Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report
+          path: artifacts/sca/pip-audit-report.json
