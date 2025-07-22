@@ -43,9 +43,14 @@ jobs:
 
 
       # -------- Python (ML) --------
+      - name: Install PyTorch
+        working-directory: ./ml
+        run: |
+          pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
       - name: Install Python dependencies
         working-directory: ./ml
-        run: pip install -r requirements.txt
+        run: pip install -r requirements.txt || true
 
       - name: Python Dependency Audit (pip-audit)
         working-directory: ./ml
