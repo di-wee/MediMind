@@ -12,22 +12,43 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create artifact folder
+        run: |
+          mkdir -p artifacts/lint
+
       # React Lint
       - name: Lint React frontend
         working-directory: ./frontend
         run: |
           npm install
-          npm run lint
+          npm run lint > ../../artifacts/lint/eslint-report.txt || true
+
+      - name: Upload ESLint Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-report
+          path: artifacts/lint/eslint-report.txt
 
       # Python Lint
       - name: Lint Python ML
         working-directory: ./ml
         run: |
           pip install pylint
-          pylint *.py || true  # Avoid fail if score is low
+          pylint *.py > ../artifacts/lint/pylint-report.txt || true
+
+      - name: Upload Pylint Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pylint-report
+          path: artifacts/lint/pylint-report.txt
 
       # Android Lint
       - name: Android Lint
         working-directory: ./android
         run: ./gradlew lint
 
+      - name: Upload Android Lint Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-lint-report
+          path: android/app/build/reports/lint-results.html
