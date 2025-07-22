@@ -86,11 +86,6 @@ As Singapore moves towards a super-aged society, chronic illnesses such as diabe
 - Caregiver alerts for non-response
 - Personalized ML-based schedule adjustment
 
----
-
-## 🔗 Relationships
-- 1 Doctor : Many Patients  
-- 1 Patient : 1 Doctor  
 
 ---
 
