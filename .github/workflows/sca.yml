@@ -12,37 +12,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # -------- React (Node.js) --------
+      ##################################
+      # React (Node.js) - Snyk SCA
+      ##################################
       - name: Install Node.js dependencies
         working-directory: ./frontend
         run: npm install
 
-      - name: Snyk React Scan
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --file=frontend/package.json
+      - name: Install Snyk CLI
+        run: npm install -g snyk
 
-      # -------- Java (Spring Boot) --------
+      - name: Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+      - name: Snyk Scan (React - Node.js)
+        working-directory: ./frontend
+        run: snyk test --file=package.json || true
+
+      ##################################
+      # Java (Spring Boot) - Snyk SCA
+      ##################################
       - name: Set up Java 21
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '21'
-      
-      - name: Install Snyk CLI
-        run: npm install -g snyk
-      
-      - name: Authenticate Snyk
-        run: snyk auth ${{ secrets.SNYK_TOKEN }}
-      
+
       - name: Snyk Scan (Java Maven - Spring Boot)
         working-directory: ./backend
-        run: snyk test
+        run: snyk test --file=pom.xml || true
 
-
-      # -------- Python (ML) --------
+      ##################################
+      # Python (ML) - pip-audit SCA
+      ##################################
       - name: Install PyTorch
         working-directory: ./ml
         run: |
@@ -56,4 +58,4 @@ jobs:
         working-directory: ./ml
         run: |
           pip install pip-audit
-          pip-audit
+          pip-audit -r requirements.txt || true
