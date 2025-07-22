@@ -1,61 +1,71 @@
-name: Full Stack CI/CD with SAST
+name: Full Stack CI/CD with SAST & Unit Tests
 
 on:
   push:
     branches: [main]
 
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true  # ✅ auto-cancels earlier runs on same branch
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # --------- SAST: CodeQL ---------
-      - name: 🛡️ Init CodeQL
+      # SAST: CodeQL Init
+      - name: Init CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: java,javascript,python
 
-      - name: ⚙️ Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: 🔍 Analyze with CodeQL
-        uses: github/codeql-action/analyze@v3
-
-      # --------- React Frontend ---------
-      - name: ⚛️ Build React Frontend
-        working-directory: ./frontend  # adjust if needed
-        run: |
-          npm install
-          npm run build
-
-      # --------- Spring Boot Backend ---------
-      - name: ☕ Build Spring Boot
-        working-directory: ./backend  # adjust if needed
+      # Java Backend: Build + Unit Test
+      - name: Build & Test Spring Boot (Maven)
+        working-directory: ./backend
         run: |
           mvn clean install
 
-      # --------- Python ML ---------
-      - name: 🐍 Run Python ML Tests
-        working-directory: ./ml  # adjust if needed
+      # Manual Build for CodeQL (Java)
+      - name: Manual Build for CodeQL (Java)
+        working-directory: ./backend
+        run: |
+          mvn clean compile
+
+      # React Frontend: Build & Test
+      - name: Build & Test React Frontend
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm run test -- --watchAll=false
+          npm run build
+
+      # Python ML: Install & Unit Test
+      - name: Install & Test Python ML
+        working-directory: ./ml
         run: |
           pip install -r requirements.txt
           python -m unittest discover
 
-      # --------- Android App ---------
-      - name: 📱 Build Android App
-        working-directory: ./android  # adjust if needed
+      # Android App Build
+      - name: Build Android App
+        working-directory: ./android
         run: |
           ./gradlew build
 
-      # --------- SCA: Snyk Scan (Optional) ---------
-      - name: 🔒 Snyk Scan (React)
+      # SAST: CodeQL Analyze
+      - name: Analyze with CodeQL
+        uses: github/codeql-action/analyze@v3
+
+      # SCA: Snyk Scan (React)
+      - name: Snyk Scan (React)
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -63,11 +73,11 @@ jobs:
           command: test
           args: --file=frontend/package.json
 
-      - name: 🔒 Snyk Scan (Java)
+      # SCA: Snyk Scan (Java)
+      - name: Snyk Scan (Java)
         uses: snyk/actions/maven@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
           args: --file=backend/pom.xml
-
