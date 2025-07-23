@@ -30,7 +30,9 @@ jobs:
 
       - name: Snyk Scan (React - Node.js)
         working-directory: ./frontend
-        run: snyk test --file=package.json --json-file-output=../../artifacts/sca/snyk-node-report.json || true
+        run: |
+          mkdir -p ../artifacts/sca
+          snyk test --file=package.json --json > ../artifacts/sca/snyk-node-report.json || echo '{}' > ../artifacts/sca/snyk-node-report.json
      
       - name: Upload Snyk Node Report
         uses: actions/upload-artifact@v4
