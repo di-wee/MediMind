@@ -31,7 +31,7 @@ jobs:
       - name: Snyk Scan (React - Node.js)
         working-directory: ./frontend
         run: snyk test --file=package.json --json-file-output=../../artifacts/sca/snyk-node-report.json || true
-
+     
       - name: Upload Snyk Node Report
         uses: actions/upload-artifact@v4
         with:
@@ -82,6 +82,11 @@ jobs:
           for nb in *.ipynb; do
             jupyter nbconvert --to html --execute "$nb" --output-dir=../../artifacts/notebooks || true
           done
+
+      - name: Copy notebooks to artifact folder
+        run: |
+          mkdir -p artifacts/notebooks
+          cp ml/*.ipynb artifacts/notebooks/ || true
 
       - name: Upload Notebook HTML Reports
         uses: actions/upload-artifact@v4
