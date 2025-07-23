@@ -51,13 +51,14 @@ jobs:
       - name: Lint Jupyter notebooks
         working-directory: ./ml
         run: |
+          mkdir -p ../artifacts/lint
           pip install nbqa pylint
           if ls *.ipynb 1> /dev/null 2>&1; then
-            nbqa pylint *.ipynb > ../../artifacts/lint/nbqa-notebook-report.txt || echo "nbqa failed" > ../../artifacts/lint/nbqa-notebook-report.txt
+            nbqa pylint *.ipynb > ../artifacts/lint/nbqa-notebook-report.txt || echo "nbqa failed" > ../artifacts/lint/nbqa-notebook-report.txt
           else
-            echo "No Jupyter notebooks found" > ../../artifacts/lint/nbqa-notebook-report.txt
+            echo "No Jupyter notebooks found" > ../artifacts/lint/nbqa-notebook-report.txt
           fi
-
+      
       - name: Upload Jupyter Lint Report
         uses: actions/upload-artifact@v4
         with:
