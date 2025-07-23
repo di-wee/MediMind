@@ -21,7 +21,11 @@ jobs:
         working-directory: ./frontend
         run: |
           npm install
-          npm run lint > ../../artifacts/lint/eslint-report.txt || true
+          if npm run | grep -q "lint"; then
+            npm run lint > ../../artifacts/lint/eslint-report.txt || echo "Lint failed" > ../../artifacts/lint/eslint-report.txt
+          else
+            echo "No lint script defined" > ../../artifacts/lint/eslint-report.txt
+          fi
 
       - name: Upload ESLint Report
         uses: actions/upload-artifact@v4
@@ -41,13 +45,17 @@ jobs:
         with:
           name: pylint-report
           path: artifacts/lint/pylint-report.txt
-
-      # Jupyter Notebook Linting (nbqa)
+ 
+      # Jupyter Notebook nbqa
       - name: Lint Jupyter notebooks
         working-directory: ./ml
         run: |
           pip install nbqa pylint
-          nbqa pylint *.ipynb > ../../artifacts/lint/nbqa-notebook-report.txt || true
+          if ls *.ipynb 1> /dev/null 2>&1; then
+            nbqa pylint *.ipynb > ../../artifacts/lint/nbqa-notebook-report.txt || echo "nbqa failed" > ../../artifacts/lint/nbqa-notebook-report.txt
+          else
+            echo "No Jupyter notebooks found" > ../../artifacts/lint/nbqa-notebook-report.txt
+          fi
 
       - name: Upload Jupyter Lint Report
         uses: actions/upload-artifact@v4
@@ -55,13 +63,13 @@ jobs:
           name: nbqa-notebook-report
           path: artifacts/lint/nbqa-notebook-report.txt
 
-      # Android Lint
+           # Android Lint
       - name: Android Lint
         working-directory: ./android
         run: ./gradlew lint
-
+      
       - name: Upload Android Lint Report
         uses: actions/upload-artifact@v4
         with:
           name: android-lint-report
-          path: android/app/build/reports/lint-results.html
+          path: android/app/build/reports/lint-results-*.html
