@@ -22,10 +22,11 @@ jobs:
         run: |
           npm install
           if npm run | grep -q "lint"; then
-            npm run lint > ../../artifacts/lint/eslint-report.txt || echo "Lint failed" > ../../artifacts/lint/eslint-report.txt
+            npm run lint > ../artifacts/lint/eslint-report.txt || echo "Lint failed" > ../artifacts/lint/eslint-report.txt
           else
-            echo "No lint script defined" > ../../artifacts/lint/eslint-report.txt
+            echo "No lint script defined" > ../artifacts/lint/eslint-report.txt
           fi
+          
 
       - name: Upload ESLint Report
         uses: actions/upload-artifact@v4
