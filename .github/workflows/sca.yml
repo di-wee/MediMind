@@ -57,26 +57,34 @@ jobs:
           name: snyk-java-report
           path: artifacts/sca/snyk-java-report.json
 
+    ##################################
+      # Python (ML) - pip-audit + Notebooks
       ##################################
-      # Python (ML) - pip-audit SCA
-      ##################################
-      - name: Install PyTorch
-        working-directory: ./ml
-        run: |
-          pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-
       - name: Install Python dependencies
         working-directory: ./ml
-        run: pip install -r requirements.txt || true
+        run: |
+          pip install -r requirements.txt
+          pip install torch torchvision torchaudio pip-audit jupyter nbconvert papermill || true
 
       - name: Python Dependency Audit (pip-audit)
         working-directory: ./ml
-        run: |
-          pip install pip-audit
-          pip-audit -r requirements.txt -f json -o ../artifacts/sca/pip-audit-report.json || true
+        run: pip-audit -r requirements.txt -f json -o ../artifacts/sca/pip-audit-report.json || true
 
       - name: Upload pip-audit Report
         uses: actions/upload-artifact@v4
         with:
           name: pip-audit-report
           path: artifacts/sca/pip-audit-report.json
+
+      - name: Execute & Convert Notebooks to HTML
+        working-directory: ./ml
+        run: |
+          for nb in *.ipynb; do
+            jupyter nbconvert --to html --execute "$nb" --output-dir=../../artifacts/notebooks || true
+          done
+
+      - name: Upload Notebook HTML Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: executed-notebooks
+          path: artifacts/notebooks
