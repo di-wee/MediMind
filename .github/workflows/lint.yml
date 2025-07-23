@@ -42,6 +42,19 @@ jobs:
           name: pylint-report
           path: artifacts/lint/pylint-report.txt
 
+      # Jupyter Notebook Linting (nbqa)
+      - name: Lint Jupyter notebooks
+        working-directory: ./ml
+        run: |
+          pip install nbqa pylint
+          nbqa pylint *.ipynb > ../../artifacts/lint/nbqa-notebook-report.txt || true
+
+      - name: Upload Jupyter Lint Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: nbqa-notebook-report
+          path: artifacts/lint/nbqa-notebook-report.txt
+
       # Android Lint
       - name: Android Lint
         working-directory: ./android
