@@ -1,0 +1,31 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@color/lavender_background"
+    android:padding="16dp"
+    android:gravity="center_vertical"
+    android:baselineAligned="false">
+
+    <TextView
+        android:id="@+id/topGreetingText"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:text="Hello, Grandpa"
+        android:textColor="@android:color/black"
+        android:textSize="25sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/logoutButton"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:text="Logout"
+        android:textSize="14sp"
+        android:textColor="@android:color/black"
+        android:background="@drawable/logout_button_bg"
+        android:textAllCaps="false"
+        android:paddingHorizontal="16dp"/>
+</LinearLayout>

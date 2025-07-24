@@ -1,0 +1,54 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="top">
+
+    <!-- Top NavBar (Hello + Logout Button) -->
+    <include
+        layout="@layout/top_nav_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Static App Welcome -->
+    <TextView
+        android:text="Welcome to MediMind"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"/>
+
+        <!-- Horizontal Calendar Strip -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:id="@+id/calendarStrip"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </HorizontalScrollView>
+
+    <!-- Today Label -->
+    <TextView
+        android:id="@+id/todayLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Today, 24 Jul"
+        android:textStyle="italic"
+        android:textSize="16sp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- CTA Button -->
+    <Button
+        android:id="@+id/addMedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add a med" />
+</LinearLayout>
