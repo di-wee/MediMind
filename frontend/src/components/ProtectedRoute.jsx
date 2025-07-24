@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router';
+import { Navigate } from 'react-router-dom';
 
 //wrapper component that will check if login is still valid before showing page
 function ProtectedRoute({ children }) {
