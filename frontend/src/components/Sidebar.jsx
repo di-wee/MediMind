@@ -2,7 +2,7 @@ import { Squares2X2Icon, UserCircleIcon } from '@heroicons/react/20/solid';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-function Sidebar() {
+function Sidebar({ mcrNo }) {
 	return (
 		<>
 			<div className='flex h-screen m-0 p-0'>
@@ -15,7 +15,7 @@ function Sidebar() {
 					<nav className='flex flex-col space-y-2'>
 						<Link
 							className='nav-button'
-							to='/profile/{mrcNo}'>
+							to={`/profile/${mcrNo}`}>
 							<UserCircleIcon className='size-6 mr-2 text-gray-500' /> Account
 						</Link>
 						<Link
