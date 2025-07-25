@@ -64,6 +64,34 @@ h1 {
 	@apply flex justify-center items-center hover:bg-gray-100 px-4 py-2 rounded transition-colors text-gray-500 duration-200;
 }
 
+table {
+	@apply w-full min-w-full border border-gray-300 text-sm text-left shadow-xl rounded-2xl;
+}
+
+thead {
+	@apply bg-sky-600 text-white text-center;
+}
+
+th {
+	@apply px-4 py-2 border-b;
+}
+
+tbody {
+	@apply divide-y divide-blue-200;
+}
+
+tr {
+	@apply hover:bg-gray-200;
+}
+
+td {
+	@apply px-4 py-2 text-center align-middle;
+}
+
+.check {
+	@apply inline-block size-7 text-red-500 text-center;
+}
+
 @media (prefers-color-scheme: light) {
 	:root {
 		color: #213547;
