@@ -2,13 +2,12 @@ import { useState } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
-import { Route, Link, Routes } from 'react-router-dom';
+import { Route, Link, Routes } from 'react-router';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import PatientProfile from './pages/PatientProfile';
 import MedicationLog from './pages/MedicationLog';
 import LandingPage from './pages/LandingPage';
-import Register from './pages/Register';
 
 function App() {
 	return (
@@ -28,10 +27,6 @@ function App() {
 						element={<Login />}
 					/>
 					<Route
-						path='/register'
-						element={<Register />}
-					/>
-					<Route
 						path='/patient/:patientId'
 						element={
 							<ProtectedRoute>
@@ -39,9 +34,6 @@ function App() {
 							</ProtectedRoute>
 						}
 					/>
-
-					{/* kiv again if this route is required or we can just use medicine log
-					as a separate component to be reused in PatientProfile component*/}
 					<Route
 						path='/patient/:patientId/:medicationId/log'
 						element={
