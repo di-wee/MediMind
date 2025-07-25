@@ -1,5 +1,11 @@
 @import 'tailwindcss';
 
+html,
+body,
+#root {
+	height: 100%;
+}
+
 :root {
 	font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 	line-height: 1.5;
@@ -9,6 +15,11 @@
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 a {
@@ -22,8 +33,7 @@ a:hover {
 
 body {
 	margin: 0;
-	display: flex;
-	place-items: center;
+	padding: 0;
 	min-width: 320px;
 	min-height: 100vh;
 }
@@ -48,6 +58,10 @@ h1 {
 
 .form-input {
 	@apply bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5;
+}
+
+.nav-button {
+	@apply flex justify-center items-center hover:bg-gray-100 px-4 py-2 rounded transition-colors text-gray-500 duration-200;
 }
 
 @media (prefers-color-scheme: light) {
