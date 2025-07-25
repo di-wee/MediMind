@@ -5,10 +5,6 @@
 	line-height: 1.5;
 	font-weight: 400;
 
-	color-scheme: light dark;
-	color: rgba(255, 255, 255, 0.87);
-	background-color: #242424;
-
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
@@ -21,7 +17,7 @@ a {
 	text-decoration: inherit;
 }
 a:hover {
-	color: #535bf2;
+	color: #282d8d;
 }
 
 body {
@@ -37,23 +33,21 @@ h1 {
 	line-height: 1.1;
 }
 
-button {
-	border-radius: 8px;
-	border: 1px solid transparent;
-	padding: 0.6em 1.2em;
-	font-size: 1em;
-	font-weight: 500;
-	font-family: inherit;
-	background-color: #1a1a1a;
-	cursor: pointer;
-	transition: border-color 0.25s;
+.btn-submit {
+	@apply bg-blue-700 text-white rounded-lg text-sm px-5 py-2.5 font-medium w-full text-center
+			hover:bg-blue-800 transition-colors duration-300 ease-in-out focus:ring-4 focus:ring-blue-300 focus:outline-none;
 }
-button:hover {
-	border-color: #646cff;
+
+.link {
+	@apply text-sm font-medium text-blue-600 hover:underline transition duration-200 ease-in-out;
 }
-button:focus,
-button:focus-visible {
-	outline: 4px auto -webkit-focus-ring-color;
+
+.form-label {
+	@apply block mb-2 text-sm font-medium text-gray-900;
+}
+
+.form-input {
+	@apply bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5;
 }
 
 @media (prefers-color-scheme: light) {
