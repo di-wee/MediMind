@@ -8,6 +8,7 @@ function PatientProfile() {
 		<>
 			<Sidebar />
 			<Header />
+			<PatientProfile />
 		</>
 	);
 }
