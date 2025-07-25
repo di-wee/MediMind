@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom';
 //wrapper component that will check if login is still valid before showing page
 function ProtectedRoute({ children }) {
 	// temp logic, to replace with UseEffect once backend Auth API is developed
-	const isLoggedIn = localStorage.getItem('isLoggedIn') === true;
+	const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
 	if (!isLoggedIn) {
 		return (

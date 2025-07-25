@@ -42,6 +42,14 @@ h1 {
 	@apply text-sm font-medium text-blue-600 hover:underline transition duration-200 ease-in-out;
 }
 
+.form-label {
+	@apply block mb-2 text-sm font-medium text-gray-900;
+}
+
+.form-input {
+	@apply bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5;
+}
+
 @media (prefers-color-scheme: light) {
 	:root {
 		color: #213547;

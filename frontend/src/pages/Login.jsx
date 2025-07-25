@@ -1,12 +1,27 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
 	const navigate = useNavigate();
+	const mcrNoRef = useRef();
+	const passwordRef = useRef();
 
 	const handleSignUp = (e) => {
 		e.preventDefault();
 		navigate('/register', { replace: true });
+	};
+
+	const handleLogin = (e) => {
+		e.preventDefault();
+		const mcrNo = mcrNoRef.current.value;
+		const password = passwordRef.current.value;
+
+		//temp logic if both fields are not null will simulate authentication
+		if (mcrNo && password) {
+			//setting key = 'isLoggedIn' with a string value = 'true'
+			localStorage.setItem('isLoggedIn', 'true');
+			navigate('/', { replace: true });
+		}
 	};
 
 	return (
@@ -34,22 +49,23 @@ function Login() {
 								<div>
 									<label
 										htmlFor='mcrNo'
-										className='block mb-2 text-sm font-medium text-gray-900'>
+										className='form-label'>
 										MCR Number
 									</label>
 									<input
 										type='text'
 										name='mcrNo'
 										id='mcrNo'
-										className='bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+										className='form-input '
 										placeholder='M1234567A'
+										ref={mcrNoRef}
 										required
 									/>
 								</div>
 								<div>
 									<label
 										htmlFor='password'
-										className='block mb-2 text-sm font-medium text-gray-900'>
+										className='form-label'>
 										Password
 									</label>
 									<input
@@ -57,23 +73,19 @@ function Login() {
 										name='password'
 										id='password'
 										placeholder='••••••••'
-										className='bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5'
+										className='form-input'
+										ref={passwordRef}
 										required
 									/>
 								</div>
-								<div className='flex items-center justify-center'>
-									<a
-										href='#'
-										className='link'>
-										Forgot password?
-									</a>
-								</div>
+
 								<button
 									type='submit'
-									className='btn-submit'>
+									className='btn-submit'
+									onClick={(e) => handleLogin(e)}>
 									Sign in
 								</button>
-								<p className='text-sm font-light text-gray-500'>
+								<p className='text-sm font-light text-gray-500 text-center'>
 									Don’t have an account yet?{' '}
 									<a
 										href='#'
