@@ -11,6 +11,15 @@ function Register() {
 		navigate('/login', { replace: true });
 	};
 
+	const handleSignUp = (e) => {
+		e.preventDefault();
+
+		//just simulating flow, proper logic will come in here eg. api calls
+		//setting key ='isLoggedIn' with a string value 'true' (not boolean)
+		localStorage.setItem('isLoggedIn', 'true');
+		navigate('/', { replace: true });
+	};
+
 	return (
 		<>
 			<section>
@@ -154,7 +163,8 @@ function Register() {
 								</div>
 								<button
 									type='submit'
-									className='btn-submit'>
+									className='btn-submit'
+									onClick={() => handleSignUp(e)}>
 									Sign Up
 								</button>
 								<p className='text-sm font-light text-gray-500 text-center'>
