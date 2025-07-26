@@ -67,7 +67,7 @@ function MedicationLog({ medication, patientId }) {
 							<th>Date</th>
 							<th>Time</th>
 							<th>
-								Taken <FunnelIcon className='inline-block size-2.5' />
+								Taken <FunnelIcon className='filter-btn' />
 							</th>
 							<th>Notes</th>
 							<th></th>

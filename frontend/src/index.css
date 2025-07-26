@@ -113,6 +113,11 @@ td {
 	@apply flex max-w-6xl mx-auto justify-between w-full mt-10 gap-x-30;
 }
 
+.filter-btn {
+	@apply inline-block size-2.5;
+	cursor: pointer;
+}
+
 @media (prefers-color-scheme: light) {
 	:root {
 		color: #213547;

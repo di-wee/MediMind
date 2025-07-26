@@ -57,10 +57,10 @@ function MedicationList({ patientId }) {
 							<th>Dosage</th>
 							<th>Frequency</th>
 							<th>
-								Status <FunnelIcon className='inline-block size-2.5' />
+								Status <FunnelIcon className='filter-btn' />
 							</th>
 							<th>
-								Missed Dose <FunnelIcon className='inline-block size-2.5' />
+								Missed Dose <FunnelIcon className='filter-btn' />
 							</th>
 						</tr>
 					</thead>
