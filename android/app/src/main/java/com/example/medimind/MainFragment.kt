@@ -8,7 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class MainFragment : Fragment() {
+class MainFragment : Fragment(), OnMedicineSelectedListener, OnEditMedicineRequestedListener {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,7 +36,7 @@ class MainFragment : Fragment() {
                     true
                 }
                 R.id.nav_medication -> {
-                    Toast.makeText(context, "Medication tab selected", Toast.LENGTH_SHORT).show()
+                    loadFragment(ActiveMedicineListFragment())
                     true
                 }
                 R.id.nav_profile -> {
@@ -52,5 +52,32 @@ class MainFragment : Fragment() {
         childFragmentManager.beginTransaction()
             .replace(R.id.main_fragment_container, fragment)
             .commit()
+    }
+
+    //Lst I add these function to make sure I can navigate to the nested fragment, and keep the navBar
+
+    fun openFragment(fragment: Fragment) {
+        childFragmentManager.beginTransaction()
+            .replace(R.id.main_fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    override fun onMedicineSelected(medicineName: String) {
+        val fragment = ViewMedicineDetailsFragment().apply {
+            arguments = Bundle().apply {
+                putString("medicineName", medicineName)
+            }
+        }
+        openFragment(fragment)
+    }
+
+    override fun onEditMedicineRequested(medicineName: String) {
+        val fragment = EditMedicineDetailsFragment().apply {
+            arguments = Bundle().apply {
+                putString("medicineName", medicineName)
+            }
+        }
+        openFragment(fragment)
     }
 }

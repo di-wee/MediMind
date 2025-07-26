@@ -29,4 +29,35 @@
         android:id="@+id/registerUserFragment"
         android:name="com.example.medimind.RegisterUserFragment"
         android:label="Register User" />
+
+    <fragment
+        android:id="@+id/activeMedicineListFragment"
+        android:name="com.example.medimind.ActiveMedicineListFragment"
+        android:label="Active Med List">
+        <action
+            android:id="@+id/action_activeMedicineListFragment_to_viewMedicineDetailsFragment"
+            app:destination="@id/viewMedicineDetailsFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/viewMedicineDetailsFragment"
+        android:name="com.example.medimind.ViewMedicineDetailsFragment"
+        android:label="View Medicine Details">
+        <argument
+            android:name="medicineName"
+            app:argType="string"/>
+        <action
+            android:id="@+id/action_viewMedicineDetailsFragment_to_editMedicineDetailsFragment"
+            app:destination="@id/editMedicineDetailsFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/editMedicineDetailsFragment"
+        android:name="com.example.medimind.EditMedicineDetailsFragment"
+        android:label="Edit Medicine Details">
+        <argument
+            android:name="medicineName"
+            app:argType="string"/>
+    </fragment>
+
 </navigation>
