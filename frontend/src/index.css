@@ -4,6 +4,9 @@ html,
 body,
 #root {
 	height: 100%;
+	width: 100%;
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 :root {
@@ -15,11 +18,6 @@ body,
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-}
-
-#root {
-	margin: 0 !important;
-	padding: 0 !important;
 }
 
 a {
@@ -36,6 +34,7 @@ body {
 	padding: 0;
 	min-width: 320px;
 	min-height: 100vh;
+	width: 100%;
 }
 
 h1 {
@@ -46,6 +45,15 @@ h1 {
 .btn-submit {
 	@apply bg-blue-700 text-white rounded-lg text-sm px-5 py-2.5 font-medium w-full text-center
 			hover:bg-blue-800 transition-colors duration-300 ease-in-out focus:ring-4 focus:ring-blue-300 focus:outline-none;
+
+	cursor: pointer;
+}
+
+.btn-edit {
+	@apply bg-sky-600 text-white rounded-lg text-sm px-1 py-2.5 font-bold w-full text-center
+	hover:bg-blue-800 transition-colors duration-300 ease-in-out focus:ring-4 focus:ring-blue-300 focus:outline-none;
+
+	cursor: pointer;
 }
 
 .link {
@@ -62,6 +70,52 @@ h1 {
 
 .nav-button {
 	@apply flex justify-center items-center hover:bg-gray-100 px-4 py-2 rounded transition-colors text-gray-500 duration-200;
+}
+
+table {
+	@apply w-full min-w-full border border-gray-300 text-sm text-left shadow-xl;
+}
+
+thead {
+	@apply bg-sky-600 text-white text-center;
+}
+
+th {
+	@apply px-4 py-2 border-b;
+}
+
+tbody {
+	@apply divide-y divide-blue-200;
+}
+
+.tr-list {
+	@apply hover:bg-gray-200 transition-colors duration-200;
+	cursor: pointer;
+}
+
+td {
+	@apply px-4 py-2 text-center align-middle;
+}
+
+.check {
+	@apply inline-block size-7 text-red-500 text-center;
+}
+
+.log-check {
+	@apply inline-block size-7 text-green-500 text-center;
+}
+
+.log-x {
+	@apply inline-block size-7 text-red-500 text-center;
+}
+
+.patient-details {
+	@apply flex max-w-6xl mx-auto justify-between w-full mt-10 gap-x-30;
+}
+
+.filter-btn {
+	@apply inline-block size-2.5;
+	cursor: pointer;
 }
 
 @media (prefers-color-scheme: light) {
