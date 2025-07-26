@@ -6,7 +6,7 @@ import { Route, Link, Routes } from 'react-router-dom';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import PatientProfile from './pages/PatientProfile';
-import MedicationLog from './pages/MedicationLog';
+import MedicationLog from './components/MedicationLog';
 import LandingPage from './pages/LandingPage';
 import Register from './pages/Register';
 
@@ -36,17 +36,6 @@ function App() {
 						element={
 							<ProtectedRoute>
 								<PatientProfile />
-							</ProtectedRoute>
-						}
-					/>
-
-					{/* kiv again if this route is required or we can just use medicine log
-					as a separate component to be reused in PatientProfile component*/}
-					<Route
-						path='/patient/:patientId/:medicationId/log'
-						element={
-							<ProtectedRoute>
-								<MedicationLog />
 							</ProtectedRoute>
 						}
 					/>

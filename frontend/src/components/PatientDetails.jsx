@@ -8,28 +8,30 @@ function PatientDetails({ patientId }) {
 
 	return (
 		<>
-			<div className='flex justify-between'>
-				<div className='w-xs mr-30'>
+			<div className='flex max-w-6xl mx-auto justify-between w-full mt-10 gap-x-30'>
+				<div className='w-1/2 pr-4'>
 					<label className='form-label'>Patient's Name</label>
 					<input
 						className='form-input'
 						type='text'
 						name='patientName'
 						value='John Tan Ah Kow'
+						readOnly
 					/>
 				</div>
-				<div className='w-xs'>
+				<div className='w-1/2 pl-4'>
 					<label className='form-label'>Patient's NRIC</label>
 					<input
 						className='form-input'
 						type='text'
 						name='patientNRIC'
 						value='S10234567A'
+						readOnly
 					/>
 				</div>
 			</div>
 			<div className='mt-20'>
-				<MedicationList />
+				<MedicationList patientId={patientId} />
 			</div>
 		</>
 	);

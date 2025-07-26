@@ -1,9 +1,28 @@
 import { CheckIcon, FunnelIcon } from '@heroicons/react/20/solid';
-import React from 'react';
+import React, { useState } from 'react';
+import MedicationLog from './MedicationLog';
 
-function MedicationList() {
+function MedicationList({ patientId }) {
+	const [medication, setMedication] = useState({});
+	const [visible, setVisible] = useState(false);
+
+	const handleMedicationClick = (meds) => {
+		//if user clicks on medication again, it will set visibility to false
+		if (meds.id == medication.id && visible) {
+			setVisible(false);
+		} else {
+			setMedication(meds);
+			setVisible(true);
+		}
+
+		console.log(medication);
+		console.log(visible);
+	};
+
+	//GET call to retrieve medication list here using patientId
 	const medicationList = [
 		{
+			id: 'guid1',
 			medicationName: 'Metformin',
 			dosage: '500mg',
 			frequency: '2x Daily',
@@ -11,6 +30,7 @@ function MedicationList() {
 			missedDose: true,
 		},
 		{
+			id: 'guid2',
 			medicationName: 'Lisinopril',
 			dosage: '10mg',
 			frequency: 'Once Daily',
@@ -18,6 +38,7 @@ function MedicationList() {
 			missedDose: false,
 		},
 		{
+			id: 'guid3',
 			medicationName: 'Atorvastatin',
 			dosage: '20mg',
 			frequency: 'Once Nightly',
@@ -27,23 +48,27 @@ function MedicationList() {
 	];
 	return (
 		<>
-			<h3 className='font-bold text-center mb-5'>Medication List</h3>
-			<div className='px-8 w-4xl mx-auto overflow-x-auto'>
+			<h3 className='font-bold text-xl text-center mb-5'>Medication List</h3>
+			<div className='px-8 w-7xl mx-auto overflow-x-auto'>
 				<table>
 					<thead>
-						<th>Medication Name</th>
-						<th>Dosage</th>
-						<th>Frequency</th>
-						<th>
-							Status <FunnelIcon className='inline-block size-2.5' />
-						</th>
-						<th>
-							Missed Dose <FunnelIcon className='inline-block size-2.5' />
-						</th>
+						<tr>
+							<th>Medication Name</th>
+							<th>Dosage</th>
+							<th>Frequency</th>
+							<th>
+								Status <FunnelIcon className='inline-block size-2.5' />
+							</th>
+							<th>
+								Missed Dose <FunnelIcon className='inline-block size-2.5' />
+							</th>
+						</tr>
 					</thead>
 					<tbody>
 						{medicationList.map((medication) => (
-							<tr>
+							<tr
+								className='tr-list'
+								onClick={() => handleMedicationClick(medication)}>
 								<td>{medication.medicationName}</td>
 								<td>{medication.dosage}</td>
 								<td>{medication.frequency}</td>
@@ -56,6 +81,14 @@ function MedicationList() {
 					</tbody>
 				</table>
 			</div>
+			{visible && (
+				<div className='mt-30'>
+					<MedicationLog
+						medication={medication}
+						patientId={patientId}
+					/>
+				</div>
+			)}
 		</>
 	);
 }
