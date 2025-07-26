@@ -109,6 +109,10 @@ td {
 	@apply inline-block size-7 text-red-500 text-center;
 }
 
+.patient-details {
+	@apply flex max-w-6xl mx-auto justify-between w-full mt-10 gap-x-30;
+}
+
 @media (prefers-color-scheme: light) {
 	:root {
 		color: #213547;

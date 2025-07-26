@@ -8,7 +8,7 @@ function PatientDetails({ patientId }) {
 
 	return (
 		<>
-			<div className='flex max-w-6xl mx-auto justify-between w-full mt-10 gap-x-30'>
+			<div className='patient-details'>
 				<div className='w-1/2 pr-4'>
 					<label className='form-label'>Patient's Name</label>
 					<input
