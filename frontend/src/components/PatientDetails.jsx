@@ -9,7 +9,7 @@ function PatientDetails({ patientId }) {
 	return (
 		<>
 			<div className='patient-details'>
-				<div className='w-1/2 pr-4'>
+				<div className='w-1/2'>
 					<label className='form-label'>Patient's Name</label>
 					<input
 						className='form-input'
@@ -19,7 +19,7 @@ function PatientDetails({ patientId }) {
 						readOnly
 					/>
 				</div>
-				<div className='w-1/2 pl-4'>
+				<div className='w-1/2 '>
 					<label className='form-label'>Patient's NRIC</label>
 					<input
 						className='form-input'

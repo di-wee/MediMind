@@ -12,10 +12,11 @@ function PatientProfile() {
 					mcrNo='M12345A'
 					firstName='Jennifer'
 				/>
-				<div className='flex-1 flex flex-col'>
+
+				<div className='ml-64 h-20'>
 					<Header />
 
-					<div className=' flex-1 overflow-y-auto p-6 mt-20 justify-items-center mb-20'>
+					<div className='flex-1 overflow-y-auto px-6 mt-20 justify-items-center'>
 						<PatientDetails patientId={patientId} />
 					</div>
 				</div>
