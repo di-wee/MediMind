@@ -60,7 +60,7 @@ function MedicationLog({ medication, patientId }) {
 					{medication.frequency}]
 				</i>
 			</h6>
-			<div className='px-8 w-7xl mx-auto overflow-x-auto'>
+			<div className='px-8 w-6xl mx-auto overflow-x-auto'>
 				<table>
 					<thead>
 						<tr>

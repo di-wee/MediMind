@@ -49,7 +49,7 @@ function MedicationList({ patientId }) {
 	return (
 		<>
 			<h3 className='font-bold text-xl text-center mb-5'>Medication List</h3>
-			<div className='px-8 w-7xl mx-auto overflow-x-auto'>
+			<div className='px-8 w-6xl mx-auto overflow-x-auto'>
 				<table>
 					<thead>
 						<tr>
@@ -82,7 +82,7 @@ function MedicationList({ patientId }) {
 				</table>
 			</div>
 			{visible && (
-				<div className='mt-30'>
+				<div className='mt-30 mb-30'>
 					<MedicationLog
 						medication={medication}
 						patientId={patientId}
