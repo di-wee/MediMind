@@ -1,80 +1,173 @@
 import { CheckIcon, FunnelIcon } from '@heroicons/react/20/solid';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import MedicationLog from './MedicationLog';
+import FilterContainer from './FilterContainer';
+import { getDynamicFilterOptions, applyFilter } from '../utils/filterUtil';
+import medsList from '../mockdata/medicationlist.json';
 
 function MedicationList({ patientId }) {
-	const [medication, setMedication] = useState({});
+	const [medicationList, setMedicationList] = useState([]);
+	const [displayedList, setDisplayedList] = useState([]);
+	const [selectedMedicine, setSelectedMedicine] = useState({});
 	const [visible, setVisible] = useState(false);
+	const [filterKey, setFilterKey] = useState(null);
+	const [selectedFilters, setSelectedFilters] = useState([]);
+	const [uniqueOptions, setUniqueOptions] = useState([]);
+
+	const filterRef = useRef();
+
+	//defining fields that needs to be filtered first
+	const filteredFields = ['isActive', 'missedDose'];
+	const labelMap = {
+		isActive: { true: 'Active', false: 'Inactive' },
+		missedDose: { true: 'Missed', false: 'Compliant' },
+	};
+
+	//to create a more dynamic filter for easily scalable filtering later
+	// desired format is [ { label: 'Active', field: 'isActive', value: true },]
+	const dynamicFilterOptions = getDynamicFilterOptions(
+		medicationList,
+		filteredFields,
+		labelMap
+	);
 
 	const handleMedicationClick = (meds) => {
 		//if user clicks on medication again, it will set visibility to false
-		if (meds.id == medication.id && visible) {
+		if (meds.id == selectedMedicine.id && visible) {
 			setVisible(false);
 		} else {
-			setMedication(meds);
+			setSelectedMedicine(meds);
 			setVisible(true);
 		}
 
-		console.log(medication);
+		console.log(selectedMedicine);
 		console.log(visible);
 	};
 
+	const handleFunnelClick = (col) => {
+		let newKey;
+		switch (col) {
+			case 'Status':
+				newKey = filterKey === 'isActive' ? null : 'isActive';
+				break;
+			case 'Missed Dose':
+				newKey = filterKey === 'missedDose' ? null : 'missedDose';
+				break;
+		}
+
+		setFilterKey(newKey);
+		if (newKey) {
+			const updatedOptions = dynamicFilterOptions.filter(
+				(op) => op.field === newKey
+			);
+			setUniqueOptions(updatedOptions.map((op) => op.label));
+		}
+	};
+
+	const handleFilterChange = (option) => {
+		setSelectedFilters(
+			(prevFilter) =>
+				prevFilter.includes(option)
+					? prevFilter.filter((o) => o !== option) //to remove from array if already exist
+					: [...prevFilter, option] // to add if not in array
+		);
+	};
+
 	//GET call to retrieve medication list here using patientId
-	const medicationList = [
-		{
-			id: 'guid1',
-			medicationName: 'Metformin',
-			dosage: '500mg',
-			frequency: '2x Daily',
-			isActive: true,
-			missedDose: true,
-		},
-		{
-			id: 'guid2',
-			medicationName: 'Lisinopril',
-			dosage: '10mg',
-			frequency: 'Once Daily',
-			isActive: true,
-			missedDose: false,
-		},
-		{
-			id: 'guid3',
-			medicationName: 'Atorvastatin',
-			dosage: '20mg',
-			frequency: 'Once Nightly',
-			isActive: false,
-			missedDose: true,
-		},
-	];
+	useEffect(() => {
+		setMedicationList(medsList);
+		setDisplayedList(medsList);
+	}, []);
+
+	useEffect(() => {
+		const filtered = applyFilter(
+			medicationList,
+			dynamicFilterOptions,
+			selectedFilters
+		);
+		setDisplayedList(filtered);
+	}, [selectedFilters, medicationList]);
+
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			//if filter-grid is open and whatever is being clicked is not the filter-grid, to close it
+			if (filterRef.current && !filterRef.current.contains(event.target)) {
+				setFilterKey(null);
+			}
+		};
+
+		document.addEventListener('mousedown', handleClickOutside);
+
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [filterRef]);
+
 	return (
 		<>
 			<h3 className='font-bold text-xl text-center mb-5'>Medication List</h3>
-			<div className='px-8 w-6xl mx-auto overflow-x-auto'>
+			<div className='max-h-96 overflow-y-auto px-8 w-6xl mx-auto overflow-x-auto mb-30 '>
 				<table>
-					<thead>
+					<thead className='sticky top-0 z-10'>
 						<tr>
 							<th>Medication Name</th>
 							<th>Dosage</th>
 							<th>Frequency</th>
+
 							<th>
-								Status <FunnelIcon className='filter-btn' />
+								<div className='relative inline-flex items-center gap-1'>
+									Status
+									<FunnelIcon
+										onClick={() => handleFunnelClick('Status')}
+										className='filter-btn'
+									/>
+								</div>
+								{filterKey === 'isActive' ? (
+									<div ref={filterRef}>
+										<FilterContainer
+											filterOptions={uniqueOptions}
+											selectedFilters={selectedFilters}
+											handleFilterChange={handleFilterChange}
+										/>
+									</div>
+								) : (
+									''
+								)}
 							</th>
-							<th>
-								Missed Dose <FunnelIcon className='filter-btn' />
+
+							<th className='relative'>
+								<div className='relative inline-flex items-center gap-1'>
+									Missed Dose
+									<FunnelIcon
+										onClick={() => handleFunnelClick('Missed Dose')}
+										className='filter-btn'
+									/>
+								</div>
+								{filterKey === 'missedDose' ? (
+									<div ref={filterRef}>
+										<FilterContainer
+											filterOptions={uniqueOptions}
+											selectedFilters={selectedFilters}
+											handleFilterChange={handleFilterChange}
+										/>
+									</div>
+								) : (
+									''
+								)}
 							</th>
 						</tr>
 					</thead>
 					<tbody>
-						{medicationList.map((medication) => (
+						{displayedList.map((meds) => (
 							<tr
 								className='tr-list'
-								onClick={() => handleMedicationClick(medication)}>
-								<td>{medication.medicationName}</td>
-								<td>{medication.dosage}</td>
-								<td>{medication.frequency}</td>
-								<td>{medication.isActive ? 'Active' : 'Inactive'}</td>
+								onClick={() => handleMedicationClick(meds)}>
+								<td>{meds.medicationName}</td>
+								<td>{meds.dosage}</td>
+								<td>{meds.frequency}</td>
+								<td>{meds.isActive ? 'Active' : 'Inactive'}</td>
 								<td>
-									{medication.missedDose ? <CheckIcon className='check' /> : ''}
+									{meds.missedDose ? <CheckIcon className='check' /> : ''}
 								</td>
 							</tr>
 						))}
@@ -82,9 +175,9 @@ function MedicationList({ patientId }) {
 				</table>
 			</div>
 			{visible && (
-				<div className='mt-30 mb-30'>
+				<div className='mb-30'>
 					<MedicationLog
-						medication={medication}
+						medication={selectedMedicine}
 						patientId={patientId}
 					/>
 				</div>
