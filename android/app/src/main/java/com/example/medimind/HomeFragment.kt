@@ -129,7 +129,13 @@ class HomeFragment : Fragment() {
             Toast.makeText(requireContext(), "Gallery button clicked", Toast.LENGTH_SHORT).show()
         }
 
-        manualButton.setOnClickListener {Toast.makeText(requireContext(), "Manual button clicked", Toast.LENGTH_SHORT).show()
+        //it was being set to use parentFragmentManager instead of nav controller
+        manualButton.setOnClickListener {
+            val fragment = NewMedManualFragment()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.main_fragment_container, fragment)
+                .addToBackStack(null)
+                .commit()
         }
 
         //camera
