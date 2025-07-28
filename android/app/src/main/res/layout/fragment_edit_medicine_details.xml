@@ -70,7 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:text="Back"/>
+            android:text="Back" />
 
         <View
             android:layout_width="0dp"

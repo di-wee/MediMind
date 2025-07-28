@@ -82,6 +82,18 @@
             android:defaultValue="" />
     </fragment>
 
+    <fragment
+        android:id="@+id/newMedManualFragment"
+        android:name="com.example.medimind.NewMedManualFragment"
+        android:label="ManualKeyNewMed">
+
+        <action
+            android:id="@+id/action_homeFragment_to_newMedManualFragment"
+            app:destination="@id/newMedManualFragment" />
+
+    </fragment>
+
+
 
 
 </navigation>
