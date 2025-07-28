@@ -1,5 +1,6 @@
 import { CheckIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import React, { useEffect, useState } from 'react';
+import medicationLog from '../mockdata/medicationlog.json';
 
 function MedicationLog({ medication, patientId }) {
 	//state management
@@ -9,52 +10,6 @@ function MedicationLog({ medication, patientId }) {
 
 	//GET call here to extract medicationLog using medication.id and patientId, useState to store
 	//medicationlog into logList
-
-	const medicationLog = [
-		{
-			id: 'guid4',
-			date: '20-07-2025',
-			time: '0800 HRs',
-			taken: true,
-			notes: '',
-		},
-		{
-			id: 'guid5',
-			date: '20-07-2025',
-			time: '0800 HRs',
-			taken: false,
-			notes: 'fell asleep',
-		},
-		{
-			id: 'guid6',
-			date: '21-07-2025',
-			time: '0800 HRs',
-			taken: true,
-			notes: '',
-		},
-		{
-			id: 'guid7',
-			date: '21-07-2025',
-			time: '2000 HRs',
-			taken: true,
-			notes: '',
-		},
-		{
-			id: 'guid8',
-			date: '22-07-2025',
-			time: '0800 HRs',
-			taken: true,
-			notes: '',
-		},
-		{
-			id: 'guid9',
-			date: '22-07-2025',
-			time: '2000 HRs',
-			taken: false,
-			notes:
-				'forgot to bring medication out testing super long note here blablablbal',
-		},
-	];
 
 	useEffect(() => {
 		setLogList(medicationLog);
@@ -93,9 +48,9 @@ function MedicationLog({ medication, patientId }) {
 					{medication.frequency}]
 				</i>
 			</h6>
-			<div className='px-8 w-6xl mx-auto overflow-x-auto'>
+			<div className='max-h-96 overflow-y-auto px-8 w-6xl mx-auto overflow-x-auto'>
 				<table>
-					<thead>
+					<thead className='sticky top-0 z-10'>
 						<tr>
 							<th>Date</th>
 							<th>Time</th>

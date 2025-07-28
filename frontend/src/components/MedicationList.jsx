@@ -1,57 +1,37 @@
 import { CheckIcon, FunnelIcon } from '@heroicons/react/20/solid';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import MedicationLog from './MedicationLog';
+import medsList from '../mockdata/medicationlist.json';
 
 function MedicationList({ patientId }) {
-	const [medication, setMedication] = useState({});
+	const [medicationList, setMedicationList] = useState([]);
+	const [selectedMedicine, setSelectedMedicine] = useState({});
 	const [visible, setVisible] = useState(false);
 
 	const handleMedicationClick = (meds) => {
 		//if user clicks on medication again, it will set visibility to false
-		if (meds.id == medication.id && visible) {
+		if (meds.id == selectedMedicine.id && visible) {
 			setVisible(false);
 		} else {
-			setMedication(meds);
+			setSelectedMedicine(meds);
 			setVisible(true);
 		}
 
-		console.log(medication);
+		console.log(selectedMedicine);
 		console.log(visible);
 	};
 
 	//GET call to retrieve medication list here using patientId
-	const medicationList = [
-		{
-			id: 'guid1',
-			medicationName: 'Metformin',
-			dosage: '500mg',
-			frequency: '2x Daily',
-			isActive: true,
-			missedDose: true,
-		},
-		{
-			id: 'guid2',
-			medicationName: 'Lisinopril',
-			dosage: '10mg',
-			frequency: 'Once Daily',
-			isActive: true,
-			missedDose: false,
-		},
-		{
-			id: 'guid3',
-			medicationName: 'Atorvastatin',
-			dosage: '20mg',
-			frequency: 'Once Nightly',
-			isActive: false,
-			missedDose: true,
-		},
-	];
+	useEffect(() => {
+		setMedicationList(medsList);
+	}, []);
+
 	return (
 		<>
 			<h3 className='font-bold text-xl text-center mb-5'>Medication List</h3>
-			<div className='px-8 w-6xl mx-auto overflow-x-auto'>
+			<div className='max-h-96 overflow-y-auto px-8 w-6xl mx-auto overflow-x-auto mb-30 '>
 				<table>
-					<thead>
+					<thead className='sticky top-0 z-10'>
 						<tr>
 							<th>Medication Name</th>
 							<th>Dosage</th>
@@ -65,16 +45,16 @@ function MedicationList({ patientId }) {
 						</tr>
 					</thead>
 					<tbody>
-						{medicationList.map((medication) => (
+						{medicationList.map((meds) => (
 							<tr
 								className='tr-list'
-								onClick={() => handleMedicationClick(medication)}>
-								<td>{medication.medicationName}</td>
-								<td>{medication.dosage}</td>
-								<td>{medication.frequency}</td>
-								<td>{medication.isActive ? 'Active' : 'Inactive'}</td>
+								onClick={() => handleMedicationClick(meds)}>
+								<td>{meds.medicationName}</td>
+								<td>{meds.dosage}</td>
+								<td>{meds.frequency}</td>
+								<td>{meds.isActive ? 'Active' : 'Inactive'}</td>
 								<td>
-									{medication.missedDose ? <CheckIcon className='check' /> : ''}
+									{meds.missedDose ? <CheckIcon className='check' /> : ''}
 								</td>
 							</tr>
 						))}
@@ -82,9 +62,9 @@ function MedicationList({ patientId }) {
 				</table>
 			</div>
 			{visible && (
-				<div className='mt-30 mb-30'>
+				<div className='mb-30'>
 					<MedicationLog
-						medication={medication}
+						medication={selectedMedicine}
 						patientId={patientId}
 					/>
 				</div>
