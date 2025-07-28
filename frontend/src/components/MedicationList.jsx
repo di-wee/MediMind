@@ -13,6 +13,8 @@ function MedicationList({ patientId }) {
 	const [selectedFilters, setSelectedFilters] = useState([]);
 	const [uniqueOptions, setUniqueOptions] = useState([]);
 
+	const filterRef = useRef();
+
 	//defining fields that needs to be filtered first
 	const filteredFields = ['isActive', 'missedDose'];
 
@@ -122,6 +124,21 @@ function MedicationList({ patientId }) {
 		setDisplayedList(filterList);
 	}, [selectedFilters, medicationList]);
 
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			//if filter-grid is open and whatever is being clicked is not the filter-grid, to close it
+			if (filterRef.current && !filterRef.current.contains(event.target)) {
+				setFilterKey(null);
+			}
+		};
+
+		document.addEventListener('mousedown', handleClickOutside);
+
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [filterRef]);
+
 	return (
 		<>
 			<h3 className='font-bold text-xl text-center mb-5'>Medication List</h3>
@@ -142,11 +159,13 @@ function MedicationList({ patientId }) {
 									/>
 								</div>
 								{filterKey === 'isActive' ? (
-									<FilterContainer
-										filterOptions={uniqueOptions}
-										selectedFilters={selectedFilters}
-										handleFilterChange={handleFilterChange}
-									/>
+									<div ref={filterRef}>
+										<FilterContainer
+											filterOptions={uniqueOptions}
+											selectedFilters={selectedFilters}
+											handleFilterChange={handleFilterChange}
+										/>
+									</div>
 								) : (
 									''
 								)}
@@ -161,11 +180,13 @@ function MedicationList({ patientId }) {
 									/>
 								</div>
 								{filterKey === 'missedDose' ? (
-									<FilterContainer
-										filterOptions={uniqueOptions}
-										selectedFilters={selectedFilters}
-										handleFilterChange={handleFilterChange}
-									/>
+									<div ref={filterRef}>
+										<FilterContainer
+											filterOptions={uniqueOptions}
+											selectedFilters={selectedFilters}
+											handleFilterChange={handleFilterChange}
+										/>
+									</div>
 								) : (
 									''
 								)}
