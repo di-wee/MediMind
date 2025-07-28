@@ -1,8 +1,9 @@
 import { CheckIcon, FunnelIcon } from '@heroicons/react/20/solid';
 import React, { useEffect, useRef, useState } from 'react';
 import MedicationLog from './MedicationLog';
-import medsList from '../mockdata/medicationlist.json';
 import FilterContainer from './FilterContainer';
+import { getDynamicFilterOptions, applyFilter } from '../utils/filterUtil';
+import medsList from '../mockdata/medicationlist.json';
 
 function MedicationList({ patientId }) {
 	const [medicationList, setMedicationList] = useState([]);
@@ -17,28 +18,18 @@ function MedicationList({ patientId }) {
 
 	//defining fields that needs to be filtered first
 	const filteredFields = ['isActive', 'missedDose'];
+	const labelMap = {
+		isActive: { true: 'Active', false: 'Inactive' },
+		missedDose: { true: 'Missed', false: 'Compliant' },
+	};
 
 	//to create a more dynamic filter for easily scalable filtering later
 	// desired format is [ { label: 'Active', field: 'isActive', value: true },]
-	const dynamicFilterOptions = filteredFields.flatMap((field) => {
-		//this will collate all unique values in the desired filtered column
-		const uniqueVal = [...new Set(medicationList.map((med) => med[field]))];
-		return uniqueVal.map((val) => ({
-			label:
-				//if val is true/false, check if the field is xxx
-				typeof val === 'boolean'
-					? field === 'missedDose'
-						? val
-							? 'Missed'
-							: 'Compliant'
-						: val
-						? 'Active'
-						: 'Inactive'
-					: val,
-			field,
-			value: val,
-		}));
-	});
+	const dynamicFilterOptions = getDynamicFilterOptions(
+		medicationList,
+		filteredFields,
+		labelMap
+	);
 
 	const handleMedicationClick = (meds) => {
 		//if user clicks on medication again, it will set visibility to false
@@ -89,39 +80,12 @@ function MedicationList({ patientId }) {
 	}, []);
 
 	useEffect(() => {
-		if (selectedFilters.length === 0) {
-			setDisplayedList(medicationList);
-			return;
-		}
-		//filter logic here
-		//group selected filter labels by fields
-		const selectedByField = {}; // { isActive: Set {true}, missedDose: Set {false} }
-
-		dynamicFilterOptions.forEach((option) => {
-			if (selectedFilters.includes(option.label)) {
-				//if eg {isActive: null}, then create a new Set for isActive keyvalue pair
-				if (!selectedByField[option.field]) {
-					selectedByField[option.field] = new Set();
-				}
-				//adding value (true/false) to the appropriate key
-				selectedByField[option.field].add(option.value);
-			}
-		});
-
-		//filter meds that match ALL selected filter values
-		const filterList = medicationList.filter((med) => {
-			for (const [key, valueSet] of Object.entries(selectedByField)) {
-				const val = med[key]; // medication[isActive] = true/false
-
-				//if the valueSet of the KV pair of selectedByField doesnt have the val, return false
-				if (!valueSet.has(val)) {
-					return false;
-				}
-			}
-			return true;
-		});
-
-		setDisplayedList(filterList);
+		const filtered = applyFilter(
+			medicationList,
+			dynamicFilterOptions,
+			selectedFilters
+		);
+		setDisplayedList(filtered);
 	}, [selectedFilters, medicationList]);
 
 	useEffect(() => {
