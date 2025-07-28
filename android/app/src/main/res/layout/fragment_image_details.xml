@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ImageDetailsFragment">
+
+
+    <ImageView
+        android:id="@+id/imagePreview"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:layout_marginTop="60dp"
+        android:scaleType="fitCenter"/>
+    
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="40dp"
+        android:paddingLeft="20dp">
+        
+        <TextView
+            android:id="@+id/medicationNameLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text = "Medication: "
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/medicationNameInput"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:hint="paracetamol"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp">
+
+        <TextView
+            android:id="@+id/dosageLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text = "Dosage: "
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/dosageInput"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:hint="2"
+            android:layout_marginStart="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text =" /tablet(s)"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp">
+
+        <TextView
+            android:id="@+id/frequencyLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text = "Frequency: "
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/frequencyInput"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:hint="2"
+            android:layout_marginStart="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text =" times/day"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp">
+
+        <TextView
+            android:id="@+id/instructionLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text = "Instruction: "
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/instructionInput"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:hint="before or afer meal"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp">
+
+        <TextView
+            android:id="@+id/noteLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text = "Note: "
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/noteInput"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:hint="For fever/pain. May cause drowsiness"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+
+
+
+
+
+
+
+</LinearLayout>
