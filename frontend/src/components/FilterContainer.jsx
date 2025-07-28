@@ -1,20 +1,30 @@
 import React from 'react';
+import '../index.css';
 
-function FilterContainer({ filterOptions }) {
+function FilterContainer({
+	filterOptions,
+	handleFilterChange,
+	selectedFilters,
+}) {
 	return (
 		<>
-			<div className='filter-container text-center'>
+			<div className='filter-grid text-center'>
 				<div className='px-2'>
 					<h3 className='text-xs'>Filter by:</h3>
 					{filterOptions.map((op) => (
-						<div class='flex items-center mt-2 mb-2'>
+						<div className='flex items-center mt-2 mb-2'>
 							<input
-								id='default-checkbox'
+								id={`checkbox-${op}`}
 								type='checkbox'
 								className='input-checkbox'
+								onChange={() => handleFilterChange(op)}
+								checked={selectedFilters.includes(op)}
+								value={`${op}:${
+									op === 'Missed' || op === 'Inactive' ? 'false' : 'true'
+								}`}
 							/>
 							<label
-								for='default-checkbox'
+								htmlFor='default-checkbox'
 								className='ms-2 text-xs text-gray-600'>
 								{op}
 							</label>

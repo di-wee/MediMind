@@ -1,26 +1,42 @@
 import { CheckIcon, FunnelIcon } from '@heroicons/react/20/solid';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import MedicationLog from './MedicationLog';
 import medsList from '../mockdata/medicationlist.json';
 import FilterContainer from './FilterContainer';
 
 function MedicationList({ patientId }) {
 	const [medicationList, setMedicationList] = useState([]);
+	const [displayedList, setDisplayedList] = useState([]);
 	const [selectedMedicine, setSelectedMedicine] = useState({});
 	const [visible, setVisible] = useState(false);
 	const [filterKey, setFilterKey] = useState(null);
+	const [selectedFilters, setSelectedFilters] = useState([]);
+	const [uniqueOptions, setUniqueOptions] = useState([]);
 
-	const uniqueStatus = [
-		...new Set(
-			medicationList.map((med) => (med.isActive ? 'Active' : 'Inactive'))
-		),
-	];
+	//defining fields that needs to be filtered first
+	const filteredFields = ['isActive', 'missedDose'];
 
-	const uniqueMissedDoseStatus = [
-		...new Set(
-			medicationList.map((med) => (med.missedDose ? 'Missed' : 'Compliant'))
-		),
-	];
+	//to create a more dynamic filter for easily scalable filtering later
+	// desired format is [ { label: 'Active', field: 'isActive', value: true },]
+	const dynamicFilterOptions = filteredFields.flatMap((field) => {
+		//this will collate all unique values in the desired filtered column
+		const uniqueVal = [...new Set(medicationList.map((med) => med[field]))];
+		return uniqueVal.map((val) => ({
+			label:
+				//if val is true/false, check if the field is xxx
+				typeof val === 'boolean'
+					? field === 'missedDose'
+						? val
+							? 'Missed'
+							: 'Compliant'
+						: val
+						? 'Active'
+						: 'Inactive'
+					: val,
+			field,
+			value: val,
+		}));
+	});
 
 	const handleMedicationClick = (meds) => {
 		//if user clicks on medication again, it will set visibility to false
@@ -35,10 +51,76 @@ function MedicationList({ patientId }) {
 		console.log(visible);
 	};
 
+	const handleFunnelClick = (col) => {
+		let newKey;
+		switch (col) {
+			case 'Status':
+				newKey = filterKey === 'isActive' ? null : 'isActive';
+				break;
+			case 'Missed Dose':
+				newKey = filterKey === 'missedDose' ? null : 'missedDose';
+				break;
+		}
+
+		setFilterKey(newKey);
+		if (newKey) {
+			const updatedOptions = dynamicFilterOptions.filter(
+				(op) => op.field === newKey
+			);
+			setUniqueOptions(updatedOptions.map((op) => op.label));
+		}
+	};
+
+	const handleFilterChange = (option) => {
+		setSelectedFilters(
+			(prevFilter) =>
+				prevFilter.includes(option)
+					? prevFilter.filter((o) => o !== option) //to remove from array if already exist
+					: [...prevFilter, option] // to add if not in array
+		);
+	};
+
 	//GET call to retrieve medication list here using patientId
 	useEffect(() => {
 		setMedicationList(medsList);
+		setDisplayedList(medsList);
 	}, []);
+
+	useEffect(() => {
+		if (selectedFilters.length === 0) {
+			setDisplayedList(medicationList);
+			return;
+		}
+		//filter logic here
+		//group selected filter labels by fields
+		const selectedByField = {}; // { isActive: Set {true}, missedDose: Set {false} }
+
+		dynamicFilterOptions.forEach((option) => {
+			if (selectedFilters.includes(option.label)) {
+				//if eg {isActive: null}, then create a new Set for isActive keyvalue pair
+				if (!selectedByField[option.field]) {
+					selectedByField[option.field] = new Set();
+				}
+				//adding value (true/false) to the appropriate key
+				selectedByField[option.field].add(option.value);
+			}
+		});
+
+		//filter meds that match ALL selected filter values
+		const filterList = medicationList.filter((med) => {
+			for (const [key, valueSet] of Object.entries(selectedByField)) {
+				const val = med[key]; // medication[isActive] = true/false
+
+				//if the valueSet of the KV pair of selectedByField doesnt have the val, return false
+				if (!valueSet.has(val)) {
+					return false;
+				}
+			}
+			return true;
+		});
+
+		setDisplayedList(filterList);
+	}, [selectedFilters, medicationList]);
 
 	return (
 		<>
@@ -55,16 +137,16 @@ function MedicationList({ patientId }) {
 								<div className='relative inline-flex items-center gap-1'>
 									Status
 									<FunnelIcon
-										onClick={() =>
-											setFilterKey((prev) =>
-												prev === 'status' ? null : 'status'
-											)
-										}
+										onClick={() => handleFunnelClick('Status')}
 										className='filter-btn'
 									/>
 								</div>
-								{filterKey === 'status' ? (
-									<FilterContainer filterOptions={uniqueStatus} />
+								{filterKey === 'isActive' ? (
+									<FilterContainer
+										filterOptions={uniqueOptions}
+										selectedFilters={selectedFilters}
+										handleFilterChange={handleFilterChange}
+									/>
 								) : (
 									''
 								)}
@@ -74,16 +156,16 @@ function MedicationList({ patientId }) {
 								<div className='relative inline-flex items-center gap-1'>
 									Missed Dose
 									<FunnelIcon
-										onClick={() =>
-											setFilterKey((prev) =>
-												prev === 'missedDose' ? null : 'missedDose'
-											)
-										}
+										onClick={() => handleFunnelClick('Missed Dose')}
 										className='filter-btn'
 									/>
 								</div>
 								{filterKey === 'missedDose' ? (
-									<FilterContainer filterOptions={uniqueMissedDoseStatus} />
+									<FilterContainer
+										filterOptions={uniqueOptions}
+										selectedFilters={selectedFilters}
+										handleFilterChange={handleFilterChange}
+									/>
 								) : (
 									''
 								)}
@@ -91,7 +173,7 @@ function MedicationList({ patientId }) {
 						</tr>
 					</thead>
 					<tbody>
-						{medicationList.map((meds) => (
+						{displayedList.map((meds) => (
 							<tr
 								className='tr-list'
 								onClick={() => handleMedicationClick(meds)}>

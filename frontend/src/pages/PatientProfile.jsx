@@ -7,13 +7,15 @@ function PatientProfile() {
 	const { patientId } = useParams();
 	return (
 		<>
-			<div className='flex h-screen'>
-				<Sidebar
-					mcrNo='M12345A'
-					firstName='Jennifer'
-				/>
+			<div className='grid-cols-4 h-screen'>
+				<div className='row-span-full'>
+					<Sidebar
+						mcrNo='M12345A'
+						firstName='Jennifer'
+					/>
+				</div>
 
-				<div className='ml-64 h-20'>
+				<div className='col-span-full ml-64 h-20'>
 					<Header />
 
 					<div className='flex-1 overflow-y-auto px-6 mt-20 justify-items-center'>
