@@ -9,6 +9,7 @@ import PatientProfile from './pages/PatientProfile';
 import MedicationLog from './components/MedicationLog';
 import LandingPage from './pages/LandingPage';
 import Register from './pages/Register';
+import DoctorProfile from './pages/DoctorProfile';
 
 function App() {
 	return (
@@ -26,6 +27,11 @@ function App() {
 					<Route
 						path='/login'
 						element={<Login />}
+					/>
+
+					<Route
+						path='/profile/:mcrNo'
+						element={<DoctorProfile />}
 					/>
 					<Route
 						path='/register'
