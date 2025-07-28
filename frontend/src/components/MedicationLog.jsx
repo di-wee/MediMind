@@ -1,8 +1,15 @@
 import { CheckIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/20/solid';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 function MedicationLog({ medication, patientId }) {
-	//GET call here to extract medicationLog using medication.id and patientId
+	//state management
+	const [editingRowId, setEditingRowId] = useState(null);
+	const [editedNote, setEditedNote] = useState('');
+	const [logList, setLogList] = useState([]);
+
+	//GET call here to extract medicationLog using medication.id and patientId, useState to store
+	//medicationlog into logList
+
 	const medicationLog = [
 		{
 			id: 'guid4',
@@ -49,6 +56,32 @@ function MedicationLog({ medication, patientId }) {
 		},
 	];
 
+	useEffect(() => {
+		setLogList(medicationLog);
+	}, []);
+
+	const handleEditClick = (log) => {
+		//storing the edited row id and note content into state
+		setEditingRowId(log.id);
+		setEditedNote(log.notes);
+	};
+
+	const handleSaveClick = () => {
+		//this is to keep the state most up to date when being edited
+		//
+		//logic: using the prev state of the medication log, and mapping (rebasing it into a new
+		// array) if the log.id matches the id of the row being edited, we will replace
+		// the note key value with editedNote, else we will just show the existing log
+		setLogList((prev) =>
+			prev.map((log) =>
+				log.id === editingRowId ? { ...log, notes: editedNote } : log
+			)
+		);
+		//re-initialising state
+		setEditingRowId(null);
+		setEditedNote('');
+	};
+
 	return (
 		<>
 			<h3 className='font-bold text-xl text-center mb-1'>
@@ -74,7 +107,7 @@ function MedicationLog({ medication, patientId }) {
 						</tr>
 					</thead>
 					<tbody>
-						{medicationLog.map((log) => (
+						{logList.map((log) => (
 							<tr>
 								<td>{log.date}</td>
 								<td>{log.time}</td>
@@ -86,10 +119,30 @@ function MedicationLog({ medication, patientId }) {
 									)}
 								</td>
 								<td className='max-w-50 break-words whitespace-normal overflow-x-auto'>
-									{log.notes}
+									{editingRowId === log.id ? (
+										<textarea
+											value={editedNote}
+											onChange={(e) => setEditedNote(e.target.value)}
+											className='input w-full border-1 border-sky-500 p-1.5 rounded-xs'
+										/>
+									) : (
+										log.notes
+									)}
 								</td>
 								<td>
-									<button className='btn-edit'>Edit</button>
+									{editingRowId === log.id ? (
+										<button
+											className='btn-save'
+											onClick={() => handleSaveClick()}>
+											Save
+										</button>
+									) : (
+										<button
+											className='btn-edit'
+											onClick={() => handleEditClick(log)}>
+											Edit
+										</button>
+									)}
 								</td>
 							</tr>
 						))}
