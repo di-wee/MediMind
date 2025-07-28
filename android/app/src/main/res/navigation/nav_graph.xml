@@ -60,4 +60,28 @@
             app:argType="string"/>
     </fragment>
 
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.medimind.HomeFragment"
+        android:label="HomeFragment">
+
+        <action
+            android:id="@+id/action_homeFragment_to_imageDetailsFragment"
+            app:destination="@id/imageDetailsFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/imageDetailsFragment"
+        android:name="com.example.medimind.ImageDetailsFragment"
+        android:label="ImageDetailsFragment">
+
+        <argument
+            android:name="imageUri"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+
+
 </navigation>
