@@ -5,31 +5,34 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ImageDetailsFragment">
+    android:paddingTop="100dp">
 
 
-    <ImageView
-        android:id="@+id/imagePreview"
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:layout_marginTop="60dp"
-        android:scaleType="fitCenter"/>
-    
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:textAlignment="center"
+        android:background="#673AB7"
+        android:textColor="@color/white"
+        android:text="Manual Key In New Med"
+        android:textSize="30sp"/>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingTop="20dp"
-        android:paddingLeft="20dp">
-        
+        android:paddingLeft="20dp"
+        android:paddingBottom="20dp">
+
         <TextView
-            android:id="@+id/medicationNameLabel"
+            android:id="@+id/medicationNameLabelManual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text = "Medication: "
             android:textSize="18sp"/>
         <EditText
-            android:id="@+id/medicationNameInput"
+            android:id="@+id/medicationNameInputManual"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:hint="paracetamol"
@@ -40,16 +43,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingLeft="20dp">
+        android:paddingLeft="20dp"
+        android:paddingBottom="20dp">
 
         <TextView
-            android:id="@+id/dosageLabel"
+            android:id="@+id/dosageLabelManual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text = "Dosage: "
             android:textSize="18sp"/>
         <EditText
-            android:id="@+id/dosageInput"
+            android:id="@+id/dosageInputManual"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:hint="2"
@@ -64,16 +68,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingLeft="20dp">
+        android:paddingLeft="20dp"
+        android:paddingBottom="20dp">
 
         <TextView
-            android:id="@+id/frequencyLabel"
+            android:id="@+id/frequencyLabelManual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text = "Frequency: "
             android:textSize="18sp"/>
         <EditText
-            android:id="@+id/frequencyInput"
+            android:id="@+id/frequencyInputManual"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:hint="2"
@@ -88,16 +93,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingLeft="20dp">
+        android:paddingLeft="20dp"
+        android:paddingBottom="20dp">
 
         <TextView
-            android:id="@+id/instructionLabel"
+            android:id="@+id/instructionLabelManual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text = "Instruction: "
             android:textSize="18sp"/>
         <EditText
-            android:id="@+id/instructionInput"
+            android:id="@+id/instructionInputManual"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:hint="before or afer meal"
@@ -108,16 +114,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingLeft="20dp">
+        android:paddingLeft="20dp"
+        android:paddingBottom="20dp">
 
         <TextView
-            android:id="@+id/noteLabel"
+            android:id="@+id/noteLabelManual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text = "Note: "
             android:textSize="18sp"/>
         <EditText
-            android:id="@+id/noteInput"
+            android:id="@+id/noteInputManual"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:hint="For fever/pain. May cause drowsiness"
@@ -131,7 +138,7 @@
         android:paddingTop="20dp">
 
         <Button
-            android:id="@+id/btnBackFromImageDetails"
+            android:id="@+id/btnBackFromManual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
@@ -143,7 +150,7 @@
             android:layout_weight="1" />
 
         <Button
-            android:id="@+id/btnSaveFromImageDetails"
+            android:id="@+id/btnSaveFromManual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
