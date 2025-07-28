@@ -126,7 +126,11 @@ td {
 }
 
 .filter-container {
-	@apply absolute min-h-10 w-40 bg-gray-50 border-gray-200 rounded shadow-lg z-50 p-2 text-gray-700;
+	@apply absolute min-h-10 overflow-x-auto w-40 bg-gray-50 border-gray-600 rounded shadow-lg z-50 p-2 text-gray-700;
+}
+
+.input-checkbox {
+	@apply 'w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600';
 }
 
 @media (prefers-color-scheme: light) {
