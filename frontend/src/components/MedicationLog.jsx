@@ -8,11 +8,37 @@ function MedicationLog({ medication, patientId }) {
 	const [editedNote, setEditedNote] = useState('');
 	const [logList, setLogList] = useState([]);
 
+	const parseDateTime = (date, time) => {
+		const [day, month, year] = date.split('-'); // day:21 month: 07, year: 2025
+
+		const rawTime = time.replace(' HRs', '').trim();
+		let formatTime = rawTime;
+		if (rawTime.length === 4) {
+			formatTime = `${rawTime.slice(0, 2)}:${rawTime.slice(2)}`; //8:00
+		}
+
+		const formatDateTime = `${year}-${month}-${day}T${formatTime}`;
+
+		return new Date(formatDateTime);
+	};
+
 	//GET call here to extract medicationLog using medication.id and patientId, useState to store
 	//medicationlog into logList
 
 	useEffect(() => {
-		setLogList(medicationLog);
+		const sortedLog = [...medicationLog].sort((a, b) => {
+			//converting to proper date-time format YYYY-MM-DD HHMM to be compared
+			const dateA = parseDateTime(a.date, a.time);
+
+			const dateB = parseDateTime(b.date, b.time);
+
+			return dateB - dateA;
+		});
+
+		// console.log('sorted', sortedLog);
+		// console.log('non-sorted', medicationLog);
+
+		setLogList(sortedLog);
 	}, []);
 
 	const handleEditClick = (log) => {
