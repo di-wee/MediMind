@@ -125,6 +125,10 @@ td {
 	cursor: pointer;
 }
 
+.filter-container {
+	@apply absolute min-h-10 w-40 bg-gray-50 border-gray-200 rounded shadow-lg z-50 p-2 text-gray-700;
+}
+
 @media (prefers-color-scheme: light) {
 	:root {
 		color: #213547;
