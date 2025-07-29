@@ -9,12 +9,15 @@ import {
 } from '@heroicons/react/24/outline';
 import allPatients from '../mockdata/patientlist.json';
 import PatientGrid from '../components/PatientGrid';
+import { useNavigate } from 'react-router-dom';
 
 function PatientList() {
 	const [patients, setPatients] = useState(allPatients);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [currentPage, setCurrentPage] = useState(1);
 	const cardsPerPage = 9;
+
+	const navigate = useNavigate();
 
 	// Filter patients based on search term - updated to search firstName, lastName, and NRIC
 	const filteredPatients = patients.filter(
@@ -46,8 +49,9 @@ function PatientList() {
 		setCurrentPage(1);
 	};
 
-	const handleAddPatient = () => {
-		window.location.href = '/addpatient';
+	const handleAddPatient = (e) => {
+		e.preventDefault();
+		navigate('/addpatient', { replace: true });
 	};
 	return (
 		<>
@@ -57,7 +61,7 @@ function PatientList() {
 				<div className='mb-8'>
 					<div className='flex items-start justify-between'>
 						<button
-							onClick={() => (window.location.href = '/addpatient')}
+							onClick={(e) => handleAddPatient(e)}
 							className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200'>
 							<UserPlusIcon className='w-4 h-4 mr-2' />
 							Add Patients
@@ -133,13 +137,6 @@ function PatientList() {
 						</p>
 					</div>
 				)}
-
-				{/* Floating Add Button */}
-				<button
-					onClick={() => (window.location.href = '/addpatient')}
-					className='fixed bottom-8 right-8 w-16 h-16 bg-gray-800 hover:bg-gray-900 text-white rounded-full shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 flex items-center justify-center group'>
-					<PlusIcon className='w-6 h-6 group-hover:scale-110 transition-transform duration-200' />
-				</button>
 			</main>
 		</>
 	);

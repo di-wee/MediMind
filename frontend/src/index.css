@@ -22,11 +22,11 @@ body,
 
 a {
 	font-weight: 500;
-	color: #646cff;
 	text-decoration: inherit;
+	color: inherit;
 }
 a:hover {
-	color: #282d8d;
+	color: inherit;
 }
 
 body {

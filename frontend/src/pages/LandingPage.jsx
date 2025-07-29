@@ -19,6 +19,7 @@ export default function LandingPage() {
 					<Sidebar
 						mcrNo='M12345A'
 						firstName='Jenny'
+						clinicName='Raffles Medical Centre'
 					/>
 				</div>
 				<div className='col-span-full ml-64 h-20'>
