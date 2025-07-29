@@ -8,31 +8,33 @@ function PatientDetails({ patientId }) {
 
 	return (
 		<>
-			<div className='patient-details'>
-				<div className='w-1/2'>
-					<label className='form-label'>Patient's Name</label>
-					<input
-						className='form-input'
-						type='text'
-						name='patientName'
-						value='John Tan Ah Kow'
-						readOnly
-					/>
+			<main className='w-full flex-1 p-8 bg-gray-50 min-h-screen'>
+				<div className='patient-details'>
+					<div className='w-1/2'>
+						<label className='form-label'>Patient's Name</label>
+						<input
+							className='form-input'
+							type='text'
+							name='patientName'
+							value='John Tan Ah Kow'
+							readOnly
+						/>
+					</div>
+					<div className='w-1/2 '>
+						<label className='form-label'>Patient's NRIC</label>
+						<input
+							className='form-input'
+							type='text'
+							name='patientNRIC'
+							value='S10234567A'
+							readOnly
+						/>
+					</div>
 				</div>
-				<div className='w-1/2 '>
-					<label className='form-label'>Patient's NRIC</label>
-					<input
-						className='form-input'
-						type='text'
-						name='patientNRIC'
-						value='S10234567A'
-						readOnly
-					/>
+				<div className='mt-20'>
+					<MedicationList patientId={patientId} />
 				</div>
-			</div>
-			<div className='mt-20'>
-				<MedicationList patientId={patientId} />
-			</div>
+			</main>
 		</>
 	);
 }

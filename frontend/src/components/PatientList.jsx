@@ -56,7 +56,7 @@ function PatientList() {
 	return (
 		<>
 			{/* Main Content */}
-			<main className='ml-58 flex-1 p-8 bg-gray-50 min-h-screen'>
+			<main className='ml-58 flex-1 p-8 px-15 bg-gray-50 min-h-screen'>
 				{/* Page Header with Add Patients Button */}
 				<div className='mb-6'>
 					<div className='flex justify-between'>

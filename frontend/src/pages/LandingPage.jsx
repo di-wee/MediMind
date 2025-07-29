@@ -28,7 +28,7 @@ export default function LandingPage() {
 						subtitle='Manage your current patient assignments'
 					/>
 				</div>
-				<div className='flex-1 overflow-y-auto px-6 mt-15 justify-items-center'>
+				<div className='flex-1 overflow-y-auto px-5 mt-15 justify-items-center'>
 					<PatientList />
 				</div>
 			</div>

@@ -17,11 +17,11 @@ function PatientProfile() {
 
 				<div className='col-span-full ml-64 h-20'>
 					<Header
-						title={'Assigned Patient'}
+						title={'Assigned Patients'}
 						subtitle={'Patient Profile'}
 					/>
 
-					<div className='flex-1 overflow-y-auto px-6 mt-20 justify-items-center'>
+					<div className='flex-1 overflow-y-auto justify-items-center'>
 						<PatientDetails patientId={patientId} />
 					</div>
 				</div>
