@@ -105,83 +105,85 @@ function MedicationList({ patientId }) {
 
 	return (
 		<>
-			<h3 className='font-bold text-xl text-center mb-3'>Medication List</h3>
-			<div className='max-h-96 overflow-y-auto px-15 w-full mx-auto overflow-x-auto mb-20 '>
-				<table>
-					<thead className='sticky top-0 z-10'>
-						<tr>
-							<th>Medication Name</th>
-							<th>Dosage</th>
-							<th>Frequency</th>
+			<div className='bg-white shadow-2xl m-5 py-8 rounded-xl'>
+				<h3 className='font-bold text-lg px-15 mb-5'>Medication List</h3>
+				<div className='max-h-96 overflow-y-auto px-15 w-full mx-auto overflow-x-auto mb-20 '>
+					<table>
+						<thead className='sticky top-0 z-10'>
+							<tr>
+								<th>Medication Name</th>
+								<th>Dosage</th>
+								<th>Frequency</th>
 
-							<th>
-								<div className='relative inline-flex items-center gap-1'>
-									Status
-									<FunnelIcon
-										onClick={() => handleFunnelClick('Status')}
-										className='filter-btn'
-									/>
-								</div>
-								{filterKey === 'isActive' ? (
-									<div ref={filterRef}>
-										<FilterContainer
-											filterOptions={uniqueOptions}
-											selectedFilters={selectedFilters}
-											handleFilterChange={handleFilterChange}
+								<th>
+									<div className='relative inline-flex items-center gap-1'>
+										Status
+										<FunnelIcon
+											onClick={() => handleFunnelClick('Status')}
+											className='filter-btn'
 										/>
 									</div>
-								) : (
-									''
-								)}
-							</th>
-
-							<th className='relative'>
-								<div className='relative inline-flex items-center gap-1'>
-									Missed Dose
-									<FunnelIcon
-										onClick={() => handleFunnelClick('Missed Dose')}
-										className='filter-btn'
-									/>
-								</div>
-								{filterKey === 'missedDose' ? (
-									<div ref={filterRef}>
-										<FilterContainer
-											filterOptions={uniqueOptions}
-											selectedFilters={selectedFilters}
-											handleFilterChange={handleFilterChange}
-										/>
-									</div>
-								) : (
-									''
-								)}
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{displayedList.map((meds) => (
-							<tr
-								className='tr-list'
-								onClick={() => handleMedicationClick(meds)}>
-								<td>{meds.medicationName}</td>
-								<td>{meds.dosage}</td>
-								<td>{meds.frequency}</td>
-								<td>
-									{meds.isActive ? (
-										<div className='pos-status'>Active</div>
+									{filterKey === 'isActive' ? (
+										<div ref={filterRef}>
+											<FilterContainer
+												filterOptions={uniqueOptions}
+												selectedFilters={selectedFilters}
+												handleFilterChange={handleFilterChange}
+											/>
+										</div>
 									) : (
-										<div className='neg-status'>Inactive</div>
+										''
 									)}
-								</td>
-								<td>
-									{meds.missedDose ? <CheckIcon className='check' /> : ''}
-								</td>
+								</th>
+
+								<th className='relative'>
+									<div className='relative inline-flex items-center gap-1'>
+										Missed Dose
+										<FunnelIcon
+											onClick={() => handleFunnelClick('Missed Dose')}
+											className='filter-btn'
+										/>
+									</div>
+									{filterKey === 'missedDose' ? (
+										<div ref={filterRef}>
+											<FilterContainer
+												filterOptions={uniqueOptions}
+												selectedFilters={selectedFilters}
+												handleFilterChange={handleFilterChange}
+											/>
+										</div>
+									) : (
+										''
+									)}
+								</th>
 							</tr>
-						))}
-					</tbody>
-				</table>
+						</thead>
+						<tbody>
+							{displayedList.map((meds) => (
+								<tr
+									className='tr-list'
+									onClick={() => handleMedicationClick(meds)}>
+									<td>{meds.medicationName}</td>
+									<td>{meds.dosage}</td>
+									<td>{meds.frequency}</td>
+									<td>
+										{meds.isActive ? (
+											<div className='pos-status'>Active</div>
+										) : (
+											<div className='neg-status'>Inactive</div>
+										)}
+									</td>
+									<td>
+										{meds.missedDose ? <CheckIcon className='check' /> : ''}
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
 			</div>
 			{visible && (
-				<div className='mb-30'>
+				<div className='bg-white shadow-2xl m-5 py-8 rounded-xl mb-30'>
 					<MedicationLog
 						medication={selectedMedicine}
 						patientId={patientId}

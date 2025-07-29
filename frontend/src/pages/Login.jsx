@@ -37,12 +37,7 @@ function Login() {
 		<>
 			<section>
 				<div className='login-container'>
-					<h2 className='flex items-center text-2xl font-semibold text-sky-600'>
-						<img
-							className='w-8 h-8 mr-2'
-							src='https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg'
-							alt='logo'
-						/>
+					<h2 className='flex items-center text-2xl font-semibold text-gray-800 '>
 						MediMind
 					</h2>
 					<div className='w-96 bg-white rounded-lg shadow-xl md:mt-0 sm:max-w-md xl:p-0'>

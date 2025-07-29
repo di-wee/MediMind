@@ -139,14 +139,10 @@ function MedicationLog({ medication, patientId }) {
 
 	return (
 		<>
-			<h3 className='font-bold text-xl text-center mb-1'>
-				Medication Intake Log
-			</h3>
-			<h6 className='text-center mb-5'>
-				<i>
-					[<b>{medication.medicationName}</b> - {medication.dosage},{' '}
-					{medication.frequency}]
-				</i>
+			<h3 className='font-bold text-lg px-15 '>Medication Intake Log</h3>
+			<h6 className='text-sm px-15 mb-5'>
+				[<b>{medication.medicationName}</b> - {medication.dosage},{' '}
+				{medication.frequency}]
 			</h6>
 			<div className='max-h-96 w-full overflow-y-auto px-15 w-6xl mx-auto overflow-x-auto'>
 				<table>

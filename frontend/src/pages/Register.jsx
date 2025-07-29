@@ -74,12 +74,7 @@ function Register() {
 		<>
 			<section>
 				<div className='flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0 mt-20 '>
-					<h2 className='flex items-center  text-2xl font-semibold text-sky-600'>
-						<img
-							className='w-8 h-8 mr-2'
-							src='https://flowbite.s3.amazonaws.com/blocks/marketing-ui/logo.svg'
-							alt='logo'
-						/>
+					<h2 className='flex items-center  text-2xl font-semibold text-gray-800'>
 						MediMind
 					</h2>
 					<div className='w-full max-w-2xl bg-white rounded-lg shadow-xl md:mt-0 sm:max-w-xl xl:p-0 mb-20'>
