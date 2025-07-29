@@ -58,30 +58,28 @@ function PatientList() {
 			{/* Main Content */}
 			<main className='ml-58 flex-1 p-8 bg-gray-50 min-h-screen'>
 				{/* Page Header with Add Patients Button */}
-				<div className='mb-8'>
-					<div className='flex items-start justify-between'>
-						<button
-							onClick={(e) => handleAddPatient(e)}
-							className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200'>
-							<UserPlusIcon className='w-4 h-4 mr-2' />
-							Add Patients
-						</button>
-					</div>
-				</div>
-
-				{/* Search Bar */}
 				<div className='mb-6'>
-					<div className='relative max-w-md'>
-						<div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-							<MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
+					<div className='flex justify-between'>
+						<div className='relative max-w-md justify-stat'>
+							<div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+								<MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
+							</div>
+							<input
+								type='text'
+								className='block w-full min-w-xl pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-gray-400 focus:border-transparent text-sm'
+								placeholder='Search by name, NRIC, or clinic...'
+								value={searchTerm}
+								onChange={handleSearchChange}
+							/>
 						</div>
-						<input
-							type='text'
-							className='block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-gray-400 focus:border-transparent text-sm'
-							placeholder='Search by name, NRIC, or clinic...'
-							value={searchTerm}
-							onChange={handleSearchChange}
-						/>
+						<div>
+							<button
+								onClick={(e) => handleAddPatient(e)}
+								className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200'>
+								<UserPlusIcon className='w-4 h-4 mr-2' />
+								Add Patients
+							</button>
+						</div>
 					</div>
 				</div>
 

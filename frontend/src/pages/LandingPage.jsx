@@ -19,7 +19,7 @@ export default function LandingPage() {
 					<Sidebar
 						mcrNo='M12345A'
 						firstName='Jenny'
-						clinicName='Raffles Medical Centre'
+						clinicName='Raffles Medical'
 					/>
 				</div>
 				<div className='col-span-full ml-64 h-20'>
@@ -28,7 +28,7 @@ export default function LandingPage() {
 						subtitle='Manage your current patient assignments'
 					/>
 				</div>
-				<div className='flex-1 overflow-y-auto px-6 mt-20 justify-items-center'>
+				<div className='flex-1 overflow-y-auto px-6 mt-15 justify-items-center'>
 					<PatientList />
 				</div>
 			</div>
