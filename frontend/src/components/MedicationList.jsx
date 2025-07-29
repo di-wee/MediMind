@@ -106,7 +106,7 @@ function MedicationList({ patientId }) {
 	return (
 		<>
 			<h3 className='font-bold text-xl text-center mb-3'>Medication List</h3>
-			<div className='max-h-96 overflow-y-auto px-8 w-6xl mx-auto overflow-x-auto mb-30 '>
+			<div className='max-h-96 overflow-y-auto px-15 w-full mx-auto overflow-x-auto mb-20 '>
 				<table>
 					<thead className='sticky top-0 z-10'>
 						<tr>

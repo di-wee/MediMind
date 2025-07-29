@@ -21,7 +21,7 @@ function PatientProfile() {
 						subtitle={'Patient Profile'}
 					/>
 
-					<div className='flex-1 overflow-y-auto justify-items-center'>
+					<div className='flex overflow-y-auto  mt-15 justify-items-center'>
 						<PatientDetails patientId={patientId} />
 					</div>
 				</div>

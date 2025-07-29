@@ -80,7 +80,7 @@ h1 {
 }
 
 table {
-	@apply w-full min-w-full border border-gray-300 text-sm text-left shadow-xl;
+	@apply w-full min-w-full border border-gray-300 text-sm font-bold text-left shadow-xl;
 }
 
 thead {
@@ -88,7 +88,8 @@ thead {
 }
 
 th {
-	@apply h-15 px-4 py-2  border-b;
+	@apply h-15 px-4 py-2 border-b;
+	font-size: 16px;
 }
 
 tbody {
@@ -117,7 +118,7 @@ td {
 }
 
 .patient-details {
-	@apply flex max-w-4xl mx-auto justify-between w-full mt-10 gap-x-30;
+	@apply px-20 flex w-full mx-auto justify-between mt-10 gap-x-30;
 }
 
 .filter-btn {
