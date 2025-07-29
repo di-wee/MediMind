@@ -37,8 +37,22 @@ class ViewMedicineDetailsFragment : Fragment() {
 
 //        to the MedicationPurposeWebView -- implement later
         view.findViewById<Button>(R.id.btnMedicationPurpose).setOnClickListener {
-            Toast.makeText(context, "Medication Purpose Button selected", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Opening medication purpose...", Toast.LENGTH_SHORT).show()
+
+            // Capitalize first letter
+            val formattedName = medicineName.trim().replaceFirstChar { it.uppercase() }
+
+            // Example: https://en.wikipedia.org/wiki/Panadol
+            val url = "https://en.wikipedia.org/wiki/$formattedName"
+
+            val fragment = WebViewFragment.newInstance(url)
+
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.nav_host_fragment, fragment)
+                .addToBackStack(null)
+                .commit()
         }
+
 
         view.findViewById<Button>(R.id.btnEditDetails).setOnClickListener {
             editListener?.onEditMedicineRequested(medicineName)
