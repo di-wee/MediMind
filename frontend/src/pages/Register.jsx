@@ -1,3 +1,4 @@
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,6 +9,8 @@ function Register() {
 		ConfirmPass: false,
 	});
 	const [clinicList, setClinicList] = useState([]);
+	const [passVisibility, setPassVisibility] = useState(false);
+	const [confirmPassVisibility, setConfirmPassVisibility] = useState(false);
 	const [selectedClinic, setSelectedClinic] = useState('');
 
 	const mcrRef = useRef();
@@ -185,43 +188,71 @@ function Register() {
 									</select>
 								</div>
 
-								<div className='flex items-center justify-between gap-10'>
+								<div className='flex justify-between gap-10'>
 									<div>
 										<label
 											htmlFor='password'
 											className='form-label'>
 											Password
 										</label>
-										<input
-											type='password'
-											name='password'
-											id='password'
-											placeholder='••••••••'
-											className='form-input'
-											minLength='8'
-											ref={passwordRef}
-											required
-										/>
+										<div>
+											<input
+												type={passVisibility ? 'text' : 'password'}
+												name='password'
+												id='password'
+												placeholder='••••••••'
+												className='form-input'
+												minLength='8'
+												ref={passwordRef}
+												required
+											/>
+											{passVisibility ? (
+												<EyeSlashIcon
+													onClick={() => setPassVisibility(false)}
+													className='size-5 relative left-40 bottom-8 cursor-pointer'
+												/>
+											) : (
+												<EyeIcon
+													onClick={() => setPassVisibility(true)}
+													className='size-5 relative left-40 bottom-8 cursor-pointer'
+												/>
+											)}
+										</div>
 									</div>
-
 									<div>
 										<label
 											htmlFor='confirmPassword'
 											className='form-label'>
 											Confirm Password
 										</label>
-										<input
-											type='password'
-											name='confirmPassword'
-											id='confirmPassword'
-											placeholder='••••••••'
-											className='form-input'
-											ref={confirmPassRef}
-											required
-										/>
-										{validation['ConfirmPass'] && (
-											<p className='inline-val-msg'>Password does not match.</p>
-										)}
+										<div>
+											<input
+												type={confirmPassVisibility ? 'text' : 'password'}
+												name='confirmPassword'
+												id='confirmPassword'
+												placeholder='••••••••'
+												className='form-input'
+												ref={confirmPassRef}
+												required
+											/>
+											{confirmPassVisibility ? (
+												<EyeSlashIcon
+													onClick={() => setConfirmPassVisibility(false)}
+													className='size-5 relative left-40 bottom-8 cursor-pointer'
+												/>
+											) : (
+												<EyeIcon
+													onClick={() => setConfirmPassVisibility(true)}
+													className='size-5 relative left-40 bottom-8 cursor-pointer'
+												/>
+											)}
+
+											{validation['ConfirmPass'] && (
+												<p className='inline-val-msg'>
+													Password does not match.
+												</p>
+											)}
+										</div>
 									</div>
 								</div>
 								<button
