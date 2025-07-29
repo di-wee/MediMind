@@ -24,6 +24,7 @@ class LoginFragment : Fragment() {
         val loginButton = view.findViewById<Button>(R.id.loginButton)
         val bypassButton = view.findViewById<Button>(R.id.bypassButton)
         val registerButton = view.findViewById<Button>(R.id.registerButton)
+        val debugButton = view.findViewById<Button>(R.id.debugButton)
 
         loginButton.setOnClickListener {
             val username = usernameField.text.toString()
@@ -43,5 +44,10 @@ class LoginFragment : Fragment() {
         registerButton.setOnClickListener {
             findNavController().navigate(R.id.action_loginFragment_to_registerUserFragment)
         }
+
+        debugButton.setOnClickListener {
+            findNavController().navigate(R.id.action_loginFragment_to_debugFragment)
+        }
+
     }
 }
