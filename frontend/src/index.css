@@ -150,6 +150,10 @@ td {
 	@apply bg-red-200 text-sm px-3 py-4 border-1 border-red-600 rounded-sm text-red-900;
 }
 
+.inline-val-msg {
+	@apply text-sm text-red-500;
+}
+
 @media (prefers-color-scheme: light) {
 	:root {
 		color: #213547;

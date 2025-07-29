@@ -1,10 +1,14 @@
 import { XCircleIcon } from '@heroicons/react/16/solid';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
 	const [validation, setValidation] = useState(false);
+	const [passVisibility, setPassVisibility] = useState(false);
+
 	const navigate = useNavigate();
+
 	const mcrNoRef = useRef();
 	const passwordRef = useRef();
 
@@ -81,15 +85,28 @@ function Login() {
 										className='form-label'>
 										Password
 									</label>
-									<input
-										type='password'
-										name='password'
-										id='password'
-										placeholder='••••••••'
-										className='form-input'
-										ref={passwordRef}
-										required
-									/>
+									<div>
+										<input
+											type={passVisibility ? 'text' : 'password'}
+											name='password'
+											id='password'
+											placeholder='••••••••'
+											className='form-input'
+											ref={passwordRef}
+											required
+										/>
+										{passVisibility ? (
+											<EyeSlashIcon
+												onClick={() => setPassVisibility(false)}
+												className='size-5 relative left-70 bottom-8 cursor-pointer'
+											/>
+										) : (
+											<EyeIcon
+												onClick={() => setPassVisibility(true)}
+												className='size-5 relative left-70 bottom-8 cursor-pointer'
+											/>
+										)}
+									</div>
 								</div>
 
 								<button
