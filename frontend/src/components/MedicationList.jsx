@@ -105,7 +105,7 @@ function MedicationList({ patientId }) {
 
 	return (
 		<>
-			<h3 className='font-bold text-xl text-center mb-5'>Medication List</h3>
+			<h3 className='font-bold text-xl text-center mb-3'>Medication List</h3>
 			<div className='max-h-96 overflow-y-auto px-8 w-6xl mx-auto overflow-x-auto mb-30 '>
 				<table>
 					<thead className='sticky top-0 z-10'>
@@ -165,7 +165,13 @@ function MedicationList({ patientId }) {
 								<td>{meds.medicationName}</td>
 								<td>{meds.dosage}</td>
 								<td>{meds.frequency}</td>
-								<td>{meds.isActive ? 'Active' : 'Inactive'}</td>
+								<td>
+									{meds.isActive ? (
+										<div className='pos-status'>Active</div>
+									) : (
+										<div className='neg-status'>Inactive</div>
+									)}
+								</td>
 								<td>
 									{meds.missedDose ? <CheckIcon className='check' /> : ''}
 								</td>
