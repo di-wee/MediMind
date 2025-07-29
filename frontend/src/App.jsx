@@ -23,6 +23,14 @@ function App() {
 							</ProtectedRoute>
 						}
 					/>
+					<Route
+						path='/addpatient'
+						element={
+							<ProtectedRoute>
+								<AddPatientPage />
+							</ProtectedRoute>
+						}
+					/>
 
 					{/* Add new patient page */}
 					<Route
@@ -40,8 +48,14 @@ function App() {
 					/>
 
 					{/* Login and Register */}
-					<Route path='/login' element={<Login />} />
-					<Route path='/register' element={<Register />} />
+					<Route
+						path='/login'
+						element={<Login />}
+					/>
+					<Route
+						path='/register'
+						element={<Register />}
+					/>
 
 					{/* Patient profile and medication logs */}
 					<Route
