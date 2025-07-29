@@ -11,7 +11,8 @@ function PatientProfile() {
 				<div className='row-span-full'>
 					<Sidebar
 						mcrNo='M12345A'
-						firstName='Jennifer'
+						firstName='Jenny'
+						clinicName='Raffles Medical Centre'
 					/>
 				</div>
 

@@ -24,10 +24,10 @@ function DoctorProfile() {
 						title='Account'
 						subtitle='View your profile details'
 					/>
-				</div>
-				<div className='flex-1 overflow-y-auto px-6 mt-20 justify-items-center'>
-					{/* Shiying to focus here */}
-					<DoctorDetails />
+					<div className='flex overflow-y-auto mt-15 justify-items-center'>
+						{/* Shiying to focus here */}
+						<DoctorDetails />
+					</div>
 				</div>
 			</div>
 		</>
