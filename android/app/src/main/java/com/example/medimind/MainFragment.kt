@@ -32,7 +32,7 @@ class MainFragment : Fragment(), OnMedicineSelectedListener, OnEditMedicineReque
                     true
                 }
                 R.id.nav_log -> {
-                    Toast.makeText(context, "Log tab selected", Toast.LENGTH_SHORT).show()
+                    loadFragment(IntakeHistoryFragment())
                     true
                 }
                 R.id.nav_medication -> {
