@@ -14,6 +14,9 @@
         <action
             android:id="@+id/action_loginFragment_to_registerUserFragment"
             app:destination="@id/registerUserFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_debugFragment"
+            app:destination="@id/debugFragment"/>
     </fragment>
 
     <fragment
@@ -22,6 +25,15 @@
         android:label="Main">
         <action
             android:id="@+id/action_mainFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/debugFragment"
+        android:name="com.example.medimind.DebugFragment"
+        android:label="Debug">
+        <action
+            android:id="@+id/action_debugFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
     </fragment>
 
