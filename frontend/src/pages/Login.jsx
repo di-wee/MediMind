@@ -1,8 +1,14 @@
-import React, { useRef } from 'react';
+import { XCircleIcon } from '@heroicons/react/16/solid';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
+	const [validation, setValidation] = useState(false);
+	const [passVisibility, setPassVisibility] = useState(false);
+
 	const navigate = useNavigate();
+
 	const mcrNoRef = useRef();
 	const passwordRef = useRef();
 
@@ -18,16 +24,19 @@ function Login() {
 
 		//temp logic if both fields are not null will simulate authentication
 		if (mcrNo && password) {
+			setValidation(false);
 			//setting key = 'isLoggedIn' with a string value = 'true'
 			localStorage.setItem('isLoggedIn', 'true');
 			navigate('/', { replace: true });
+		} else {
+			setValidation(true);
 		}
 	};
 
 	return (
 		<>
 			<section>
-				<div className='flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0'>
+				<div className='login-container'>
 					<h2 className='flex items-center text-2xl font-semibold text-sky-600'>
 						<img
 							className='w-8 h-8 mr-2'
@@ -41,6 +50,16 @@ function Login() {
 							<h2 className='text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl'>
 								Welcome back!
 							</h2>
+							{validation && (
+								<div className='login-validation relative'>
+									<p>Invalid username or password!</p>
+									<XCircleIcon
+										className='size-4.5 absolute right-5 top-5 cursor-pointer'
+										onClick={() => setValidation(false)}
+									/>
+								</div>
+							)}
+
 							<form
 								className='space-y-4 md:space-y-6'
 								action='#'>
@@ -66,15 +85,28 @@ function Login() {
 										className='form-label'>
 										Password
 									</label>
-									<input
-										type='password'
-										name='password'
-										id='password'
-										placeholder='••••••••'
-										className='form-input'
-										ref={passwordRef}
-										required
-									/>
+									<div>
+										<input
+											type={passVisibility ? 'text' : 'password'}
+											name='password'
+											id='password'
+											placeholder='••••••••'
+											className='form-input'
+											ref={passwordRef}
+											required
+										/>
+										{passVisibility ? (
+											<EyeSlashIcon
+												onClick={() => setPassVisibility(false)}
+												className='size-5 relative left-70 bottom-8 cursor-pointer'
+											/>
+										) : (
+											<EyeIcon
+												onClick={() => setPassVisibility(true)}
+												className='size-5 relative left-70 bottom-8 cursor-pointer'
+											/>
+										)}
+									</div>
 								</div>
 
 								<button

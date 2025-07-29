@@ -1,0 +1,162 @@
+[
+	{
+		"id": "guid1",
+		"medicationName": "Metformin",
+		"dosage": "500mg",
+		"frequency": "2x Daily",
+		"isActive": true,
+		"missedDose": true
+	},
+	{
+		"id": "guid2",
+		"medicationName": "Lisinopril",
+		"dosage": "10mg",
+		"frequency": "Once Daily",
+		"isActive": true,
+		"missedDose": false
+	},
+	{
+		"id": "guid3",
+		"medicationName": "Atorvastatin",
+		"dosage": "20mg",
+		"frequency": "Once Nightly",
+		"isActive": false,
+		"missedDose": false
+	},
+	{
+		"id": "guid4",
+		"medicationName": "Amlodipine",
+		"dosage": "5mg",
+		"frequency": "Once Daily",
+		"isActive": true,
+		"missedDose": false
+	},
+	{
+		"id": "guid5",
+		"medicationName": "Omeprazole",
+		"dosage": "20mg",
+		"frequency": "Before Breakfast",
+		"isActive": false,
+		"missedDose": false
+	},
+	{
+		"id": "guid6",
+		"medicationName": "Losartan",
+		"dosage": "50mg",
+		"frequency": "Once Morning",
+		"isActive": true,
+		"missedDose": true
+	},
+	{
+		"id": "guid7",
+		"medicationName": "Furosemide",
+		"dosage": "40mg",
+		"frequency": "Once Daily",
+		"isActive": true,
+		"missedDose": false
+	},
+	{
+		"id": "guid8",
+		"medicationName": "Levothyroxine",
+		"dosage": "75mcg",
+		"frequency": "Before Breakfast",
+		"isActive": true,
+		"missedDose": true
+	},
+	{
+		"id": "guid9",
+		"medicationName": "Simvastatin",
+		"dosage": "10mg",
+		"frequency": "Once Nightly",
+		"isActive": false,
+		"missedDose": false
+	},
+	{
+		"id": "guid10",
+		"medicationName": "Warfarin",
+		"dosage": "5mg",
+		"frequency": "Once Daily",
+		"isActive": true,
+		"missedDose": false
+	},
+	{
+		"id": "guid11",
+		"medicationName": "Gabapentin",
+		"dosage": "300mg",
+		"frequency": "3x Daily",
+		"isActive": true,
+		"missedDose": false
+	},
+	{
+		"id": "guid12",
+		"medicationName": "Sertraline",
+		"dosage": "50mg",
+		"frequency": "Once Morning",
+		"isActive": false,
+		"missedDose": false
+	},
+	{
+		"id": "guid13",
+		"medicationName": "Clopidogrel",
+		"dosage": "75mg",
+		"frequency": "Once Daily",
+		"isActive": true,
+		"missedDose": false
+	},
+	{
+		"id": "guid14",
+		"medicationName": "Alendronate",
+		"dosage": "70mg",
+		"frequency": "Once Weekly",
+		"isActive": false,
+		"missedDose": false
+	},
+	{
+		"id": "guid15",
+		"medicationName": "Glipizide",
+		"dosage": "5mg",
+		"frequency": "2x Daily",
+		"isActive": true,
+		"missedDose": true
+	},
+	{
+		"id": "guid16",
+		"medicationName": "Insulin Glargine",
+		"dosage": "10 units",
+		"frequency": "Once Nightly",
+		"isActive": true,
+		"missedDose": false
+	},
+	{
+		"id": "guid17",
+		"medicationName": "Aspirin",
+		"dosage": "81mg",
+		"frequency": "Once Daily",
+		"isActive": true,
+		"missedDose": false
+	},
+	{
+		"id": "guid18",
+		"medicationName": "Docusate",
+		"dosage": "100mg",
+		"frequency": "As Needed",
+		"isActive": false,
+		"missedDose": false
+	},
+	{
+		"id": "guid19",
+		"medicationName": "Hydrochlorothiazide",
+		"dosage": "25mg",
+		"frequency": "Once Morning",
+		"isActive": true,
+		"missedDose": true
+	},
+	{
+		"id": "guid20",
+		"medicationName": "Pantoprazole",
+		"dosage": "40mg",
+		"frequency": "Once Morning",
+		"isActive": true,
+		"missedDose": false
+	}
+]
