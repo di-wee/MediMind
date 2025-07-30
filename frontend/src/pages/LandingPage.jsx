@@ -16,11 +16,7 @@ export default function LandingPage() {
 			<div className='grid-cols-4 h-screen'>
 				{/* Sidebar */}
 				<div className='row-span-full'>
-					<Sidebar
-						mcrNo='M12345A'
-						firstName='Jenny'
-						clinicName='Raffles Medical Centre'
-					/>
+					<Sidebar />
 				</div>
 				<div className='col-span-full ml-64 h-20'>
 					<Header
