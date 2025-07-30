@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:padding="24dp">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Top NavBar (same as HomeFragment) -->
         <include
             layout="@layout/top_nav_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <!-- Profile Heading -->
         <TextView
             android:id="@+id/profileText"
             android:layout_width="wrap_content"
@@ -23,7 +27,7 @@
             android:layout_marginTop="24dp"
             android:layout_gravity="center_horizontal" />
 
-        <!-- Each TextView corresponds to a column in the users table -->
+        <!-- User Info -->
         <TextView
             android:id="@+id/txtUsername"
             android:layout_width="wrap_content"
@@ -80,6 +84,7 @@
             android:layout_marginStart="24dp"
             android:textSize="18sp" />
 
+        <!-- Edit Profile Button -->
         <Button
             android:id="@+id/editProfileButton"
             android:layout_width="match_parent"
