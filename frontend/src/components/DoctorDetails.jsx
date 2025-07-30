@@ -110,31 +110,31 @@ function DoctorDetails({ mcrNo }) {
 						<div className='w-xl'>
 							<label className='form-label'>First Name</label>
 							<input
-								className='form-input'
+								className='form-readonly'
 								type='text'
 								name='firstName'
 								value={doctorInfo.firstName}
-								readOnly
+								disabled
 							/>
 						</div>
 						<div className='w-xl '>
 							<label className='form-label'>Last Name</label>
 							<input
-								className='form-input'
+								className='form-readonly'
 								type='text'
 								name='lastName'
 								value={doctorInfo.lastName}
-								readOnly
+								disabled
 							/>
 						</div>
 						<div className='w-xl'>
 							<label className='form-label'>MCR No</label>
 							<input
-								className='form-input'
+								className='form-readonly'
 								type='text'
 								name='MCRNo'
 								value={doctorInfo.mcrNo}
-								readOnly
+								disabled
 							/>
 						</div>
 					</div>
@@ -142,12 +142,12 @@ function DoctorDetails({ mcrNo }) {
 						<div className='w-xl'>
 							<label className='form-label'>Email Address</label>
 							<input
-								className='form-input'
+								className={`form-editable ${!isEditing ? 'bg-gray-200' : ''}`}
 								type='text'
 								name='email'
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
-								readOnly={!isEditing}
+								disabled={!isEditing}
 							/>
 						</div>
 						<div className='w-xl'>
@@ -173,11 +173,11 @@ function DoctorDetails({ mcrNo }) {
 								</select>
 							) : (
 								<input
-									className='form-input'
+									className={`form-editable ${!isEditing ? 'bg-gray-200' : ''}`}
 									type='text'
 									name='clinicName'
 									value={clinic}
-									readOnly
+									disabled
 								/>
 							)}
 						</div>
@@ -191,12 +191,14 @@ function DoctorDetails({ mcrNo }) {
 								{isChangingPassword ? 'Current Password' : 'Password'}
 							</label>
 							<input
-								className='form-input'
+								className={`form-editable ${
+									!isChangingPassword ? 'bg-gray-200' : ''
+								}`}
 								type='password'
 								name='password'
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
-								readOnly={!isChangingPassword}
+								disabled={!isChangingPassword}
 							/>
 							{validation.currentPassValidation && (
 								<p className='inline-val-msg'>
@@ -209,7 +211,7 @@ function DoctorDetails({ mcrNo }) {
 							<div className='w-1/2'>
 								<label className='form-label'>New Password</label>
 								<input
-									className='form-input'
+									className='form-editable'
 									type='password'
 									name='newPassword'
 									value={newPassword}
