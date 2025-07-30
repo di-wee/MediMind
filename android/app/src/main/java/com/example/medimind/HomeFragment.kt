@@ -20,6 +20,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import android.graphics.Color
+import android.view.Gravity
 
 class HomeFragment : Fragment() {
 
@@ -205,45 +207,54 @@ class HomeFragment : Fragment() {
         for (i in 0..6) {
             val dayCopy = calendar.clone() as Calendar
 
-            val dayView = TextView(requireContext()).apply {
-                val day = dayFormat.format(dayCopy.time)
-                val date = dateFormat.format(dayCopy.time)
-                text = "$day\n$date"
-                setPadding(24, 8, 24, 8)
-                textAlignment = View.TEXT_ALIGNMENT_CENTER
-
-                setOnClickListener {
-                    selectedDateView?.setBackgroundColor(0x00000000)
-                    (selectedDateView as? TextView)?.setTextColor(
-                        ContextCompat.getColor(requireContext(), android.R.color.black)
-                    )
-
-                    setBackgroundColor(
-                        ContextCompat.getColor(
-                            requireContext(),
-                            android.R.color.holo_blue_light
-                        )
-                    )
-                    setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
-
-                    selectedDateView = this
-                    selectedCalendar = dayCopy
-
-                    Toast.makeText(
-                        context,
-                        "Selected: ${SimpleDateFormat("EEE, dd MMM").format(dayCopy.time)}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
-                if (isSameDay(dayCopy, today)) {
-                    post { performClick() }
-                } else {
-                    setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
-                }
+            val container = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER_HORIZONTAL
+                setPadding(16, 8, 16, 8)
             }
 
-            calendarLayout.addView(dayView)
+            val dayText = TextView(requireContext()).apply {
+                text = dayFormat.format(dayCopy.time)
+                textSize = 14f
+                setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+                gravity = Gravity.CENTER
+            }
+
+            val dateText = TextView(requireContext()).apply {
+                text = dateFormat.format(dayCopy.time)
+                textSize = 14f
+                setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+                gravity = Gravity.CENTER
+            }
+
+            container.addView(dayText)
+            container.addView(dateText)
+
+            container.setOnClickListener {
+                // reset previous
+                (selectedDateView as? LinearLayout)?.let { prev ->
+                    val prevDate = prev.getChildAt(1) as TextView
+                    prevDate.background = null
+                    prevDate.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+                    val prevDay = prev.getChildAt(0) as TextView
+                    prevDay.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+                }
+
+                // highlight current date
+                dateText.background = ContextCompat.getDrawable(requireContext(), R.drawable.circle_blue_bg)
+                dateText.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+                dayText.setTextColor(Color.parseColor("#1E88E5")) // blue text for selected day
+
+                selectedDateView = container
+                selectedCalendar = dayCopy
+            }
+
+            // preselect today
+            if (isSameDay(dayCopy, today)) {
+                container.post { container.performClick() }
+            }
+
+            calendarLayout.addView(container)
             calendar.add(Calendar.DAY_OF_MONTH, 1)
         }
     }
