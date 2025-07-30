@@ -1,27 +1,16 @@
 import { XCircleIcon } from '@heroicons/react/16/solid';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
-import React, { useContext, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import MediMindContext from '../context/MediMindContext';
 
 function Login() {
 	const [validation, setValidation] = useState(false);
 	const [passVisibility, setPassVisibility] = useState(false);
-	const mmCtxt = useContext(MediMindContext);
-	const { setDoctorInfo } = mmCtxt;
 
 	const navigate = useNavigate();
 
 	const mcrNoRef = useRef();
 	const passwordRef = useRef();
-
-	const mockData = {
-		firstName: 'Jenny',
-		lastName: 'Goh',
-		mcrNo: 'M12345A',
-		email: 'jenny.g@gmail.com',
-		clinic: 'Raffles Medical Centre',
-	};
 
 	const handleSignUp = (e) => {
 		e.preventDefault();
@@ -38,7 +27,6 @@ function Login() {
 			setValidation(false);
 			//setting key = 'isLoggedIn' with a string value = 'true'
 			localStorage.setItem('isLoggedIn', 'true');
-			setDoctorInfo(mockData);
 			navigate('/', { replace: true });
 		} else {
 			setValidation(true);

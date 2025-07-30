@@ -3,16 +3,11 @@ import {
 	Squares2X2Icon,
 	UserCircleIcon,
 } from '@heroicons/react/24/outline';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import MediMindContext from '../context/MediMindContext';
 
-function Sidebar() {
+function Sidebar({ mcrNo, firstName, clinicName }) {
 	const location = useLocation();
-	const mmCtxt = useContext(MediMindContext);
-	const { doctorInfo } = mmCtxt;
-
-	//eventually
 
 	const handleLogout = () => {
 		localStorage.removeItem('isLoggedIn');
@@ -42,14 +37,10 @@ function Sidebar() {
 						</div>
 						<div className='flex-1 min-w-0'>
 							<p className='text-sm font-semibold text-gray-900 truncate'>
-								Dr. {doctorInfo.firstName}
+								Dr. {firstName}
 							</p>
-							<p className='text-xs text-gray-500 truncate'>
-								MCR: {doctorInfo.mcrNo}
-							</p>
-							<p className='text-xs text-gray-500 truncate'>
-								{doctorInfo.clinic}
-							</p>
+							<p className='text-xs text-gray-500 truncate'>MCR: {mcrNo}</p>
+							<p className='text-xs text-gray-500 truncate'>{clinicName}</p>
 						</div>
 					</div>
 				</div>
@@ -58,15 +49,15 @@ function Sidebar() {
 				<nav className='flex-1 px-4 py-6'>
 					<div className='space-y-1'>
 						<Link
-							to={`/profile/${doctorInfo.mcrNo}`}
+							to={`/profile/${mcrNo}`}
 							className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
-								isActive(`/profile/${doctorInfo.mcrNo}`)
+								isActive(`/profile/${mcrNo}`)
 									? 'bg-gray-100 text-gray-900 border-l-4 border-gray-600'
 									: 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
 							}`}>
 							<UserCircleIcon
 								className={`w-5 h-5 mr-3 transition-colors ${
-									isActive(`/profile/${doctorInfo.mcrNo}`)
+									isActive(`/profile/${mcrNo}`)
 										? 'text-gray-700'
 										: 'text-gray-400 group-hover:text-gray-600'
 								}`}
