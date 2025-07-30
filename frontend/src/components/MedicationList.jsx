@@ -107,7 +107,7 @@ function MedicationList({ patientId }) {
 		<>
 			<div className='bg-white shadow-2xl m-5 py-8 rounded-xl'>
 				<h3 className='font-bold text-lg px-15 mb-5'>Medication List</h3>
-				<div className='max-h-96 overflow-y-auto px-15 w-full mx-auto overflow-x-auto mb-20 '>
+				<div className='max-h-96 overflow-y-auto px-15 w-full mx-auto overflow-x-auto mb-10 '>
 					<table>
 						<thead className='sticky top-0 z-10'>
 							<tr>
@@ -182,14 +182,18 @@ function MedicationList({ patientId }) {
 					</table>
 				</div>
 			</div>
-			{visible && (
-				<div className='bg-white shadow-2xl m-5 py-8 rounded-xl mb-30'>
-					<MedicationLog
-						medication={selectedMedicine}
-						patientId={patientId}
-					/>
-				</div>
-			)}
+
+			<div
+				className={`bg-white shadow-2xl mx-5 mt-10 rounded-xl mb-30 transform transition-all duration-500 ease-in-out ${
+					visible
+						? 'opacity-100 translate-y-0 py-8'
+						: 'opacity-0 -translate-y-5 h-0 py-0'
+				}`}>
+				<MedicationLog
+					medication={selectedMedicine}
+					patientId={patientId}
+				/>
+			</div>
 		</>
 	);
 }

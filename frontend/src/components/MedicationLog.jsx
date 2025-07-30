@@ -144,7 +144,7 @@ function MedicationLog({ medication, patientId }) {
 				[<b>{medication.medicationName}</b> - {medication.dosage},{' '}
 				{medication.frequency}]
 			</h6>
-			<div className='max-h-96 w-full overflow-y-auto px-15 w-6xl mx-auto overflow-x-auto'>
+			<div className='max-h-96 w-full overflow-y-auto px-15 mx-auto overflow-x-auto mb-10'>
 				<table>
 					<thead className='sticky top-0 z-10'>
 						<tr>
