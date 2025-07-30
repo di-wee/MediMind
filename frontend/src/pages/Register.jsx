@@ -21,7 +21,13 @@ function Register() {
 	const confirmPassRef = useRef();
 
 	// temporarily hard-coded, to eventually call GET API to extract list of clinics
-	const clinics = ['Clinic A', 'Clinic B', 'Clinic C'];
+	const clinics = [
+		'Raffles Medical Centre',
+		'Healthway Clinic',
+		'Mount Elizabeth Medical',
+		'Tan Tock Seng Hospital',
+		'Singapore General Hospital',
+	];
 
 	const handleSignIn = (e) => {
 		e.preventDefault();

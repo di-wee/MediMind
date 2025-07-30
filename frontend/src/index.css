@@ -126,7 +126,7 @@ td {
 }
 
 .password-details {
-	@apply px-20 flex w-full mx-auto  mt-5 gap-x-15;
+	@apply px-20 flex w-full mx-auto mt-5  gap-x-15;
 }
 
 .filter-btn {
