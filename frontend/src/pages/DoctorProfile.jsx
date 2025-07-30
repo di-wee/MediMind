@@ -19,14 +19,13 @@ function DoctorProfile() {
 						clinicName='Raffles Medical Centre'
 					/>
 				</div>
-				<div className='col-span-full ml-64 h-20'>
+				<div className='col-span-full ml-64'>
 					<Header
 						title='Account'
 						subtitle='View your profile details'
 					/>
-					<div className='flex overflow-y-auto mt-15 justify-items-center'>
-						{/* Shiying to focus here */}
-						<DoctorDetails />
+					<div className='flex overflow-y-auto mt-10 justify-items-center'>
+						<DoctorDetails mcrNo={mcrNo} />
 					</div>
 				</div>
 			</div>

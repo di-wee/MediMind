@@ -121,6 +121,14 @@ td {
 	@apply px-20 flex w-full mx-auto justify-between mt-5 gap-x-30;
 }
 
+.profile-details {
+	@apply px-20 flex w-full mx-auto justify-between mt-5 gap-x-15;
+}
+
+.password-details {
+	@apply px-20 flex w-full mx-auto  mt-5 gap-x-15;
+}
+
 .filter-btn {
 	@apply inline-block size-2.5;
 	cursor: pointer;
