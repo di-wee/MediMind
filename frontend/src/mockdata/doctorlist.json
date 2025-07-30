@@ -1,0 +1,82 @@
+[
+  {
+    "firstName": "Jenny",
+    "lastName": "Goh",
+    "mcrNo": "M12345A",
+    "emailAddress": "alice.tan@example.com",
+    "clinicName": "Raffles Medical Centre",
+    "password": "medimind123"
+  },
+  {
+    "firstName": "Benjamin",
+    "lastName": "Lim",
+    "mcrNo": "M23456B",
+    "emailAddress": "ben.lim@example.com",
+    "clinicName": "Healthway Clinic",
+    "password": "medimind123"
+  },
+  {
+    "firstName": "Catherine",
+    "lastName": "Ng",
+    "mcrNo": "M34567C",
+    "emailAddress": "catherine.ng@example.com",
+    "clinicName": "Mount Elizabeth Medical",
+    "password": "medimind123"
+  },
+  {
+    "firstName": "David",
+    "lastName": "Ong",
+    "mcrNo": "M45678D",
+    "emailAddress": "david.ong@example.com",
+    "clinicName": "Tan Tock Seng Hospital",
+    "password": "medimind123"
+  },
+  {
+    "firstName": "Emily",
+    "lastName": "Chua",
+    "mcrNo": "M56789E",
+    "emailAddress": "emily.chua@example.com",
+    "clinicName": "Singapore General Hospital",
+    "password": "medimind123"
+  },
+  {
+    "firstName": "Felix",
+    "lastName": "Tan",
+    "mcrNo": "M67890F",
+    "emailAddress": "felix.tan@example.com",
+    "clinicName": "Raffles Medical Centre",
+    "password": "medimind123"
+  },
+  {
+    "firstName": "Grace",
+    "lastName": "Lee",
+    "mcrNo": "M78901G",
+    "emailAddress": "grace.lee@example.com",
+    "clinicName": "Healthway Clinic",
+    "password": "medimind123"
+  },
+  {
+    "firstName": "Hannah",
+    "lastName": "Wong",
+    "mcrNo": "M89012H",
+    "emailAddress": "hannah.wong@example.com",
+    "clinicName": "Mount Elizabeth Medical",
+    "password": "medimind123"
+  },
+  {
+    "firstName": "Ivan",
+    "lastName": "Chan",
+    "mcrNo": "M90123I",
+    "emailAddress": "ivan.chan@example.com",
+    "clinicName": "Tan Tock Seng Hospital",
+    "password": "medimind123"
+  },
+  {
+    "firstName": "Joanna",
+    "lastName": "Goh",
+    "mcrNo": "M01234J",
+    "emailAddress": "joanna.goh@example.com",
+    "clinicName": "Singapore General Hospital",
+    "password": "medimind123"
+  }
+]

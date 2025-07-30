@@ -1,4 +1,7 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+
+import doctorList from '../mockdata/doctorlist.json';
+import {XCircleIcon} from "@heroicons/react/16/solid/index.js";
 
 function DoctorDetails({ mcrNo }) {
 	//1. need you to help with the update details mock functionality.
@@ -12,6 +15,63 @@ function DoctorDetails({ mcrNo }) {
 	// change password button will change to save password. on button click, it will save the changed password
 	//
 	//u will need to useState to manage all of this. jiayous! most important to finish feature 1, feature2 cannot nvm.
+	const [doctorInfo, setDoctorInfo] = useState({
+		firstName: '',
+		lastName: '',
+		mcrNo: '',
+		emailAddress: '',
+		clinicName: '',
+		password: ''
+	});
+	const [validation,setValidation] = useState(false)
+	const [isEditing,setIsEditing] = useState(false)
+	const [isChangingPassword,setIsChangingPassword] = useState(false)
+	const [password,setPassword] = useState(doctorInfo.password)
+	const [email,setEmail]=useState(doctorInfo.emailAddress)
+	const [clinic,setClinic]=useState(doctorInfo.clinicName)
+	const [confirmPassword,setConfirmPassword]=useState('');
+	const clinicOptions = [
+		"Raffles Medical Centre",
+		"Healthway Clinic",
+		"Mount Elizabeth Medical",
+		"Tan Tock Seng Hospital",
+		"Singapore General Hospital"
+	];
+
+	const handleEditToggle = ()=>{
+		if(isEditing){
+			//call api to save
+			setIsEditing(false);
+		}else{
+			setIsEditing(true);
+		}
+	}
+	const handlePasswordToggle = ()=>{
+		if (isChangingPassword){
+			if(password==confirmPassword&&password&&confirmPassword){
+				setValidation(false);
+				setIsChangingPassword(false);
+				//call api to save data
+			}else{
+				setValidation(true);
+			}
+		}else{
+			setIsChangingPassword(true);
+		}
+	}
+
+	useEffect(() => {
+		const doctor = doctorList.find((d) => d.mcrNo===mcrNo);
+		console.log(doctor)
+		if(doctor){
+			setDoctorInfo(doctor);
+			setEmail(doctor.emailAddress || '');
+			setClinic(doctor.clinicName || '');
+			setPassword(doctor.password || '');
+		}
+
+	}, [mcrNo]);
+
 	return (
 		<>
 			<main className='w-full flex-1 mt-23  bg-gray-50 min-h-screen'>
@@ -26,7 +86,7 @@ function DoctorDetails({ mcrNo }) {
 								className='form-input'
 								type='text'
 								name='firstName'
-								value='Jenny'
+								value={doctorInfo.firstName}
 								readOnly
 							/>
 						</div>
@@ -36,7 +96,7 @@ function DoctorDetails({ mcrNo }) {
 								className='form-input'
 								type='text'
 								name='lastName'
-								value='Goh'
+								value={doctorInfo.lastName}
 								readOnly
 							/>
 						</div>
@@ -46,7 +106,7 @@ function DoctorDetails({ mcrNo }) {
 								className='form-input'
 								type='text'
 								name='MCRNo'
-								value='M12345A'
+								value={doctorInfo.mcrNo}
 								readOnly
 							/>
 						</div>
@@ -58,42 +118,86 @@ function DoctorDetails({ mcrNo }) {
 								className='form-input'
 								type='text'
 								name='email'
-								value='jenny.g@gmail.com'
-								readOnly
+								value={email}
+								onChange={(e)=>setEmail(e.target.value)}
+								readOnly={!isEditing}
 							/>
 						</div>
 						<div className='w-xl'>
 							<label className='form-label'>Practicing Clinic</label>
-							<input
+							{isEditing?(
+								<select
+									className='form-input'
+									name='clinicName'
+									value={clinic}
+									onChange={(e) => setClinic(e.target.value)}
+								>
+									<option value="" disabled>-- Select Clinic --</option>
+									{clinicOptions.map((name, index) => (
+										<option key={index} value={name}>
+											{name}
+										</option>
+									))}
+								</select>
+							):<input
 								className='form-input'
 								type='text'
-								name='firstName'
-								value='Raffles Medical Centre'
+								name='clinicName'
+								value={clinic}
 								readOnly
-							/>
+							/>}
 						</div>
 					</div>
 				</div>
 				<div className='border-1 border-gray-200 shadow-xl bg-white py-8 m-5 rounded-xl'>
 					<h2 className='font-bold text-lg px-15 '>Password</h2>
-					<div className='password-details'>
-						<div className='w-1/2'>
+					<div className='password-details flex flex-col gap-4 px-5'>
+						<div className='w-full'>
 							<label className='form-label'>Password</label>
 							<input
 								className='form-input'
 								type='password'
-								name='firstName'
-								value='medimind123'
-								readOnly
+								name='password'
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+								readOnly={!isChangingPassword}
 							/>
 						</div>
-						<div className='flex items-end'>
-							<button className='btn-submit'>Change Password</button>
+
+					{isChangingPassword && (
+						<div className='w-full'>
+							<label className='form-label'>Confirm Password</label>
+							<input
+								className='form-input'
+								type='password'
+								name='confirmPassword'
+								value={confirmPassword}
+								onChange={(e) => setConfirmPassword(e.target.value)}
+							/>
 						</div>
+					)}
+					{validation && (
+						<div className='login-validation relative mt-2'>
+							<p>password and confirm password don't matched!</p>
+							<XCircleIcon
+								className='size-4.5 absolute right-5 top-5 cursor-pointer'
+								onClick={() => setValidation(false)}
+							/>
+						</div>
+					)}
+
+					<div className='w-1/2 mt-4'>
+						<button onClick={handlePasswordToggle} className='btn-submit'>
+							{isChangingPassword ? 'Save' : 'Change Password'}
+						</button>
+					</div>
 					</div>
 				</div>
+
 				<div className='flex justify-end px-5 py-5'>
-					<button className='btn-submit max-w-40 end'>Update Details</button>
+					<button onClick={handleEditToggle} className='btn-submit max-w-40 end'>
+						{ isEditing ? 'Save':'Update Details'}
+					</button>
 				</div>
 			</main>
 		</>
