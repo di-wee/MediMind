@@ -1,111 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
     app:startDestination="@id/loginFragment">
 
+    <!-- Global action to logout -->
+    <action
+        android:id="@+id/action_global_logout"
+        app:destination="@id/loginFragment" />
+
+    <!-- Login Fragment -->
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.medimind.LoginFragment"
         android:label="Login">
+
         <action
             android:id="@+id/action_loginFragment_to_mainFragment"
             app:destination="@id/mainFragment" />
+
         <action
             android:id="@+id/action_loginFragment_to_registerUserFragment"
             app:destination="@id/registerUserFragment" />
+
         <action
             android:id="@+id/action_loginFragment_to_debugFragment"
-            app:destination="@id/debugFragment"/>
+            app:destination="@id/debugFragment" />
     </fragment>
 
+    <!-- Main Fragment -->
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.example.medimind.MainFragment"
         android:label="Main">
+
         <action
             android:id="@+id/action_mainFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
     </fragment>
 
+    <!-- Debug Fragment -->
     <fragment
         android:id="@+id/debugFragment"
         android:name="com.example.medimind.DebugFragment"
         android:label="Debug">
+
         <action
             android:id="@+id/action_debugFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
     </fragment>
 
+    <!-- Register User Fragment -->
     <fragment
         android:id="@+id/registerUserFragment"
         android:name="com.example.medimind.RegisterUserFragment"
         android:label="Register User" />
-
-    <fragment
-        android:id="@+id/activeMedicineListFragment"
-        android:name="com.example.medimind.ActiveMedicineListFragment"
-        android:label="Active Med List">
-        <action
-            android:id="@+id/action_activeMedicineListFragment_to_viewMedicineDetailsFragment"
-            app:destination="@id/viewMedicineDetailsFragment"/>
-    </fragment>
-
-    <fragment
-        android:id="@+id/viewMedicineDetailsFragment"
-        android:name="com.example.medimind.ViewMedicineDetailsFragment"
-        android:label="View Medicine Details">
-        <argument
-            android:name="medicineName"
-            app:argType="string"/>
-        <action
-            android:id="@+id/action_viewMedicineDetailsFragment_to_editMedicineDetailsFragment"
-            app:destination="@id/editMedicineDetailsFragment"/>
-    </fragment>
-
-    <fragment
-        android:id="@+id/editMedicineDetailsFragment"
-        android:name="com.example.medimind.EditMedicineDetailsFragment"
-        android:label="Edit Medicine Details">
-        <argument
-            android:name="medicineName"
-            app:argType="string"/>
-    </fragment>
-
-    <fragment
-        android:id="@+id/homeFragment"
-        android:name="com.example.medimind.HomeFragment"
-        android:label="HomeFragment">
-
-        <action
-            android:id="@+id/action_homeFragment_to_imageDetailsFragment"
-            app:destination="@id/imageDetailsFragment" />
-
-    </fragment>
-
-    <fragment
-        android:id="@+id/imageDetailsFragment"
-        android:name="com.example.medimind.ImageDetailsFragment"
-        android:label="ImageDetailsFragment">
-
-        <argument
-            android:name="imageUri"
-            app:argType="string"
-            android:defaultValue="" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/newMedManualFragment"
-        android:name="com.example.medimind.NewMedManualFragment"
-        android:label="ManualKeyNewMed">
-
-        <action
-            android:id="@+id/action_homeFragment_to_newMedManualFragment"
-            app:destination="@id/newMedManualFragment" />
-
-    </fragment>
-
-
-
 
 </navigation>

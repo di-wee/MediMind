@@ -14,6 +14,7 @@ import com.example.medimind.adapter.DateAdapter
 import com.example.medimind.model.DateGroup
 import com.example.medimind.model.IntakeGroup
 import com.example.medimind.model.MedicineIntakeItem
+import androidx.navigation.findNavController
 
 class IntakeHistoryFragment : Fragment() {
 
@@ -32,7 +33,8 @@ class IntakeHistoryFragment : Fragment() {
 
         val logoutButton = view.findViewById<Button>(R.id.logoutButton)
         logoutButton.setOnClickListener {
-            findNavController().navigate(R.id.action_mainFragment_to_loginFragment)
+            val rootNavController = requireActivity().findNavController(R.id.nav_host_fragment)
+            rootNavController.navigate(R.id.action_global_logout)
         }
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.intakeHistoryRecyclerView)

@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.findNavController
 
 class ProfileFragment : Fragment() {
     override fun onCreateView(
@@ -40,7 +41,8 @@ class ProfileFragment : Fragment() {
 
         val logoutButton = view.findViewById<Button>(R.id.logoutButton)
         logoutButton.setOnClickListener {
-            findNavController().navigate(R.id.action_mainFragment_to_loginFragment)
+            val rootNavController = requireActivity().findNavController(R.id.nav_host_fragment)
+            rootNavController.navigate(R.id.action_global_logout)
         }
     }
 }

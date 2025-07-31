@@ -6,10 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-
+import androidx.navigation.fragment.findNavController
 
 class NewMedManualFragment : Fragment() {
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,20 +22,18 @@ class NewMedManualFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_new_med_manual, container, false)
     }
 
-    override fun onViewCreated(view:View, savedInstanceState: Bundle?){
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val backBtnFromManual = view.findViewById<Button>(R.id.btnBackFromManual)
-        backBtnFromManual.setOnClickListener{
-            parentFragmentManager.popBackStack()
+        backBtnFromManual.setOnClickListener {
+            // Use NavController to navigate back
+            findNavController().navigateUp()
         }
 
         val saveBtnFromManual = view.findViewById<Button>(R.id.btnSaveFromManual)
-        saveBtnFromManual.setOnClickListener{
-            //toDo and save info to database
+        saveBtnFromManual.setOnClickListener {
+            // TODO: Implement saving logic to database
         }
     }
-
-
-
 }
