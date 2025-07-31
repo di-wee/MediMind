@@ -25,7 +25,6 @@ import android.view.Gravity
 
 class HomeFragment : Fragment() {
 
-
     //Pris: buttons under add new Med FAB
     private lateinit var addMedButton: FloatingActionButton
     private lateinit var cameraButton: FloatingActionButton
@@ -37,12 +36,11 @@ class HomeFragment : Fragment() {
     //camera
     private lateinit var cameraBox: ImageView
 
-
     //Pris: adding animation for add new med button to open and close(found in res/animation file)
-    private val rotateOpen by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_open_anim)}
-    private val rotateClose by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_close_anim)}
-    private val fromBottom by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.from_bottom_anim)}
-    private val toBottom by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.to_bottom_anim)}
+    private val rotateOpen by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_open_anim) }
+    private val rotateClose by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_close_anim) }
+    private val fromBottom by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.from_bottom_anim) }
+    private val toBottom by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.to_bottom_anim) }
     private var clicked = false
 
     //Pris:camera
@@ -55,14 +53,12 @@ class HomeFragment : Fragment() {
     private var pendingImageUri: Uri? = null
     private var shouldNavigateToImageDetails = false
 
-
     //Lewis: calendar
     private val dayFormat = SimpleDateFormat("EEE", Locale.getDefault())
     private val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
     private val fullDateFormat = SimpleDateFormat("dd MMM", Locale.getDefault())
     private var selectedDateView: View? = null
     private var selectedCalendar: Calendar? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,7 +71,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-// Gallery result
+        // Gallery result
         pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             if (uri != null) {
                 pendingImageUri = uri
@@ -131,13 +127,13 @@ class HomeFragment : Fragment() {
             Toast.makeText(requireContext(), "Gallery button clicked", Toast.LENGTH_SHORT).show()
         }
 
-        //it was being set to use parentFragmentManager instead of nav controller
         manualButton.setOnClickListener {
-            val fragment = NewMedManualFragment()
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.main_fragment_container, fragment)
-                .addToBackStack(null)
-                .commit()
+            // Commented out manual navigation for now, to focus on bottom nav setup
+            // val fragment = NewMedManualFragment()
+            // parentFragmentManager.beginTransaction()
+            //     .replace(R.id.main_fragment_container, fragment)
+            //     .addToBackStack(null)
+            //     .commit()
         }
 
         //camera
@@ -191,12 +187,6 @@ class HomeFragment : Fragment() {
                 .show()
         }
     }
-
-//        val addMedButton = view.findViewById<Button>(R.id.addMedButton)
-//        addMedButton.setOnClickListener {
-//            Toast.makeText(context, "Add a med clicked", Toast.LENGTH_SHORT).show()
-//        }
-
 
     private fun populateCalendarStrip(calendarLayout: LinearLayout) {
         val today = Calendar.getInstance()
@@ -270,7 +260,6 @@ class HomeFragment : Fragment() {
         clicked = !clicked
     }
 
-
     private fun setVisibility(clicked: Boolean) {
         if (!clicked) {
             cameraButton.visibility = View.VISIBLE
@@ -287,7 +276,6 @@ class HomeFragment : Fragment() {
             galleryBtnText.visibility = View.INVISIBLE
             manualBtnText.visibility = View.INVISIBLE
         }
-
     }
 
     private fun setAnimation(clicked: Boolean) {
@@ -308,15 +296,13 @@ class HomeFragment : Fragment() {
             manualBtnText.startAnimation(toBottom)
             addMedButton.startAnimation(rotateClose)
         }
-
     }
 
     override fun onResume() {
         super.onResume()
 
-        //childFragmentManager was being used, NavController was bypassed and is not opening HomeFragment
-        //hence have to Call mainFragment to open imageDetailsFragment
-        //i am navigating camera,photogallery and manualKeyIn from homeFragment to imageDetailsFragment
+        // Commented out manual navigation to ImageDetailsFragment for now
+        /*
         if (shouldNavigateToImageDetails && pendingImageUri != null) {
             val fragment = ImageDetailsFragment().apply {
                 arguments = Bundle().apply {
@@ -334,11 +320,6 @@ class HomeFragment : Fragment() {
             shouldNavigateToImageDetails = false
             pendingImageUri = null
         }
+        */
     }
-
 }
-
-
-
-
-
