@@ -13,14 +13,15 @@ export default function PatientGrid({
 	};
 
 	return (
-		<div className='flex-1 flex flex-col'>
+		<div className='flex-1 flex flex-col w-full'>
 			<div
-				className='grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8 content-start'
-				style={{ minHeight: '600px' }}>
+				className="grid grid-cols-3 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-8 content-start w-full"
+				style={{ minHeight: '600px' }}
+				>
 				{patients.map((patient) => (
 					<div
 						key={patient.id}
-						className='bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 hover:border-gray-300 flex flex-col h-fit'>
+						className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 hover:border-gray-300 flex flex-col h-fit w-full min-w-[450px] max-w-[450px] mx-auto flex-shrink-0">
 						<div className='p-5 flex flex-col h-full'>
 							{/* Patient Header */}
 							<div className='flex items-start justify-between mb-4'>
