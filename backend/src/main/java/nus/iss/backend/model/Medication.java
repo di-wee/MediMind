@@ -34,8 +34,8 @@ public class Medication{
     private String timing;
     @Column(name = "Instructions", nullable = false)
     private String instructions;
-    @Column(name = "Notes")
-    private String notes;
+    @Column(name = "Doctor_Notes")
+    private String doctorNotes;
     @Column(name = "Is_Active", nullable = false)
     private boolean isActive = true;
 
