@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import androidx.navigation.fragment.findNavController
 
 class ImageDetailsFragment : Fragment() {
 
@@ -27,15 +28,15 @@ class ImageDetailsFragment : Fragment() {
             imagePreview.setImageURI(imageUri)
         }
 
-        //Pris: popBackStack helps it auto go back to previous page
+        // Use NavController to navigate back
         val backBtnFromImageDetails = view.findViewById<Button>(R.id.btnBackFromImageDetails)
-        backBtnFromImageDetails.setOnClickListener{
-            parentFragmentManager.popBackStack()
+        backBtnFromImageDetails.setOnClickListener {
+            findNavController().popBackStack()
         }
 
         val saveBtnFromImageDetails = view.findViewById<Button>(R.id.btnSaveFromImageDetails)
-        saveBtnFromImageDetails.setOnClickListener{
-            //toDo and save info to database
+        saveBtnFromImageDetails.setOnClickListener {
+            // TODO: Save info to database
         }
     }
 }
