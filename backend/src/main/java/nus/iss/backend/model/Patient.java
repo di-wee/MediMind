@@ -8,6 +8,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 
 import java.sql.Types;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -55,5 +56,5 @@ public class Patient {
             joinColumns = @JoinColumn(name = "Patient_Id"),
             inverseJoinColumns = @JoinColumn(name = "Medication_Id")
     )
-    private List<Medication> medications;
+    private List<Medication> medications = new ArrayList<>();
 }
