@@ -1,4 +1,9 @@
-import { CheckIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import {
+	ArrowsUpDownIcon,
+	CheckIcon,
+	FunnelIcon,
+	XMarkIcon,
+} from '@heroicons/react/20/solid';
 import React, { useEffect, useRef, useState } from 'react';
 import { getDynamicFilterOptions, applyFilter } from '../utils/filterUtil';
 import medicationLog from '../mockdata/medicationlog.json';
@@ -10,9 +15,16 @@ function MedicationLog({ medication, patientId }) {
 	const [editedNote, setEditedNote] = useState('');
 	const [logList, setLogList] = useState([]);
 	const [displayList, setDisplayList] = useState([]);
+	//filter state
 	const [filterKey, setFilterKey] = useState(null);
 	const [uniqueOptions, setUniqueOptions] = useState([]);
 	const [selectedFilters, setSelectedFilters] = useState([]);
+
+	//sort logic
+	const [sortConfig, setSortConfig] = useState({
+		column: 'date',
+		order: 'desc',
+	});
 
 	const filterRef = useRef();
 
@@ -95,6 +107,42 @@ function MedicationLog({ medication, patientId }) {
 		);
 	};
 
+	const processDisplayList = () => {
+		let filtered = applyFilter(logList, dynamicFilterOptions, selectedFilters);
+
+		filtered = [...filtered].sort((a, b) => {
+			let aVal, bVal;
+			if (sortConfig.column === 'date') {
+				aVal = parseDateTime(a.date, a.time);
+				bVal = parseDateTime(b.date, b.time);
+			} else if (sortConfig.column === 'time') {
+				const parseTime = (time) => {
+					const rawTime = time.replace(' HRs', ''); // 0800
+					const hours = parseInt(rawTime.slice(0, 2), 10); //8
+					const minutes = parseInt(rawTime.slice(2), 10); //0
+					const totalMinutes = hours * 60 + minutes;
+					return totalMinutes;
+				};
+				aVal = parseTime(a.time);
+				bVal = parseTime(b.time);
+			}
+			return sortConfig.order === 'asc' ? aVal - bVal : bVal - aVal;
+		});
+
+		setDisplayList(filtered);
+	};
+
+	useEffect(() => {
+		processDisplayList();
+	}, [selectedFilters, logList, sortConfig]);
+
+	const handleSort = (column) => {
+		setSortConfig((prev) => ({
+			column: column,
+			order: prev.column === column && prev.order === 'asc' ? 'desc' : 'asc',
+		}));
+	};
+
 	//GET call here to extract medicationLog using medication.id and patientId, useState to store
 	//medicationlog into logList
 
@@ -114,15 +162,6 @@ function MedicationLog({ medication, patientId }) {
 		setLogList(sortedLog);
 		setDisplayList(sortedLog);
 	}, []);
-
-	useEffect(() => {
-		const filtered = applyFilter(
-			logList,
-			dynamicFilterOptions,
-			selectedFilters
-		);
-		setDisplayList(filtered);
-	}, [selectedFilters, logList]);
 
 	useEffect(() => {
 		const handleClickOutside = (event) => {
@@ -148,8 +187,24 @@ function MedicationLog({ medication, patientId }) {
 				<table>
 					<thead className='sticky top-0 z-10'>
 						<tr>
-							<th>Date</th>
-							<th>Time</th>
+							<th>
+								<div className='relative inline-flex items-center gap-1'>
+									Date{' '}
+									<ArrowsUpDownIcon
+										onClick={() => handleSort('date')}
+										className='inline-block size-4 cursor-pointer'
+									/>
+								</div>
+							</th>
+							<th>
+								<div className='relative inline-flex items-center gap-1'>
+									Time{' '}
+									<ArrowsUpDownIcon
+										onClick={() => handleSort('time')}
+										className='inline-block size-4 cursor-pointer'
+									/>
+								</div>
+							</th>
 							<th>
 								<div className='relative inline-flex items-center gap-1'>
 									Taken
