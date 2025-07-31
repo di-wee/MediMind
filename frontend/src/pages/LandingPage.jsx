@@ -1,37 +1,31 @@
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import { useState } from 'react';
-import {
-	PlusIcon,
-	MagnifyingGlassIcon,
-	UserPlusIcon,
-} from '@heroicons/react/24/outline';
-import allPatients from '../mockdata/patientlist.json';
-import PatientGrid from '../components/PatientGrid';
 import PatientList from '../components/PatientList';
 
 export default function LandingPage() {
-	return (
-		<>
-			<div className='grid-cols-4 h-screen'>
-				{/* Sidebar */}
-				<div className='row-span-full'>
-					<Sidebar
-						mcrNo='M12345A'
-						firstName='Jenny'
-						clinicName='Raffles Medical Centre'
-					/>
-				</div>
-				<div className='col-span-full ml-64 h-20'>
-					<Header
-						title='Assigned Patients'
-						subtitle='Manage your current patient assignments'
-					/>
-				</div>
-				<div className='flex-1 overflow-y-auto px-5 mt-15 justify-items-center'>
-					<PatientList />
-				</div>
-			</div>
-		</>
-	);
+   return (
+   	<div className="min-h-screen grid grid-cols-[256px_1fr] bg-gray-50">
+   		{/* Sidebar - Grid item spanning both rows */}
+   		<div className="row-span-2">
+   			<Sidebar
+   				mcrNo='M12345A'
+   				firstName='Jenny'
+   				clinicName='Raffles Medical Centre'
+   			/>
+   		</div>
+   		
+   		{/* Header - Second column, first row */}
+   		<div className="col-start-2 sticky top-0 z-10">
+   			<Header
+   				title='Assigned Patients'
+   				subtitle='Manage your current patient assignments'
+   			/>
+   		</div>
+   		
+   		{/* Main Content - Second column, second row */}
+   		<main className="col-start-2 overflow-y-auto">
+   			<PatientList />
+   		</main>
+   	</div>
+   );
 }

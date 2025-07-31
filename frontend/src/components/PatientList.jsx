@@ -1,21 +1,26 @@
 import React from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
 	PlusIcon,
 	MagnifyingGlassIcon,
 	UserPlusIcon,
+	Squares2X2Icon,
+	ListBulletIcon,
 } from '@heroicons/react/24/outline';
 import allPatients from '../mockdata/patientlist.json';
 import PatientGrid from '../components/PatientGrid';
+import PatientListView from '../components/PatientListView';
 import { useNavigate } from 'react-router-dom';
 
 function PatientList() {
 	const [patients, setPatients] = useState(allPatients);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [currentPage, setCurrentPage] = useState(1);
-	const cardsPerPage = 9;
+	const [viewMode, setViewMode] = useState('list'); // 'grid' or 'list'
+	const [itemsPerPage, setItemsPerPage] = useState(5);
+	const [sortBy, setSortBy] = useState(null); // 'clinic-asc', 'clinic-desc', etc.
 
 	const navigate = useNavigate();
 
@@ -28,13 +33,71 @@ function PatientList() {
 			patient.clinicName.toLowerCase().includes(searchTerm.toLowerCase())
 	);
 
-	const indexOfLastCard = currentPage * cardsPerPage;
-	const indexOfFirstCard = indexOfLastCard - cardsPerPage;
-	const currentPatients = filteredPatients.slice(
+	// Sort patients if sortBy is set
+	const sortedPatients = useMemo(() => {
+		if (!sortBy) return filteredPatients;
+		
+		const [field, direction] = sortBy.split('-');
+		
+		return [...filteredPatients].sort((a, b) => {
+			let aValue, bValue;
+			
+			if (field === 'clinic') {
+				aValue = a.clinicName;
+				bValue = b.clinicName;
+				
+				if (direction === 'asc') {
+					return aValue.localeCompare(bValue);
+				} else {
+					return bValue.localeCompare(aValue);
+				}
+			} else if (field === 'age') {
+				// Calculate age for both patients
+				const today = new Date();
+				
+				const aDate = new Date(a.dob);
+				let aAge = today.getFullYear() - aDate.getFullYear();
+				const aMonthDiff = today.getMonth() - aDate.getMonth();
+				if (aMonthDiff < 0 || (aMonthDiff === 0 && today.getDate() < aDate.getDate())) {
+					aAge--;
+				}
+				
+				const bDate = new Date(b.dob);
+				let bAge = today.getFullYear() - bDate.getFullYear();
+				const bMonthDiff = today.getMonth() - bDate.getMonth();
+				if (bMonthDiff < 0 || (bMonthDiff === 0 && today.getDate() < bDate.getDate())) {
+					bAge--;
+				}
+				
+				aValue = aAge;
+				bValue = bAge;
+				
+				if (direction === 'asc') {
+					return aValue - bValue;
+				} else {
+					return bValue - aValue;
+				}
+			} else if (field === 'name') {
+				// Sort by full name (firstName + lastName)
+				aValue = `${a.firstName} ${a.lastName}`;
+				bValue = `${b.firstName} ${b.lastName}`;
+				
+				if (direction === 'asc') {
+					return aValue.localeCompare(bValue);
+				} else {
+					return bValue.localeCompare(aValue);
+				}
+			}
+		});
+	}, [filteredPatients, sortBy]);
+
+	const indexOfLastCard = currentPage * itemsPerPage;
+	const indexOfFirstCard = indexOfLastCard - itemsPerPage;
+	const currentPatients = sortedPatients.slice(
 		indexOfFirstCard,
 		indexOfLastCard
 	);
-	const totalPages = Math.ceil(filteredPatients.length / cardsPerPage);
+	const totalPages = Math.ceil(sortedPatients.length / itemsPerPage);
 
 	const handleRemove = (id) => {
 		setPatients(patients.filter((patient) => patient.id !== id));
@@ -49,18 +112,26 @@ function PatientList() {
 		setCurrentPage(1);
 	};
 
+	// Reset to page 1 when items per page changes
+	const handleItemsPerPageChange = (e) => {
+		setItemsPerPage(Number(e.target.value));
+		setCurrentPage(1);
+	};
+
 	const handleAddPatient = (e) => {
 		e.preventDefault();
 		navigate('/addpatient', { replace: true });
 	};
+
 	return (
 		<>
 			{/* Main Content */}
-			<main className='ml-58 flex-1 p-8 px-15 bg-gray-50 min-h-screen'>
-				{/* Page Header with Add Patients Button */}
+			<main className='flex-1 p-8 px-15 bg-gray-50 min-h-screen w-full pt-10'>
+				{/* Page Header with Search, View Toggle, Per Page Selector, and Add Patients Button */}
 				<div className='mb-6'>
-					<div className='flex justify-between'>
-						<div className='relative max-w-md justify-stat'>
+					<div className='flex justify-between items-center'>
+						{/* Left side - Search */}
+						<div className='relative max-w-md'>
 							<div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
 								<MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
 							</div>
@@ -72,7 +143,54 @@ function PatientList() {
 								onChange={handleSearchChange}
 							/>
 						</div>
-						<div>
+
+						{/* Right side - Per Page Selector, View Toggle, and Add Button */}
+						<div className='flex items-center space-x-4'>
+							{/* Items Per Page Selector */}
+							<div className='flex items-center space-x-2'>
+								<label htmlFor='itemsPerPage' className='text-sm text-gray-700 font-medium'>
+									Show:
+								</label>
+								<select
+									id='itemsPerPage'
+									value={itemsPerPage}
+									onChange={handleItemsPerPageChange}
+									className='border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent'>
+									<option value={5}>5</option>
+									<option value={10}>10</option>
+									<option value={20}>20</option>
+									<option value={30}>30</option>
+									<option value={40}>40</option>
+									<option value={50}>50</option>
+								</select>
+								<span className='text-sm text-gray-700'>per page</span>
+							</div>
+
+							{/* View Toggle */}
+							<div className='flex items-center bg-white rounded-lg border border-gray-300 p-1'>
+								<button
+									onClick={() => setViewMode('grid')}
+									className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+										viewMode === 'grid'
+											? 'bg-gray-800 text-white shadow-sm'
+											: 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+									}`}
+									title='Grid View'>
+									<Squares2X2Icon className='w-4 h-4' />
+								</button>
+								<button
+									onClick={() => setViewMode('list')}
+									className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+										viewMode === 'list'
+											? 'bg-gray-800 text-white shadow-sm'
+											: 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+									}`}
+									title='List View'>
+									<ListBulletIcon className='w-4 h-4' />
+								</button>
+							</div>
+
+							{/* Add Patients Button */}
 							<button
 								onClick={(e) => handleAddPatient(e)}
 								className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200'>
@@ -83,13 +201,26 @@ function PatientList() {
 					</div>
 				</div>
 
-				{/* Patient Grid */}
-				<PatientGrid
-					patients={currentPatients}
-					onRemove={handleRemove}
-					searchTerm={searchTerm}
-					onAddPatient={handleAddPatient}
-				/>
+				{/* Patient Display Container */}
+				<div>
+					{viewMode === 'grid' ? (
+						<PatientGrid
+							patients={currentPatients}
+							onRemove={handleRemove}
+							searchTerm={searchTerm}
+							onAddPatient={handleAddPatient}
+						/>
+					) : (
+						<PatientListView
+							patients={currentPatients}
+							onRemove={handleRemove}
+							searchTerm={searchTerm}
+							onAddPatient={handleAddPatient}
+							sortBy={sortBy}
+							onSort={setSortBy}
+						/>
+					)}
+				</div>
 
 				{/* Pagination */}
 				{totalPages > 1 && (
@@ -126,13 +257,19 @@ function PatientList() {
 				)}
 
 				{/* Summary */}
-				{filteredPatients.length > 0 && (
+				{sortedPatients.length > 0 && (
 					<div className='mt-6 bg-white rounded-lg border border-gray-200 p-4'>
-						<p className='text-sm text-gray-600'>
-							Showing {currentPatients.length} of {filteredPatients.length}{' '}
-							patients
-							{searchTerm && ` matching "${searchTerm}"`}
-						</p>
+						<div className='flex justify-between items-center'>
+							<p className='text-sm text-gray-600'>
+								Showing {currentPatients.length} of {sortedPatients.length}{' '}
+								patients
+								{searchTerm && ` matching "${searchTerm}"`}
+								{' in ' + (viewMode === 'grid' ? 'grid' : 'list') + ' view'}
+							</p>
+							<p className='text-sm text-gray-500'>
+								{itemsPerPage} per page • Page {currentPage} of {totalPages}
+							</p>
+						</div>
 					</div>
 				)}
 			</main>

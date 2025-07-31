@@ -18,7 +18,7 @@ function Sidebar({ mcrNo, firstName, clinicName }) {
 	};
 
 	return (
-		<div className='fixed top-0 left-0 h-screen w-64 bg-white border-r border-gray-300 shadow-lg z-20'>
+		<div className='h-full w-64 bg-white border-r border-gray-300 shadow-lg'>
 			<aside className='flex flex-col h-full'>
 				{/* Header */}
 				<div className='px-6 py-8 border-b border-gray-200 bg-gray-50'>

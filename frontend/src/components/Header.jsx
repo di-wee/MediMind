@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 
 export default function PageHeader({ title, subtitle }) {
 	return (
-		<div className='mb-8 shadow-xl py-8 px-8 w-full fixed z-10 top-0 bg-white'>
+		<div className='sticky top-0 z-10 mb-8 shadow-xl py-8 px-8 w-full bg-white'>
 			<div className='flex items-center justify-start'>
 				<div>
 					<div className='inline-flex  items-center gap-2'>
