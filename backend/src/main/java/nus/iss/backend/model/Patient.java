@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 
+import java.sql.Types;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +22,7 @@ public class Patient {
             name = "UUID",
             strategy = "org.hibernate.id.UUIDGenerator"
     )
+    @JdbcTypeCode(Types.VARCHAR)
     @Column(name="Id", updatable = false, nullable = false)
     private UUID id;
     @Column(name = "Email")
@@ -36,8 +39,6 @@ public class Patient {
     private String gender;
     @Column(name = "DOB", nullable = false)
     private Date dob;
-    @Column(name = "ClinicName", nullable = false)
-    private String clinicName;
 
     @ManyToOne
     @JoinColumn(name = "Assigned_Doctor")

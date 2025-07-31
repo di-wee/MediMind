@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 
+import java.sql.Types;
 import java.util.Date;
 import java.util.UUID;
 
@@ -19,6 +21,7 @@ public class IntakeHistory {
             name = "UUID",
             strategy = "org.hibernate.id.UUIDGenerator"
     )
+    @JdbcTypeCode(Types.VARCHAR)
     @Column(name="Id", updatable = false, nullable = false)
     private UUID id;
     @Column(name = "Logged_Date")
