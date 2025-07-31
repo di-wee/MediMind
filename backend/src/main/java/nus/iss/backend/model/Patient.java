@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +39,7 @@ public class Patient {
     @Column(name = "Gender", nullable = false)
     private String gender;
     @Column(name = "DOB", nullable = false)
-    private Date dob;
+    private LocalDate dob;
 
     @ManyToOne
     @JoinColumn(name = "Assigned_Doctor")

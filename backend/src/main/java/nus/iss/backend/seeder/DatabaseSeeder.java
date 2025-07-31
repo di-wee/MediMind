@@ -147,7 +147,16 @@ public class DatabaseSeeder implements CommandLineRunner {
                 patient.setPassword(faker.internet().password(8, 12));
                 patient.setNric("S" + faker.number().numberBetween(1000000, 9999999) + faker.letterify("?"));
                 patient.setGender(random.nextBoolean() ? "Male" : "Female");
-                patient.setDob(faker.date().birthday(60, 90)); // Age 60-90
+
+
+
+                // convert to LocalDate to remove time
+                LocalDate dob = faker.date().birthday(60, 90)// age 60-90
+                        .toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+                patient.setDob(dob);
+                
                 patient.setClinic(clinic);
                 patient.setDoctor(clinicDoctors.get(random.nextInt(clinicDoctors.size())));
 
