@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.graphics.Color
 import android.view.Gravity
+import androidx.navigation.findNavController
 
 class HomeFragment : Fragment() {
 
@@ -91,7 +92,8 @@ class HomeFragment : Fragment() {
         // Logout action
         val logoutButton = view.findViewById<Button>(R.id.logoutButton)
         logoutButton.setOnClickListener {
-            findNavController().navigate(R.id.action_mainFragment_to_loginFragment)
+            val rootNavController = requireActivity().findNavController(R.id.nav_host_fragment)
+            rootNavController.navigate(R.id.action_global_logout)
         }
 
         // Today label

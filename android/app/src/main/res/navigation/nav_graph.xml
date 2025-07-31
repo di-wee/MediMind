@@ -5,6 +5,11 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/loginFragment">
 
+    <!-- Global action to logout -->
+    <action
+        android:id="@+id/action_global_logout"
+        app:destination="@id/loginFragment" />
+
     <!-- Login Fragment -->
     <fragment
         android:id="@+id/loginFragment"
