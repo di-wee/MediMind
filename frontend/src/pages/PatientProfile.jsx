@@ -1,8 +1,34 @@
 import React from 'react';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
+import Header from '../components/Header';
+import PatientDetails from '../components/PatientDetails';
 function PatientProfile() {
 	const { patientId } = useParams();
-	return <div></div>;
+	return (
+		<>
+			<div className='grid-cols-4 h-screen'>
+				<div className='row-span-full'>
+					<Sidebar
+						mcrNo='M12345A'
+						firstName='Jenny'
+						clinicName='Raffles Medical Centre'
+					/>
+				</div>
+
+				<div className='col-span-full ml-64 h-20'>
+					<Header
+						title={'Assigned Patients'}
+						subtitle={'Patient Profile'}
+					/>
+
+					<div className='flex overflow-y-auto  mt-15 justify-items-center'>
+						<PatientDetails patientId={patientId} />
+					</div>
+				</div>
+			</div>
+		</>
+	);
 }
 
 export default PatientProfile;

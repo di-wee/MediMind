@@ -1,0 +1,50 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="72dp"
+    android:background="#1E88E5"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp">
+
+    <!-- Profile Icon -->
+    <ImageView
+        android:id="@+id/profileIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_person"
+        android:background="@drawable/circle_white_bg"
+        android:padding="8dp"
+        android:layout_centerVertical="true" />
+
+    <!-- Greeting / Username -->
+    <TextView
+        android:id="@+id/topGreetingText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/profileIcon"
+        android:layout_marginStart="16dp"
+        android:layout_centerVertical="true"
+        android:text="Hello, Grandpa"
+        android:textColor="@android:color/white"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <!-- Logout Button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/logoutButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/logout_button_white_bg"
+        android:drawableStart="@drawable/ic_logout"
+        android:drawablePadding="8dp"
+        android:text="Logout"
+        android:textSize="14sp"
+        android:textColor="#1E88E5"
+        android:textAllCaps="false"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"/>
+</RelativeLayout>

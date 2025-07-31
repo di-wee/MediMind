@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_main_graph"
+    app:startDestination="@id/homeFragment">
+
+    <!-- Home Fragment -->
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.medimind.HomeFragment"
+        android:label="Home">
+
+        <action
+            android:id="@+id/action_homeFragment_to_imageDetailsFragment"
+            app:destination="@id/imageDetailsFragment" />
+
+        <action
+            android:id="@+id/action_homeFragment_to_newMedManualFragment"
+            app:destination="@id/newMedManualFragment" />
+    </fragment>
+
+    <!-- Image Details Fragment -->
+    <fragment
+        android:id="@+id/imageDetailsFragment"
+        android:name="com.example.medimind.ImageDetailsFragment"
+        android:label="Image Details">
+        <argument
+            android:name="imageUri"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+    <!-- Manual Medication Entry Fragment -->
+    <fragment
+        android:id="@+id/newMedManualFragment"
+        android:name="com.example.medimind.NewMedManualFragment"
+        android:label="Manual Medication Entry" />
+
+    <!-- Intake History Fragment -->
+    <fragment
+        android:id="@+id/intakeHistoryFragment"
+        android:name="com.example.medimind.IntakeHistoryFragment"
+        android:label="Intake History" />
+
+    <!-- Active Medicine List Fragment -->
+    <fragment
+        android:id="@+id/activeMedicineListFragment"
+        android:name="com.example.medimind.ActiveMedicineListFragment"
+        android:label="Active Medicines">
+
+        <!-- Action to view medicine details -->
+        <action
+            android:id="@+id/action_activeMedicineListFragment_to_viewMedicineDetailsFragment"
+            app:destination="@id/viewMedicineDetailsFragment" />
+    </fragment>
+
+    <!-- View Medicine Details Fragment -->
+    <fragment
+        android:id="@+id/viewMedicineDetailsFragment"
+        android:name="com.example.medimind.ViewMedicineDetailsFragment"
+        android:label="View Medicine Details" >
+
+        <!-- Argument to receive medicineName -->
+        <argument
+            android:name="medicineName"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_viewMedicineDetailsFragment_to_editMedicineDetailsFragment"
+            app:destination="@id/editMedicineDetailsFragment" />
+
+        <action
+            android:id="@+id/action_viewMedicineDetailsFragment_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
+    </fragment>
+
+    <!-- Edit Medicine Details Fragment -->
+    <fragment
+        android:id="@+id/editMedicineDetailsFragment"
+        android:name="com.example.medimind.EditMedicineDetailsFragment"
+        android:label="Edit Medicine Details" />
+
+    <!-- WebView Fragment -->
+    <fragment
+        android:id="@+id/webViewFragment"
+        android:name="com.example.medimind.WebViewFragment"
+        android:label="Web View">
+        <argument
+            android:name="EXTERNAL_URL"
+            app:argType="string" />
+    </fragment>
+
+    <!-- Profile Fragment -->
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.medimind.ProfileFragment"
+        android:label="Profile" />
+</navigation>
