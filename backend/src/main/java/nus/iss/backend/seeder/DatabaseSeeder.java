@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -24,6 +26,14 @@ public class DatabaseSeeder implements CommandLineRunner {
             "Omeprazole", "Amlodipine", "Ventolin", "Atorvastatin", "Insulin"
     );
     private final Random random = new Random();
+
+    private final List<LocalTime> possibleTimes = Arrays.asList(
+            LocalTime.of(8, 0),
+            LocalTime.of(14, 0),
+            LocalTime.of(20, 0)
+    );
+    private final LocalTime morningTime = LocalTime.of(8, 0);
+    private final LocalTime eveningTime = LocalTime.of(20, 0);
 
     @Override
     @Transactional
@@ -180,54 +190,70 @@ public class DatabaseSeeder implements CommandLineRunner {
             return;
         }
 
-        LocalDate now = LocalDate.now();
+        LocalDate today = LocalDate.now();
+        LocalDate firstDayOfMonth = today.withDayOfMonth(1);
+
         for (Patient patient : patients) {
             for (int i = 0; i < 10; i++) {
                 Medication med = new Medication();
                 med.setMedicationName(commonMeds.get(random.nextInt(commonMeds.size())));
                 med.setDosage((random.nextInt(2) + 1) + " tablet(s)");
                 med.setIntakeQuantity(String.valueOf(random.nextInt(2) + 1));
-                med.setFrequency(random.nextBoolean() ? "Once Daily" : "Twice Daily");
+                boolean isOnceDaily = random.nextBoolean();
+                med.setFrequency(isOnceDaily ? "Once Daily" : "Twice Daily");
                 med.setTiming(random.nextBoolean() ? "After Meal" : "Before Meal");
                 med.setInstructions("Follow doctor’s instructions");
                 med.setDoctorNotes(null);
                 med.setActive(random.nextBoolean());
-                med.setPatients(Collections.singletonList(patient));
 
                 entityManager.persist(med);
 
-                // Schedules
-                int scheduleCount = random.nextInt(3) + 2; // 2-4 schedules
-                for (int j = 0; j < scheduleCount; j++) {
+                patient.getMedications().add(med);
+                med.getPatients().add(patient);
+
+                // Determine schedule times
+                List<LocalTime> medTimes = new ArrayList<>();
+                if (isOnceDaily) {
+                    medTimes.add(possibleTimes.get(random.nextInt(possibleTimes.size())));
+                } else {
+                    medTimes.add(morningTime); // 8 AM
+                    medTimes.add(eveningTime); // 8 PM
+                }
+
+                for (LocalTime time : medTimes) {
+                    // Create schedule (only time)
                     Schedule schedule = new Schedule();
                     schedule.setPatient(patient);
                     schedule.setMedication(med);
-
-                    // 80% current month, 20% last month
-                    LocalDate date = random.nextDouble() < 0.8
-                            ? now.minusDays(random.nextInt(now.getDayOfMonth()))
-                            : now.minusDays(random.nextInt(30) + now.getDayOfMonth());
-
-                    schedule.setScheduledTime(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                    schedule.setScheduledTime(time); // LocalTime only
                     entityManager.persist(schedule);
 
-                    // IntakeHistory for active meds only
+                    // Generate intake logs for the first 14 days of current month
                     if (med.isActive()) {
-                        int logCount = random.nextInt(3) + 1; // 1-3 logs
-                        for (int k = 0; k < logCount; k++) {
+                        for (int day = 0; day < 14; day++) {
+                            LocalDate logDate = firstDayOfMonth.plusDays(day);
+
+                            // Avoid creating logs beyond today
+                            if (logDate.isAfter(today)) break;
+
                             IntakeHistory log = new IntakeHistory();
                             log.setPatient(patient);
                             log.setSchedule(schedule);
-                            log.setLoggedDate(schedule.getScheduledTime());
-                            log.setTaken(random.nextBoolean());
+                            log.setLoggedDate(logDate); // LocalDate only
+                            log.setTaken(random.nextInt(100) < 80); // 80% chance taken
                             log.setDoctorNote(null);
+
                             entityManager.persist(log);
                         }
                     }
                 }
             }
+            entityManager.merge(patient);
         }
     }
+
+
+
 
 }
 

@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 
 import java.sql.Types;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +27,7 @@ public class Schedule {
     @Column(name="Id", updatable = false, nullable = false)
     private UUID id;
     @Column(name = "Scheduled_Time")
-    private Date scheduledTime;
+    private LocalTime scheduledTime;
     @ManyToOne
     @JoinColumn(name = "Medication_Id",nullable = false)
     private Medication medication;

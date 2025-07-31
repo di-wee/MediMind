@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.UUID;
 
@@ -25,7 +26,7 @@ public class IntakeHistory {
     @Column(name="Id", updatable = false, nullable = false)
     private UUID id;
     @Column(name = "Logged_Date")
-    private Date loggedDate;
+    private LocalDate loggedDate;
     @Column(name="Is_Taken",nullable = false)
     private boolean isTaken;
     @Column(name = "Doctor_Note")

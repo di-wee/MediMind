@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -43,7 +44,7 @@ public class Medication{
     private boolean isActive = true;
 
     @ManyToMany(mappedBy = "medications")
-    private List<Patient> patients;
+    private List<Patient> patients = new ArrayList<>();
     @OneToMany(mappedBy = "medication", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Schedule> schedules;
 }
