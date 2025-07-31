@@ -60,15 +60,36 @@
         android:id="@+id/viewMedicineDetailsFragment"
         android:name="com.example.medimind.ViewMedicineDetailsFragment"
         android:label="View Medicine Details" >
+
+        <!-- Argument to receive medicineName -->
+        <argument
+            android:name="medicineName"
+            app:argType="string" />
+
         <action
             android:id="@+id/action_viewMedicineDetailsFragment_to_editMedicineDetailsFragment"
             app:destination="@id/editMedicineDetailsFragment" />
+
+        <action
+            android:id="@+id/action_viewMedicineDetailsFragment_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
     </fragment>
 
+    <!-- Edit Medicine Details Fragment -->
     <fragment
         android:id="@+id/editMedicineDetailsFragment"
         android:name="com.example.medimind.EditMedicineDetailsFragment"
         android:label="Edit Medicine Details" />
+
+    <!-- WebView Fragment -->
+    <fragment
+        android:id="@+id/webViewFragment"
+        android:name="com.example.medimind.WebViewFragment"
+        android:label="Web View">
+        <argument
+            android:name="EXTERNAL_URL"
+            app:argType="string" />
+    </fragment>
 
     <!-- Profile Fragment -->
     <fragment

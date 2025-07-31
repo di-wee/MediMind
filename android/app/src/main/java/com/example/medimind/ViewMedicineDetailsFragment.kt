@@ -32,24 +32,24 @@ class ViewMedicineDetailsFragment : Fragment() {
             val bundle = Bundle().apply {
                 putString("medicineName", medicineName)
             }
-            findNavController().navigate(R.id.action_viewMedicineDetailsFragment_to_editMedicineDetailsFragment, bundle)
+            findNavController().navigate(
+                R.id.action_viewMedicineDetailsFragment_to_editMedicineDetailsFragment,
+                bundle
+            )
         }
 
+        // Navigate to WebViewFragment passing URL as argument using NavController
         view.findViewById<Button>(R.id.btnMedicationPurpose).setOnClickListener {
             Toast.makeText(context, "Opening medication purpose...", Toast.LENGTH_SHORT).show()
 
-            // Capitalize first letter
+            // Capitalize first letter for URL
             val formattedName = medicineName.trim().replaceFirstChar { it.uppercase() }
-
-            // Example URL
             val url = "https://en.wikipedia.org/wiki/$formattedName"
 
-            // Assuming you have a WebViewFragment with a newInstance(url) method
-            val fragment = WebViewFragment.newInstance(url)
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.nav_host_fragment, fragment)
-                .addToBackStack(null)
-                .commit()
+            val bundle = Bundle().apply {
+                putString("EXTERNAL_URL", url)
+            }
+            findNavController().navigate(R.id.action_viewMedicineDetailsFragment_to_webViewFragment, bundle)
         }
 
         view.findViewById<Button>(R.id.btnDelete).setOnClickListener {
@@ -57,7 +57,7 @@ class ViewMedicineDetailsFragment : Fragment() {
         }
 
         view.findViewById<Button>(R.id.btnBack).setOnClickListener {
-            parentFragmentManager.popBackStack()
+            findNavController().popBackStack()
         }
     }
 }
