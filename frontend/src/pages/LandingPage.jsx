@@ -6,7 +6,7 @@ export default function LandingPage() {
    return (
    	<div className="min-h-screen grid grid-cols-[256px_1fr] bg-gray-50">
    		{/* Sidebar - Grid item spanning both rows */}
-   		<div className="row-span-2">
+   		<div className="row-span-2 h-screen">
    			<Sidebar
    				mcrNo='M12345A'
    				firstName='Jenny'
