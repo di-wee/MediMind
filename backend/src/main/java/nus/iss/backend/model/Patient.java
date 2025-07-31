@@ -42,6 +42,11 @@ public class Patient {
     @ManyToOne
     @JoinColumn(name = "Assigned_Doctor")
     private Doctor doctor;
+
+    @ManyToOne
+    @JoinColumn(name = "Clinic_UUID", nullable = false)
+    private Clinic clinic;
+
     @ManyToMany
     @JoinTable(
             name = "Patient_Medication",
