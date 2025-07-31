@@ -3,9 +3,11 @@ package nus.iss.backend.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -13,9 +15,13 @@ import java.util.List;
 @Table(name = "Patient")
 public class Patient {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="Id")
-    private int id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @Column(name="Id", updatable = false, nullable = false)
+    private UUID id;
     @Column(name = "Email")
     private String email;
     @Column(name="Password",nullable = false)
@@ -32,9 +38,15 @@ public class Patient {
     private Date dob;
     @Column(name = "ClinicName", nullable = false)
     private String clinicName;
+
     @ManyToOne
-    @JoinColumn(name = "AssignedDoctor")
+    @JoinColumn(name = "Assigned_Doctor")
     private Doctor doctor;
     @ManyToMany
+    @JoinTable(
+            name = "Patient_Medication",
+            joinColumns = @JoinColumn(name = "Patient_Id"),
+            inverseJoinColumns = @JoinColumn(name = "Medication_Id")
+    )
     private List<Medication> medications;
 }
