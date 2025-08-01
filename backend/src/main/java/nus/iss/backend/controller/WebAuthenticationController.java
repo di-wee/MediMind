@@ -27,7 +27,7 @@ public class WebAuthenticationController {
     private HttpSession session;
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateDoctor(@RequestBody LoginReqWeb loginReq, HttpSession httpSession) {
+    public ResponseEntity<Void> authenticateDoctor(@RequestBody LoginReqWeb loginReq, HttpSession httpSession) {
         try {
             Doctor doctor = doctorService.login(loginReq.getMcrNo(), loginReq.getPassword());
             session.setAttribute("doctorMcr", doctor.getMcrNo());
@@ -53,5 +53,18 @@ public class WebAuthenticationController {
         Doctor doc = doctorService.findDoctorByMcrNo(mcrNo);
         return new ResponseEntity<>(doc, HttpStatus.OK);
 }
+
+
+@PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpSession session) {
+        String mcrNo = (String) session.getAttribute("doctorMcr");
+        if (mcrNo == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        session.invalidate();
+        return new ResponseEntity<>(HttpStatus.OK);
+}
+
 
 }

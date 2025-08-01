@@ -9,8 +9,19 @@ import { Link, useLocation } from 'react-router-dom';
 function Sidebar({ mcrNo, firstName, clinicName }) {
 	const location = useLocation();
 
-	const handleLogout = () => {
-		localStorage.removeItem('isLoggedIn');
+	const handleLogout = async () => {
+		try {
+			const response = fetch(import.meta.env.VITE_SERVER + '/api/web/logout', {
+				method: 'POST',
+				credentials: 'include',
+			});
+
+			if (!response.ok) {
+				throw new Error('Error clearing session for logout!');
+			}
+		} catch (err) {
+			console.error('Error handling logout: ', err);
+		}
 	};
 
 	const isActive = (path) => {
