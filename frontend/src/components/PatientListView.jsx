@@ -11,7 +11,7 @@ export default function PatientListView({
 	onSort,
 }) {
 	const navigate = useNavigate();
-	
+
 	const handleViewDetails = (patientId) => {
 		navigate(`/patient/${patientId}`, { replace: true });
 	};
@@ -68,63 +68,78 @@ export default function PatientListView({
 					{/* Table Header */}
 					<div className='bg-gray-50 px-6 py-4 border-b border-gray-200'>
 						<div className='grid grid-cols-12 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider'>
-							<div 
+							<div
 								className='col-span-3 flex items-center cursor-pointer hover:text-gray-700'
-								onClick={() => handleSort('name')}
-							>
+								onClick={() => handleSort('name')}>
 								Patient Name
-								<svg 
+								<svg
 									className={`w-3 h-3 ml-1 transform transition-transform ${
-										sortBy?.startsWith('name') 
-											? sortBy === 'name-desc' ? 'rotate-180' : '' // little transition to make the arrow flip 180 degrees
+										sortBy?.startsWith('name')
+											? sortBy === 'name-desc'
+												? 'rotate-180'
+												: '' // little transition to make the arrow flip 180 degrees
 											: 'opacity-30'
-									}`} 
-									fill='none' 
-									stroke='currentColor' 
-									viewBox='0 0 24 24'
-								>
-									<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 9l-7 7-7-7' />
+									}`}
+									fill='none'
+									stroke='currentColor'
+									viewBox='0 0 24 24'>
+									<path
+										strokeLinecap='round'
+										strokeLinejoin='round'
+										strokeWidth={2}
+										d='M19 9l-7 7-7-7'
+									/>
 								</svg>
 							</div>
 							<div className='col-span-2'>NRIC</div>
-							<div 
+							<div
 								className='col-span-1 flex items-center cursor-pointer hover:text-gray-700'
-								onClick={() => handleSort('age')}
-							>
+								onClick={() => handleSort('age')}>
 								Age
-								<svg 
+								<svg
 									className={`w-3 h-3 ml-1 transform transition-transform ${
-										sortBy?.startsWith('age') 
-											? sortBy === 'age-desc' ? 'rotate-180' : '' 
+										sortBy?.startsWith('age')
+											? sortBy === 'age-desc'
+												? 'rotate-180'
+												: ''
 											: 'opacity-30'
-									}`} 
-									fill='none' 
-									stroke='currentColor' 
-									viewBox='0 0 24 24'
-								>
-									<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 9l-7 7-7-7' />
+									}`}
+									fill='none'
+									stroke='currentColor'
+									viewBox='0 0 24 24'>
+									<path
+										strokeLinecap='round'
+										strokeLinejoin='round'
+										strokeWidth={2}
+										d='M19 9l-7 7-7-7'
+									/>
 								</svg>
 							</div>
 							<div className='col-span-1'>Gender</div>
-							<div 
+							<div
 								className='col-span-3 flex items-center cursor-pointer hover:text-gray-700'
-								onClick={() => handleSort('clinic')}
-							>
+								onClick={() => handleSort('clinic')}>
 								Clinic
-								<svg 
+								<svg
 									className={`w-3 h-3 ml-1 transform transition-transform ${
-										sortBy?.startsWith('clinic') 
-											? sortBy === 'clinic-desc' ? 'rotate-180' : '' 
+										sortBy?.startsWith('clinic')
+											? sortBy === 'clinic-desc'
+												? 'rotate-180'
+												: ''
 											: 'opacity-30'
-									}`} 
-									fill='none' 
-									stroke='currentColor' 
-									viewBox='0 0 24 24'
-								>
-									<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 9l-7 7-7-7' />
+									}`}
+									fill='none'
+									stroke='currentColor'
+									viewBox='0 0 24 24'>
+									<path
+										strokeLinecap='round'
+										strokeLinejoin='round'
+										strokeWidth={2}
+										d='M19 9l-7 7-7-7'
+									/>
 								</svg>
 							</div>
-							<div className='col-span-2'>Actions</div>
+							<div className='col-span-2'></div>
 						</div>
 					</div>
 
@@ -147,14 +162,17 @@ export default function PatientListView({
 								<div
 									key={patient.id}
 									className='px-6 py-4 hover:bg-gray-50 transition-colors duration-150'>
-									<div className='grid grid-cols-12 gap-4 items-center'>
+									<div
+										onClick={() => handleViewDetails(patient.id)}
+										className='grid grid-cols-12 gap-4 items-center cursor-pointer'>
 										{/* Patient Name */}
 										<div className='col-span-3'>
 											<div className='flex items-center space-x-3'>
 												{/* Avatar */}
 												<div className='w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center border border-gray-300 flex-shrink-0'>
 													<span className='text-sm font-semibold text-gray-600'>
-														{patient.firstName.charAt(0)}{patient.lastName.charAt(0)}
+														{patient.firstName.charAt(0)}
+														{patient.lastName.charAt(0)}
 													</span>
 												</div>
 												<div>
@@ -204,18 +222,12 @@ export default function PatientListView({
 
 										{/* Actions */}
 										<div className='col-span-2'>
-											<div className='flex items-center space-x-2'>
-												<button
-													onClick={() => handleViewDetails(patient.id)}
-													className='inline-flex items-center px-3 py-1.5 border border-gray-200 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400 transition-all duration-200'>
-													<EyeIcon className='w-3 h-3 mr-1' />
-													View
-												</button>
+											<div className='flex items-center ml-10 space-x-2'>
 												<button
 													onClick={() => onRemove(patient.id)}
-													className='p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors duration-200'
+													className='p-1.5  text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors duration-200'
 													title='Remove patient'>
-													<TrashIcon className='w-4 h-4' />
+													<TrashIcon className='w-4 h-4 cursor-pointer ' />
 												</button>
 											</div>
 										</div>

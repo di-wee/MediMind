@@ -108,7 +108,7 @@ function MedicationList({ patientId }) {
 			<div className='bg-white shadow-2xl m-5 py-8 rounded-xl'>
 				<h3 className='font-bold text-lg px-15 mb-5'>Medication List</h3>
 				<div className='max-h-96 overflow-y-auto px-15 w-full mx-auto overflow-x-auto mb-10 '>
-					<table>
+					<table className='table-auto'>
 						<thead className='sticky top-0 z-10'>
 							<tr>
 								<th>Medication Name</th>
