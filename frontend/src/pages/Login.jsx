@@ -17,18 +17,35 @@ function Login() {
 		navigate('/register', { replace: true });
 	};
 
-	const handleLogin = (e) => {
+	const handleLogin = async (e) => {
 		e.preventDefault();
 		const mcrNo = mcrNoRef.current.value;
 		const password = passwordRef.current.value;
 
-		//temp logic if both fields are not null will simulate authentication
-		if (mcrNo && password) {
-			setValidation(false);
-			//setting key = 'isLoggedIn' with a string value = 'true'
-			localStorage.setItem('isLoggedIn', 'true');
+		if (!mcrNo || !password) {
+			setValidation(true);
+			return;
+		}
+
+		try {
+			const response = await fetch(
+				import.meta.env.VITE_SERVER + 'api/web/login',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ mcrNo, password }),
+					credentials: 'include',
+				}
+			);
+			if (!response.ok) {
+				throw new Error('Invalid credentials');
+			}
+
 			navigate('/', { replace: true });
-		} else {
+		} catch (err) {
+			console.error('Login failed:', err.message);
 			setValidation(true);
 		}
 	};
