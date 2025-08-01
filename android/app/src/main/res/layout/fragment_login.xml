@@ -1,0 +1,52 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/usernameInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Username" />
+
+    <EditText
+        android:id="@+id/passwordInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Login Button. -->
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Login"
+        android:layout_marginTop="24dp"/>
+
+    <!-- New User Registration Button. -->
+    <Button
+        android:id="@+id/registerButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Register"
+        android:layout_marginTop="12dp"/>
+
+    <!-- Button to bypass login requirement for dev purposes. -->
+    <Button
+        android:id="@+id/bypassButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Bypass Login"
+        android:layout_marginTop="12dp"/>
+    <Button
+        android:id="@+id/debugButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="debug reminder"
+        android:layout_marginTop="12dp"/>
+</LinearLayout>

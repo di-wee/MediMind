@@ -3,28 +3,40 @@ package nus.iss.backend.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 
+import java.sql.Types;
+import java.time.LocalDate;
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "Medication Intake History")
+@Table(name = "Medication_Intake_History")
 public class IntakeHistory {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="Id")
-    private int id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @JdbcTypeCode(Types.VARCHAR)
+    @Column(name="Id", updatable = false, nullable = false)
+    private UUID id;
     @Column(name = "Logged_Date")
-    private Date loggedDate;
-    @Column(name="IsTaken",nullable = false)
+    private LocalDate loggedDate;
+    @Column(name="Is_Taken",nullable = false)
     private boolean isTaken;
-    @Column(name = "DoctorNote")
+    @Column(name = "Doctor_Note")
     private String doctorNote;
+
     @ManyToOne
-    @JoinColumn(name = "Patient_id",nullable = false)
+    @JoinColumn(name = "Patient_Id",nullable = false)
     private Patient patient;
+
     @ManyToOne
-    @JoinColumn(name="Medication_schedule_id",nullable = false)
+    @JoinColumn(name="Schedule_Id",nullable = false)
     private Schedule schedule;
 }

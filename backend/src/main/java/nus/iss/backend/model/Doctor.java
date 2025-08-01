@@ -12,8 +12,8 @@ import java.util.List;
 @Table(name = "Doctor")
 public class Doctor {
     @Id
-    @Column(name = "MCR_no")
-    private String mcr_no;
+    @Column(name = "MCR_No")
+    private String mcrNo;
     @Column(name="Password",nullable = false)
     private String password;
     @Column(name = "FirstName",nullable = false)
@@ -22,10 +22,12 @@ public class Doctor {
     private String lastName;
     @Column(name = "Email", nullable = false)
     private String email;
-    @OneToOne
-    @JoinColumn(name = "Practicing_clinic_UUID")
+
+
+    @ManyToOne
+    @JoinColumn(name = "Clinic_UUID", nullable = false)
     private Clinic clinic;
-    @OneToMany(mappedBy = "doctor")
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Patient> patients;
 }
 
