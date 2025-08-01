@@ -25,4 +25,9 @@ public class DoctorImpl implements DoctorService {
         return doctor;
     }
 
+    public Doctor findDoctorByMcrNo (String mcrNo) {
+        return doctorRepo.findDoctorByMcrNo(mcrNo);
+
+    }
+
 }

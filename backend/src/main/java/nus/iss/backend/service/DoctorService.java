@@ -11,4 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface DoctorService {
 
     Doctor login(String mcrNo, String password);
+
+    Doctor findDoctorByMcrNo(String mcrNo);
 }
