@@ -13,4 +13,6 @@ public interface DoctorService {
     Doctor login(String mcrNo, String password);
 
     Doctor findDoctorByMcrNo(String mcrNo);
+
+
 }

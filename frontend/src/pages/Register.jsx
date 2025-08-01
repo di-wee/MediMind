@@ -11,7 +11,7 @@ function Register() {
 	const [clinicList, setClinicList] = useState([]);
 	const [passVisibility, setPassVisibility] = useState(false);
 	const [confirmPassVisibility, setConfirmPassVisibility] = useState(false);
-	const [selectedClinic, setSelectedClinic] = useState('');
+	const [selectedClinic, setSelectedClinic] = useState(null);
 
 	const mcrRef = useRef();
 	const firstNameRef = useRef();
@@ -19,15 +19,9 @@ function Register() {
 	const emailRef = useRef();
 	const passwordRef = useRef();
 	const confirmPassRef = useRef();
+	const clinicRef = useRef();
 
 	// temporarily hard-coded, to eventually call GET API to extract list of clinics
-	const clinics = [
-		'Raffles Medical Centre',
-		'Healthway Clinic',
-		'Mount Elizabeth Medical',
-		'Tan Tock Seng Hospital',
-		'Singapore General Hospital',
-	];
 
 	const handleSignIn = (e) => {
 		e.preventDefault();
@@ -69,11 +63,38 @@ function Register() {
 		navigate('/', { replace: true });
 	};
 
-	const handleOptionOnChange = () => {};
+	const handleOptionOnChange = (clinic) => {
+		setSelectedClinic(clinic);
+		console.log(clinic);
+	};
 
 	useEffect(() => {
-		//get API to be called here to retrieve clinic list to be mapped
-		setClinicList(clinics);
+		const fetchAllClinics = async () => {
+			try {
+				const response = await fetch(
+					import.meta.env.VITE_SERVER + 'api/web/all-clinics',
+					{
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					}
+				);
+
+				if (!response.ok) {
+					throw new Error('Error retrieving clinics!');
+				}
+
+				const clinics = await response.json();
+				setClinicList(clinics);
+			} catch (err) {
+				console.error(
+					'Error exception caught when calling GET API to retrieve clinic: ',
+					err
+				);
+			}
+		};
+		fetchAllClinics();
 	}, []);
 
 	return (
@@ -171,6 +192,7 @@ function Register() {
 										name='clinic'
 										id='clinic'
 										className='form-input'
+										ref={clinicRef}
 										required>
 										<option
 											value=''
@@ -180,10 +202,9 @@ function Register() {
 										</option>
 										{clinicList.map((clinic) => (
 											<option
-												key={clinic}
-												value={clinic}
-												onChange={() => handleOptionOnChange()}>
-												{clinic}
+												key={clinic.id}
+												value={clinic.clinicName}>
+												{clinic.clinicName}
 											</option>
 										))}
 									</select>
