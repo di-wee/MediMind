@@ -1,22 +1,20 @@
 package nus.iss.backend.service.Implementation;
 
-import nus.iss.backend.controller.WebAuthenticationController;
+import nus.iss.backend.dao.DoctorUpdateReqWeb;
 import nus.iss.backend.dao.RegistrationRequestWeb;
 import nus.iss.backend.exceptions.InvalidCredentialsException;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.exceptions.UserAlreadyExist;
 import nus.iss.backend.model.Clinic;
 import nus.iss.backend.model.Doctor;
-import nus.iss.backend.repostiory.ClinicRepository;
-import nus.iss.backend.repostiory.DoctorRepository;
+import nus.iss.backend.repositiory.ClinicRepository;
+import nus.iss.backend.repositiory.DoctorRepository;
 import nus.iss.backend.service.DoctorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.security.auth.login.LoginException;
 
 @Service
 @Transactional
@@ -68,6 +66,28 @@ public class DoctorImpl implements DoctorService {
 
         return newDoctor;
 
+    }
+    public Doctor updateDoctor(DoctorUpdateReqWeb request) {
+        Doctor doctor = doctorRepo.findDoctorByMcrNo(request.getMcrNo());
+        if (doctor == null) {
+            throw new ItemNotFound("Doctor not found!");
+        }
+        Clinic clinic = clinicRepository.findClinicByClinicName(request.getClinicName());
+        if (clinic == null) {
+            logger.error("Clinic name: " + request.getClinicName());
+            throw new ItemNotFound("Clinic not found!");
+        }
+        if(clinic!=null){
+            doctor.setClinic(clinic);
+        }
+        if (request.getPassword() != null) {
+            doctor.setPassword(request.getPassword());
+        }
+        if (request.getEmail() != null) {
+            doctor.setEmail(request.getEmail());
+        }
+        doctorRepo.saveAndFlush(doctor);
+        return doctor;
     }
 
 }
