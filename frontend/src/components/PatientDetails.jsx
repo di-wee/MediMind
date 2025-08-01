@@ -32,7 +32,7 @@ function PatientDetails({ patientId }) {
 
 	return (
 		<>
-			<main className='w-full flex-1 mt-20 bg-gray-50 min-h-screen'>
+			<main className='w-full flex-1 mt-5 bg-gray-50 min-h-screen'>
 				<div className='shadow-xl bg-white py-8 m-5 rounded-xl'>
 					<h2 className='font-bold text-lg px-15 '>Patient Details</h2>
 					<div className='patient-details'>
