@@ -1,8 +1,12 @@
 package nus.iss.backend.controller;
 
+import jakarta.servlet.Registration;
 import jakarta.servlet.http.HttpSession;
 import nus.iss.backend.dao.LoginReqWeb;
+import nus.iss.backend.dao.RegistrationRequestWeb;
 import nus.iss.backend.exceptions.InvalidCredentialsException;
+import nus.iss.backend.exceptions.ItemNotFound;
+import nus.iss.backend.exceptions.UserAlreadyExist;
 import nus.iss.backend.model.Clinic;
 import nus.iss.backend.model.Doctor;
 import nus.iss.backend.service.ClinicService;
@@ -77,6 +81,21 @@ public class WebAuthenticationController {
 
         session.invalidate();
         return new ResponseEntity<>(HttpStatus.OK);
+}
+
+@PostMapping("/register")
+public ResponseEntity<Doctor> register(@RequestBody RegistrationRequestWeb request) {
+        try {
+            Doctor saveDoctor = doctorService.registerDoctor(request);
+            return new ResponseEntity<>(saveDoctor, HttpStatus.OK);
+        } catch (UserAlreadyExist e) {
+            logger.error("Error when registering Doctor: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (ItemNotFound e) {
+            logger.error("Error when registering Doctor: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
 }
 
 @GetMapping("/all-clinics")

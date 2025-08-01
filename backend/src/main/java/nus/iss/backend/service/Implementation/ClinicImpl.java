@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -22,10 +23,11 @@ public class ClinicImpl implements ClinicService {
     }
 
     @Override
-    public Clinic findByClinicName(String clinicName) {
+    public Clinic findClinicByClinicName(String clinicName) {
         return clinicRepo.findClinicByClinicName(clinicName);
-
     }
+
+
 
 
 }
