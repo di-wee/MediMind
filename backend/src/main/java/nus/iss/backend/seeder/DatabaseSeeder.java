@@ -187,60 +187,167 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private void seedMedicationsAndSchedules(List<Patient> patients) {
         if (countEntities(Medication.class) > 0) {
+            System.out.println("Medications already exist, skipping seeding...");
             return;
         }
 
         LocalDate today = LocalDate.now();
         LocalDate firstDayOfMonth = today.withDayOfMonth(1);
 
+        // Map realistic instructions and notes per medication
+        Map<String, List<String>> instructionsMap = Map.of(
+                "Panadol", List.of(
+                        "Take with or after food to avoid stomach upset.",
+                        "Do not exceed 8 tablets in 24 hours.",
+                        "Avoid alcohol while taking Panadol."
+                ),
+                "Metformin", List.of(
+                        "Take with meals to reduce stomach upset.",
+                        "Do not crush or chew extended-release tablets.",
+                        "Maintain a consistent meal schedule while on this medication."
+                ),
+                "Lipitor", List.of(
+                        "Can be taken with or without food.",
+                        "Avoid grapefruit juice while on Lipitor.",
+                        "Take at the same time every day for best results."
+                ),
+                "Amoxicillin", List.of(
+                        "Take every 8 hours for full effect.",
+                        "Finish the entire course even if you feel better.",
+                        "Can be taken with or without food; take with water."
+                ),
+                "Losartan", List.of(
+                        "Can be taken with or without food.",
+                        "Avoid potassium-rich salt substitutes unless instructed.",
+                        "Take at the same time each day."
+                ),
+                "Omeprazole", List.of(
+                        "Take 30 minutes before a meal, preferably breakfast.",
+                        "Do not crush or chew the capsule.",
+                        "Avoid alcohol and NSAIDs if possible."
+                ),
+                "Amlodipine", List.of(
+                        "Can be taken with or without food.",
+                        "Avoid grapefruit juice as it may increase side effects.",
+                        "Take at the same time each day for consistent blood pressure control."
+                ),
+                "Ventolin", List.of(
+                        "Use the inhaler as directed for wheezing or shortness of breath.",
+                        "Shake the inhaler before use.",
+                        "Rinse mouth after inhalation if using with a spacer."
+                ),
+                "Atorvastatin", List.of(
+                        "Can be taken with or without food.",
+                        "Avoid excessive alcohol while on this medication.",
+                        "Take in the evening for best cholesterol-lowering effect."
+                ),
+                "Insulin", List.of(
+                        "Inject subcutaneously as prescribed, rotate injection sites.",
+                        "Monitor blood sugar regularly.",
+                        "Do not skip meals after insulin injection."
+                )
+        );
+
+        Map<String, List<String>> notesMap = Map.of(
+                "Panadol", List.of(
+                        "Do not combine with other medications containing paracetamol.",
+                        "Seek medical attention if fever persists beyond 3 days."
+                ),
+                "Metformin", List.of(
+                        "May cause mild gastrointestinal upset initially.",
+                        "Report persistent vomiting or diarrhea to your doctor."
+                ),
+                "Lipitor", List.of(
+                        "Report any unusual muscle pain or weakness.",
+                        "Routine liver function tests may be required."
+                ),
+                "Amoxicillin", List.of(
+                        "May cause mild diarrhea; take probiotics if recommended.",
+                        "Inform your doctor if you develop a rash or breathing difficulty."
+                ),
+                "Losartan", List.of(
+                        "May cause dizziness; get up slowly from sitting/lying position.",
+                        "Monitor blood pressure regularly at home."
+                ),
+                "Omeprazole", List.of(
+                        "Prolonged use may affect calcium absorption.",
+                        "Inform your doctor if you experience persistent stomach pain."
+                ),
+                "Amlodipine", List.of(
+                        "May cause ankle swelling in some patients.",
+                        "Avoid sudden discontinuation without medical advice."
+                ),
+                "Ventolin", List.of(
+                        "Excessive use may cause rapid heartbeat or tremors.",
+                        "Seek medical attention if inhaler use increases suddenly."
+                ),
+                "Atorvastatin", List.of(
+                        "Report any signs of liver problems (yellow eyes/skin, dark urine).",
+                        "Do not consume large amounts of alcohol while on this medication."
+                ),
+                "Insulin", List.of(
+                        "Keep a source of sugar nearby to manage hypoglycemia.",
+                        "Store in a refrigerator; do not freeze."
+                )
+        );
+
         for (Patient patient : patients) {
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 10; i++) { // 10 meds per patient
                 Medication med = new Medication();
-                med.setMedicationName(commonMeds.get(random.nextInt(commonMeds.size())));
-                med.setDosage((random.nextInt(2) + 1) + " tablet(s)");
-                med.setIntakeQuantity(String.valueOf(random.nextInt(2) + 1));
-                boolean isOnceDaily = random.nextBoolean();
-                med.setFrequency(isOnceDaily ? "Once Daily" : "Twice Daily");
-                med.setTiming(random.nextBoolean() ? "After Meal" : "Before Meal");
-                med.setInstructions("Follow doctor’s instructions");
-                med.setDoctorNotes(null);
+                String medName = commonMeds.get(random.nextInt(commonMeds.size()));
+                med.setMedicationName(medName);
+
+                int quantity = random.nextInt(2) + 1; // 1-2 tablets
+                med.setIntakeQuantity(quantity + " tablet" + (quantity > 1 ? "s" : ""));
+
+                int frequency = random.nextInt(3) + 1;
+                med.setFrequency(frequency);
+
+                //  optional timing
+                med.setTiming(random.nextInt(100) < 70 ?
+                        (random.nextBoolean() ? "Every morning" : "Every night")
+                        : null);
+
+                // assign realistic instructions and notes from map
+                med.setInstructions(getRandomItem(instructionsMap.getOrDefault(medName, List.of("Follow doctor's advice."))));
+                med.setNotes(getRandomItem(notesMap.getOrDefault(medName, List.of("No special notes."))));
                 med.setActive(random.nextBoolean());
 
                 entityManager.persist(med);
-
                 patient.getMedications().add(med);
                 med.getPatients().add(patient);
 
-                // Determine schedule times
+                // generate realistic schedule times
                 List<LocalTime> medTimes = new ArrayList<>();
-                if (isOnceDaily) {
+                if (frequency == 1) {
                     medTimes.add(possibleTimes.get(random.nextInt(possibleTimes.size())));
+                } else if (frequency == 2) {
+                    medTimes.add(morningTime);
+                    medTimes.add(eveningTime);
                 } else {
-                    medTimes.add(morningTime); // 8 AM
-                    medTimes.add(eveningTime); // 8 PM
+                    medTimes.addAll(possibleTimes);
                 }
 
+
                 for (LocalTime time : medTimes) {
-                    // Create schedule (only time)
+                    // schedule
                     Schedule schedule = new Schedule();
                     schedule.setPatient(patient);
                     schedule.setMedication(med);
-                    schedule.setScheduledTime(time); // LocalTime only
+                    schedule.setScheduledTime(time);
                     entityManager.persist(schedule);
 
-                    // Generate intake logs for the first 14 days of current month
+                    // intake logs for first 20 days of current month
                     if (med.isActive()) {
-                        for (int day = 0; day < 14; day++) {
+                        for (int day = 0; day < 20; day++) {
                             LocalDate logDate = firstDayOfMonth.plusDays(day);
-
-                            // Avoid creating logs beyond today
                             if (logDate.isAfter(today)) break;
 
                             IntakeHistory log = new IntakeHistory();
                             log.setPatient(patient);
                             log.setSchedule(schedule);
-                            log.setLoggedDate(logDate); // LocalDate only
-                            log.setTaken(random.nextInt(100) < 80); // 80% chance taken
+                            log.setLoggedDate(logDate);
+                            log.setTaken(random.nextInt(100) < 80); // 80% adherence
                             log.setDoctorNote(null);
 
                             entityManager.persist(log);
@@ -252,6 +359,10 @@ public class DatabaseSeeder implements CommandLineRunner {
         }
     }
 
+    // helper generic function to select a random item from a list
+    private <T> T getRandomItem(List<T> list) {
+        return list.get(random.nextInt(list.size()));
+    }
 
 
 

@@ -28,18 +28,16 @@ public class Medication{
     private UUID id;
     @Column(name = "Medication_Name",nullable = false)
     private String medicationName;
-    @Column(name="Dosage",nullable = false)
-    private String dosage;
     @Column(name = "Intake_Quantity",nullable = false)
     private String intakeQuantity;
     @Column(name = "Frequency",nullable = false)
-    private String frequency;
+    private int frequency;
     @Column(name = "Timing")
     private String timing;
-    @Column(name = "Instructions", nullable = false)
+    @Column(name = "Instructions")
     private String instructions;
-    @Column(name = "Doctor_Notes")
-    private String doctorNotes;
+    @Column(name = "Notes")
+    private String notes;
     @Column(name = "Is_Active", nullable = false)
     private boolean isActive = true;
 
