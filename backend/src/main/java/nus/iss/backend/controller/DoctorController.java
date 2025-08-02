@@ -1,9 +1,7 @@
 package nus.iss.backend.controller;
 
 import nus.iss.backend.dao.DoctorUpdateReqWeb;
-import nus.iss.backend.exceptions.InvalidCredentialsException;
 import nus.iss.backend.model.Doctor;
-import nus.iss.backend.repositiory.DoctorRepository;
 import nus.iss.backend.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +16,7 @@ import org.slf4j.LoggerFactory;
 @RequestMapping("/api/doctor")
 
 public class DoctorController {
-    private static final Logger logger = LoggerFactory.getLogger(WebAuthenticationController.class);
+    private static final Logger logger = LoggerFactory.getLogger(DoctorController.class);
 
     @Autowired
     private DoctorService doctorService;

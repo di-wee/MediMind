@@ -1,7 +1,7 @@
 package nus.iss.backend.service.Implementation;
 
 import nus.iss.backend.model.Clinic;
-import nus.iss.backend.repositiory.ClinicRepository;
+import nus.iss.backend.repository.ClinicRepository;
 import nus.iss.backend.service.ClinicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
