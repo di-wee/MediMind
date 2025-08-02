@@ -155,7 +155,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 patient.setEmail(email);
 
                 patient.setPassword(faker.internet().password(8, 12));
-                patient.setNric("S" + faker.number().numberBetween(1000000, 9999999) + faker.letterify("?"));
+                patient.setNric("S" + faker.number().numberBetween(1000000, 9999999) + faker.letterify("?").toUpperCase());
                 patient.setGender(random.nextBoolean() ? "Male" : "Female");
 
 
@@ -335,6 +335,10 @@ public class DatabaseSeeder implements CommandLineRunner {
                     schedule.setPatient(patient);
                     schedule.setMedication(med);
                     schedule.setScheduledTime(time);
+
+                    schedule.setIsActive(random.nextInt(100) < 80); // 80% active, 20% inactive
+                    schedule.setCreationDate(LocalDateTime.now().minusDays(random.nextInt(30))); // created within last 30 days
+
                     entityManager.persist(schedule);
 
                     // intake logs for first 20 days of current month
