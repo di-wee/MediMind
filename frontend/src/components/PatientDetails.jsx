@@ -7,27 +7,46 @@ function PatientDetails({ patientId }) {
 
 	//call GET API to retrieve patient's information
 	useEffect(() => {
-		const patient = patientList.find((p) => p.id === parseInt(patientId));
-		console.log(patient);
+		const fetchPatientDetails = async () => {
+			try {
+				const response = await fetch(
+					import.meta.env.VITE_SERVER + `api/patient/${patientId}`,
+					{
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					}
+				);
 
-		// Compute derived fields
-		const fullName = `${patient.firstName} ${patient.lastName}`;
-		const dob = new Date(patient.dob);
-		const today = new Date();
+				if (response.ok) {
+					const patient = await response.json();
+					console.log(patient);
+					// compute derived fields
+					const fullName = `${patient.firstName} ${patient.lastName}`;
+					const dob = new Date(patient.dob);
+					const today = new Date();
 
-		let age = today.getFullYear() - dob.getFullYear();
-		if (
-			today.getMonth() < dob.getMonth() ||
-			(today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())
-		) {
-			age--;
-		}
+					let age = today.getFullYear() - dob.getFullYear();
+					if (
+						today.getMonth() < dob.getMonth() ||
+						(today.getMonth() === dob.getMonth() &&
+							today.getDate() < dob.getDate())
+					) {
+						age--;
+					}
 
-		setPatientInfo({
-			...patient,
-			fullName,
-			age,
-		});
+					setPatientInfo({
+						...patient,
+						fullName,
+						age,
+					});
+				}
+			} catch (err) {
+				console.error('Error: ', err);
+			}
+		};
+		fetchPatientDetails();
 	}, [patientId]);
 
 	return (

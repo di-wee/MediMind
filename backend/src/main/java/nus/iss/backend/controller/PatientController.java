@@ -30,7 +30,7 @@ public class PatientController {
 
             if (pt.isPresent()) {
                 Patient patient = pt.get();
-                return new ResponseEntity<>(patient, HttpStatus.FOUND);
+                return new ResponseEntity<>(patient, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }

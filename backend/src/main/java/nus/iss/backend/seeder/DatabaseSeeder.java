@@ -155,7 +155,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 patient.setEmail(email);
 
                 patient.setPassword(faker.internet().password(8, 12));
-                patient.setNric("S" + faker.number().numberBetween(1000000, 9999999) + faker.letterify("?"));
+                patient.setNric("S" + faker.number().numberBetween(1000000, 9999999) + faker.letterify("?").toUpperCase());
                 patient.setGender(random.nextBoolean() ? "Male" : "Female");
 
 
