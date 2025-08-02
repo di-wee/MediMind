@@ -1,5 +1,6 @@
 package nus.iss.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,6 +51,7 @@ public class Patient {
     @JoinColumn(name = "Clinic_UUID", nullable = false)
     private Clinic clinic;
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "Patient_Medication",
