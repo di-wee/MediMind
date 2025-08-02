@@ -41,6 +41,7 @@ public class Medication{
     @Column(name = "Is_Active", nullable = false)
     private boolean isActive = true;
 
+
     @ManyToMany(mappedBy = "medications")
     private List<Patient> patients = new ArrayList<>();
     @OneToMany(mappedBy = "medication", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

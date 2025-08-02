@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 
 import java.sql.Types;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +32,9 @@ public class Schedule {
 
     @Column(name = "Is_Active")
     private Boolean isActive;
+
+    @Column(name = "CreationDate")
+    private LocalDateTime creationDate;
 
     @ManyToOne
     @JoinColumn(name = "Medication_Id",nullable = false)
