@@ -43,7 +43,11 @@ function App() {
 
 						<Route
 							path='/profile/:mcrNo'
-							element={<DoctorProfile />}
+							element={
+								<ProtectedRoute>
+									<DoctorProfile />
+								</ProtectedRoute>
+							}
 						/>
 						<Route
 							path='/register'
@@ -53,10 +57,6 @@ function App() {
 						<Route
 							path='/login'
 							element={<Login />}
-						/>
-						<Route
-							path='/register'
-							element={<Register />}
 						/>
 
 						<Route

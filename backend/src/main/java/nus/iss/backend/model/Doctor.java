@@ -1,11 +1,13 @@
 package nus.iss.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -24,7 +26,7 @@ public class Doctor {
     @Column(name = "Email", nullable = false)
     private String email;
 
-    
+
     @ManyToOne
     @JoinColumn(name = "Clinic_UUID", nullable = false)
     private Clinic clinic;
@@ -32,5 +34,11 @@ public class Doctor {
     @JsonIgnore
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Patient> patients;
+
+    @JsonProperty("patientIds")
+    public List<UUID> getPatientIds() {
+        return patients == null ? List.of() :
+                patients.stream().map(Patient::getId).toList();
+    }
 }
 
