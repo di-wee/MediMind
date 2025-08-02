@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import MedicationList from './MedicationList';
-import patientList from '../mockdata/patientlist.json';
 
 function PatientDetails({ patientId }) {
 	const [patientInfo, setPatientInfo] = useState({});
-	const [medicationList, setMedicationList] = useState(null);
+	const [medicationList, setMedicationList] = useState([]);
 
 	//call GET API to retrieve patient's information
 	useEffect(() => {
 		const fetchPatientDetails = async () => {
 			try {
+				console.log('PatientDetails mounted with patientId:', patientId);
 				const response = await fetch(
 					import.meta.env.VITE_SERVER + `api/patient/${patientId}`,
 					{

@@ -21,15 +21,13 @@ function ProtectedRoute({ children }) {
 						credentials: 'include',
 					}
 				);
-
+				const doctor = await response.json();
 				if (response.ok) {
 					setIsLoggedIn(true);
+					setDoctorDetails(doctor);
 				} else {
 					setIsLoggedIn(false);
 				}
-
-				const doctor = await response.json();
-				setDoctorDetails(doctor);
 			} catch (err) {
 				console.error('Error checking session: ', err);
 				setIsLoggedIn(false);
@@ -40,6 +38,10 @@ function ProtectedRoute({ children }) {
 		checkSession();
 		console.log(doctorDetails);
 	}, []);
+
+	useEffect(() => {
+		console.log('Doctor details updated:', doctorDetails);
+	}, [doctorDetails]);
 	if (isChecking) {
 		return <div>Loading...</div>;
 	}

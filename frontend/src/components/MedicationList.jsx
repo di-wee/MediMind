@@ -24,7 +24,7 @@ function MedicationList({ patientId, medicationList, setMedicationList }) {
 	//to create a more dynamic filter for easily scalable filtering later
 	// desired format is [ { label: 'Active', field: 'active', value: true },]
 	const dynamicFilterOptions = getDynamicFilterOptions(
-		medicationList,
+		medicationList || [],
 		filteredFields,
 		labelMap
 	);
@@ -74,7 +74,7 @@ function MedicationList({ patientId, medicationList, setMedicationList }) {
 	//GET call to retrieve medication list here using patientId
 	useEffect(() => {
 		setDisplayedList(medicationList);
-	}, []);
+	}, [medicationList]);
 
 	useEffect(() => {
 		const filtered = applyFilter(
