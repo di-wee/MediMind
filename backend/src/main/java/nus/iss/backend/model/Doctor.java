@@ -24,7 +24,7 @@ public class Doctor {
     @Column(name = "Email", nullable = false)
     private String email;
 
-    @JsonIgnore
+    
     @ManyToOne
     @JoinColumn(name = "Clinic_UUID", nullable = false)
     private Clinic clinic;
