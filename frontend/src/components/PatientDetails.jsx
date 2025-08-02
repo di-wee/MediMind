@@ -22,12 +22,14 @@ function PatientDetails({ patientId }) {
 				if (response.ok) {
 					const patient = await response.json();
 					console.log(patient);
+
 					// compute derived fields
 					const fullName = `${patient.firstName} ${patient.lastName}`;
 					const dob = new Date(patient.dob);
 					const today = new Date();
 
 					let age = today.getFullYear() - dob.getFullYear();
+					//if patient's birthday hasnt passed, then to keep them a year younger
 					if (
 						today.getMonth() < dob.getMonth() ||
 						(today.getMonth() === dob.getMonth() &&
@@ -51,7 +53,7 @@ function PatientDetails({ patientId }) {
 
 	return (
 		<>
-			<main className='w-full flex-1 mt-5 bg-gray-50 min-h-screen'>
+			<main className='w-full flex-1 bg-gray-50 min-h-screen'>
 				<div className='shadow-xl bg-white py-8 m-5 rounded-xl'>
 					<h2 className='font-bold text-lg px-15 '>Patient Details</h2>
 					<div className='patient-details'>
@@ -61,7 +63,7 @@ function PatientDetails({ patientId }) {
 								className='form-input'
 								type='text'
 								name='patientName'
-								value={patientInfo.fullName}
+								value={patientInfo.fullName || ''}
 								readOnly
 							/>
 						</div>
@@ -71,7 +73,7 @@ function PatientDetails({ patientId }) {
 								className='form-input'
 								type='text'
 								name='patientNRIC'
-								value={patientInfo.nric}
+								value={patientInfo.nric || ''}
 								readOnly
 							/>
 						</div>
@@ -83,7 +85,7 @@ function PatientDetails({ patientId }) {
 								className='form-input'
 								type='text'
 								name='patientDob'
-								value={patientInfo.dob}
+								value={patientInfo.dob || ''}
 								readOnly
 							/>
 						</div>
@@ -93,7 +95,7 @@ function PatientDetails({ patientId }) {
 								className='form-input'
 								type='text'
 								name='patientAge'
-								value={patientInfo.age}
+								value={patientInfo.age ?? ''}
 								readOnly
 							/>
 						</div>

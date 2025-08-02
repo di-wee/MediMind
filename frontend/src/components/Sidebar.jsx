@@ -31,10 +31,6 @@ function Sidebar() {
 		return location.pathname === path;
 	};
 
-	useEffect(() => {
-		console.log(doctorDetails);
-	});
-
 	return (
 		<div className='h-full w-64 bg-white border-r border-gray-300 shadow-lg'>
 			<aside className='flex flex-col h-full'>
