@@ -52,7 +52,7 @@ public class Patient {
     @JoinColumn(name = "Clinic_UUID", nullable = false)
     private Clinic clinic;
 
-    @JsonIgnore
+
     @ManyToMany
     @JoinTable(
             name = "Patient_Medication",

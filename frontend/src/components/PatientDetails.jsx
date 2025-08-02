@@ -4,6 +4,7 @@ import patientList from '../mockdata/patientlist.json';
 
 function PatientDetails({ patientId }) {
 	const [patientInfo, setPatientInfo] = useState({});
+	const [medicationList, setMedicationList] = useState(null);
 
 	//call GET API to retrieve patient's information
 	useEffect(() => {
@@ -43,6 +44,8 @@ function PatientDetails({ patientId }) {
 						fullName,
 						age,
 					});
+
+					setMedicationList(patient.medications);
 				}
 			} catch (err) {
 				console.error('Error: ', err);
@@ -102,7 +105,11 @@ function PatientDetails({ patientId }) {
 					</div>
 				</div>
 				<div className='mt-8'>
-					<MedicationList patientId={patientId} />
+					<MedicationList
+						patientId={patientId}
+						medicationList={medicationList}
+						setMedicationList={setMedicationList}
+					/>
 				</div>
 			</main>
 		</>

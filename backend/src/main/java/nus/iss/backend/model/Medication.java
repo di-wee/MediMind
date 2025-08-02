@@ -1,5 +1,6 @@
 package nus.iss.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,9 +42,11 @@ public class Medication{
     @Column(name = "Is_Active", nullable = false)
     private boolean isActive = true;
 
-
+    @JsonIgnore
     @ManyToMany(mappedBy = "medications")
     private List<Patient> patients = new ArrayList<>();
+
+    @JsonIgnore
     @OneToMany(mappedBy = "medication", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Schedule> schedules;
 }
