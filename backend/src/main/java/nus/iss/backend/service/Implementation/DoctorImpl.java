@@ -72,12 +72,12 @@ public class DoctorImpl implements DoctorService {
         if (doctor == null) {
             throw new ItemNotFound("Doctor not found!");
         }
-        Clinic clinic = clinicRepository.findClinicByClinicName(request.getClinicName());
-        if (clinic == null) {
-            logger.error("Clinic name: " + request.getClinicName());
-            throw new ItemNotFound("Clinic not found!");
-        }
-        if(clinic!=null){
+        if(request.getClinic() != null){
+            Clinic clinic = request.getClinic();
+            if (clinic == null) {
+                logger.error("Clinic uuid: " + request.getClinic());
+                throw new ItemNotFound("Clinic not found!");
+            }
             doctor.setClinic(clinic);
         }
         if (request.getPassword() != null) {

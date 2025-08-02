@@ -24,14 +24,14 @@ public class DoctorController {
     private DoctorService doctorService;
 
     @PutMapping("/update")
-    public ResponseEntity<Void> updateDoctor(@RequestBody DoctorUpdateReqWeb update) {
+    public ResponseEntity<Doctor> updateDoctor(@RequestBody DoctorUpdateReqWeb update) {
         try{
             Doctor doctor = doctorService.updateDoctor(update);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(doctor, HttpStatus.OK);
         }catch (ItemNotFound e) {
             logger.error("Doctor not found (Status Code: " + HttpStatus.NOT_FOUND + "): " + e);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-    
+
 }
