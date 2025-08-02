@@ -28,6 +28,10 @@ public class Schedule {
     private UUID id;
     @Column(name = "Scheduled_Time")
     private LocalTime scheduledTime;
+
+    @Column(name = "Is_Active")
+    private Boolean isActive;
+
     @ManyToOne
     @JoinColumn(name = "Medication_Id",nullable = false)
     private Medication medication;
