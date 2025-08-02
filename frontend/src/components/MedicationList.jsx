@@ -3,10 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import MedicationLog from './MedicationLog';
 import FilterContainer from './FilterContainer';
 import { getDynamicFilterOptions, applyFilter } from '../utils/filterUtil';
-import medsList from '../mockdata/medicationlist.json';
 
-function MedicationList({ patientId }) {
-	const [medicationList, setMedicationList] = useState([]);
+function MedicationList({ patientId, medicationList, setMedicationList }) {
 	const [displayedList, setDisplayedList] = useState([]);
 	const [selectedMedicine, setSelectedMedicine] = useState({});
 	const [visible, setVisible] = useState(false);
@@ -17,14 +15,14 @@ function MedicationList({ patientId }) {
 	const filterRef = useRef();
 
 	//defining fields that needs to be filtered first
-	const filteredFields = ['isActive', 'missedDose'];
+	const filteredFields = ['active', 'missedDose'];
 	const labelMap = {
-		isActive: { true: 'Active', false: 'Inactive' },
+		active: { true: 'Active', false: 'Inactive' },
 		missedDose: { true: 'Missed', false: 'Compliant' },
 	};
 
 	//to create a more dynamic filter for easily scalable filtering later
-	// desired format is [ { label: 'Active', field: 'isActive', value: true },]
+	// desired format is [ { label: 'Active', field: 'active', value: true },]
 	const dynamicFilterOptions = getDynamicFilterOptions(
 		medicationList,
 		filteredFields,
@@ -48,7 +46,7 @@ function MedicationList({ patientId }) {
 		let newKey;
 		switch (col) {
 			case 'Status':
-				newKey = filterKey === 'isActive' ? null : 'isActive';
+				newKey = filterKey === 'active' ? null : 'active';
 				break;
 			case 'Missed Dose':
 				newKey = filterKey === 'missedDose' ? null : 'missedDose';
@@ -75,8 +73,7 @@ function MedicationList({ patientId }) {
 
 	//GET call to retrieve medication list here using patientId
 	useEffect(() => {
-		setMedicationList(medsList);
-		setDisplayedList(medsList);
+		setDisplayedList(medicationList);
 	}, []);
 
 	useEffect(() => {
@@ -112,8 +109,8 @@ function MedicationList({ patientId }) {
 						<thead className='sticky top-0 z-10'>
 							<tr>
 								<th>Medication Name</th>
-								<th>Dosage</th>
-								<th>Frequency</th>
+
+								<th>Intake/ day</th>
 
 								<th>
 									<div className='relative inline-flex items-center gap-1'>
@@ -123,7 +120,7 @@ function MedicationList({ patientId }) {
 											className='filter-btn'
 										/>
 									</div>
-									{filterKey === 'isActive' ? (
+									{filterKey === 'active' ? (
 										<div ref={filterRef}>
 											<FilterContainer
 												filterOptions={uniqueOptions}
@@ -164,10 +161,10 @@ function MedicationList({ patientId }) {
 									className='tr-list'
 									onClick={() => handleMedicationClick(meds)}>
 									<td>{meds.medicationName}</td>
-									<td>{meds.dosage}</td>
+
 									<td>{meds.frequency}</td>
 									<td>
-										{meds.isActive ? (
+										{meds.active ? (
 											<div className='pos-status'>Active</div>
 										) : (
 											<div className='neg-status'>Inactive</div>
