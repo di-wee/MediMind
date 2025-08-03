@@ -16,4 +16,6 @@ public interface MedicationService {
     Boolean hasMedicineMissedDose(UUID medicationId);
 
     Medication findMedicineById (UUID medicationId);
+
+    Medication saveMedication(Medication medication);
 }
