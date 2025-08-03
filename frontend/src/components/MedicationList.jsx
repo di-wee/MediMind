@@ -74,6 +74,7 @@ function MedicationList({ patientId, medicationList, setMedicationList }) {
 	//GET call to retrieve medication list here using patientId
 	useEffect(() => {
 		setDisplayedList(medicationList);
+		console.log(medicationList);
 	}, [medicationList]);
 
 	useEffect(() => {
@@ -110,7 +111,9 @@ function MedicationList({ patientId, medicationList, setMedicationList }) {
 							<tr>
 								<th>Medication Name</th>
 
-								<th>Intake/ day</th>
+								<th>Intake/ Day</th>
+
+								<th>Intake Quantity</th>
 
 								<th>
 									<div className='relative inline-flex items-center gap-1'>
@@ -163,6 +166,7 @@ function MedicationList({ patientId, medicationList, setMedicationList }) {
 									<td>{meds.medicationName}</td>
 
 									<td>{meds.frequency}</td>
+									<td>{meds.intakeQuantity}</td>
 									<td>
 										{meds.active ? (
 											<div className='pos-status'>Active</div>

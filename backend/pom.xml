@@ -207,7 +207,7 @@
                         </configuration>
                     </execution>
                 </executions>
-               
+
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

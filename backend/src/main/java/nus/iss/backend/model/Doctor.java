@@ -35,10 +35,10 @@ public class Doctor {
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Patient> patients;
 
-    @JsonProperty("patientIds")
-    public List<UUID> getPatientIds() {
-        return patients == null ? List.of() :
-                patients.stream().map(Patient::getId).toList();
-    }
+//    @JsonProperty("patientIds")
+//    public List<UUID> getPatientIds() {
+//        return patients == null ? List.of() :
+//                patients.stream().map(Patient::getId).toList();
+//    }
 }
 

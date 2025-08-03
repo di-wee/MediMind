@@ -44,14 +44,34 @@ function PatientDetails({ patientId }) {
 						fullName,
 						age,
 					});
-
-					setMedicationList(patient.medications);
 				}
 			} catch (err) {
-				console.error('Error: ', err);
+				console.error('Error fetching patient details: ', err);
+			}
+		};
+
+		const fetchPatientMedicationList = async () => {
+			try {
+				const response = await fetch(
+					import.meta.env.VITE_SERVER + `api/patient/${patientId}/medications`,
+					{
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					}
+				);
+
+				if (response.ok) {
+					const medication = await response.json();
+					setMedicationList(medication);
+				}
+			} catch (err) {
+				console.error('Error in retrieving medication list of patient: ', err);
 			}
 		};
 		fetchPatientDetails();
+		fetchPatientMedicationList();
 	}, [patientId]);
 
 	return (
