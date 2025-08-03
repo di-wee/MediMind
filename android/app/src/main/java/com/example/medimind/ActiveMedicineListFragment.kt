@@ -39,6 +39,7 @@ class ActiveMedicineListFragment : Fragment() {
         adapter = MedicineAdapter(medicineList) { medicine ->
             val bundle = Bundle().apply {
                 putString("medicineName", medicine.medicationName)
+                putString("medicineId", medicine.id)
             }
             findNavController().navigate(R.id.action_activeMedicineListFragment_to_viewMedicineDetailsFragment, bundle)
         }
