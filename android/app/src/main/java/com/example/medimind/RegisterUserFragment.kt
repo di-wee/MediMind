@@ -2,6 +2,7 @@ package com.example.medimind
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,7 @@ import com.example.medimind.network.ApiClient
 import com.example.medimind.network.RegisterRequest
 import kotlinx.coroutines.launch
 import java.util.*
+import java.util.regex.Pattern
 
 class RegisterUserFragment : Fragment() {
 
@@ -72,21 +74,81 @@ class RegisterUserFragment : Fragment() {
             dpd.show()
         }
 
+        // Setup gender dropdown
+        val genderSpinner = view.findViewById<Spinner>(R.id.spinnerGender)
+        val genderOptions = listOf("Male", "Female")
+        val genderAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, genderOptions)
+        genderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        genderSpinner.adapter = genderAdapter
+
         // Back to login
         view.findViewById<Button>(R.id.backToLoginButton).setOnClickListener {
             findNavController().navigateUp()
         }
 
+        // Fields
+        val emailField = view.findViewById<EditText>(R.id.inputEmail)
+        val passwordField = view.findViewById<EditText>(R.id.inputPassword)
+        val confirmPasswordField = view.findViewById<EditText>(R.id.inputConfirmPassword)
+        val nricField = view.findViewById<EditText>(R.id.inputNRIC)
+        val firstNameField = view.findViewById<EditText>(R.id.inputFirstName)
+        val lastNameField = view.findViewById<EditText>(R.id.inputLastName)
+
         // Register button action
         view.findViewById<Button>(R.id.registerButton).setOnClickListener {
-            val email = view.findViewById<EditText>(R.id.inputEmail).text.toString()
-            val password = view.findViewById<EditText>(R.id.inputPassword).text.toString()
-            val nric = view.findViewById<EditText>(R.id.inputNRIC).text.toString()
-            val firstName = view.findViewById<EditText>(R.id.inputFirstName).text.toString()
-            val lastName = view.findViewById<EditText>(R.id.inputLastName).text.toString()
-            val gender = view.findViewById<EditText>(R.id.inputGender).text.toString()
+
+            val email = emailField.text.toString().trim()
+            val password = passwordField.text.toString()
+            val confirmPassword = confirmPasswordField.text.toString()
+            val nric = nricField.text.toString().trim()
+            val firstName = firstNameField.text.toString().trim()
+            val lastName = lastNameField.text.toString().trim()
+            val gender = genderSpinner.selectedItem?.toString() ?: ""
             val dob = dobTextView.text.toString()
-            val selectedClinicName = clinicSpinner.selectedItem.toString()
+            val selectedClinicName = clinicSpinner.selectedItem?.toString() ?: ""
+
+            // --------- VALIDATION START ----------
+            if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                emailField.error = "Enter a valid email"
+                return@setOnClickListener
+            }
+
+            val nricRegex = "^[STFG]\\d{7}[A-Z]$"
+            if (!Pattern.matches(nricRegex, nric)) {
+                nricField.error = "Enter a valid NRIC (e.g., S1234567A)"
+                return@setOnClickListener
+            }
+
+            if (password.length < 6) {
+                passwordField.error = "Password must be at least 6 characters"
+                return@setOnClickListener
+            }
+
+            if (password != confirmPassword) {
+                confirmPasswordField.error = "Passwords do not match"
+                return@setOnClickListener
+            }
+
+            if (firstName.isEmpty()) {
+                firstNameField.error = "First name required"
+                return@setOnClickListener
+            }
+
+            if (lastName.isEmpty()) {
+                lastNameField.error = "Last name required"
+                return@setOnClickListener
+            }
+
+            if (dob.isEmpty() || dob == "Select DOB") {
+                Toast.makeText(requireContext(), "Please select a date of birth", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (gender.isEmpty()) {
+                Toast.makeText(requireContext(), "Please select a gender", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            // --------- VALIDATION END ----------
 
             // Build request – sending clinicName (you can switch to clinicId if needed)
             val request = RegisterRequest(
