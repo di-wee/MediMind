@@ -3,7 +3,7 @@ package nus.iss.backend.service.Implementation;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Schedule;
-import nus.iss.backend.repostiory.MedicationRepository;
+import nus.iss.backend.repository.MedicationRepository;
 import nus.iss.backend.service.MedicationService;
 import nus.iss.backend.service.ScheduleService;
 import org.slf4j.Logger;

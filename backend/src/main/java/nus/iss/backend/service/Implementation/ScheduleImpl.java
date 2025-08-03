@@ -3,7 +3,7 @@ package nus.iss.backend.service.Implementation;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.model.Schedule;
-import nus.iss.backend.repostiory.ScheduleRepository;
+import nus.iss.backend.repository.ScheduleRepository;
 import nus.iss.backend.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
