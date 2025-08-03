@@ -29,7 +29,6 @@ object ReminderUtils {
         }")
 
         val intent = Intent(context, ReminderReceiver::class.java).apply {
-            putExtra("schedule_id", schedule.id)
             putExtra("time_millis", schedule.timeMillis)
         }
 
