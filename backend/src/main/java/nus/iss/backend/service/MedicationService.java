@@ -10,6 +10,10 @@ import java.util.UUID;
 @Service
 @Transactional
 public interface MedicationService {
-    public Medication findMedicationById(UUID id);
-    public List<Medication> findAllMedications(List<UUID> medIds);
+
+    List<Medication> findAllMedications(List<UUID> medIds);
+
+    Boolean hasMedicineMissedDose(UUID medicationId);
+
+    Medication findMedicineById (UUID medicationId);
 }
