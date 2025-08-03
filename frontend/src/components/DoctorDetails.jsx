@@ -66,6 +66,7 @@ function DoctorDetails({ mcrNo }) {
 			//if either field is empty don't save just revert
 			if (password.length === 0 || newPassword.length === 0) {
 				setNewPassword('');
+				setPassword(doctorInfo.password);
 				setIsChangingPassword(false);
 				setValidation({
 					currentPassValidation: false,
@@ -120,7 +121,7 @@ function DoctorDetails({ mcrNo }) {
 			console.log(doctorInfo.password);
 		}else {
 				setIsChangingPassword(true);
-				setPassword('');
+				setPassword('')
 			console.log("currentpassword: ", doctorInfo.password);
 			}
 		}
