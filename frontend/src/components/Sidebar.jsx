@@ -3,14 +3,28 @@ import {
 	Squares2X2Icon,
 	UserCircleIcon,
 } from '@heroicons/react/24/outline';
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import MediMindContext from '../context/MediMindContext';
 
-function Sidebar({ mcrNo, firstName, clinicName }) {
+function Sidebar() {
 	const location = useLocation();
+	const mediMindCtx = useContext(MediMindContext);
+	const { doctorDetails } = mediMindCtx;
 
-	const handleLogout = () => {
-		localStorage.removeItem('isLoggedIn');
+	const handleLogout = async () => {
+		try {
+			const response = fetch(import.meta.env.VITE_SERVER + '/api/web/logout', {
+				method: 'POST',
+				credentials: 'include',
+			});
+
+			if (!response.ok) {
+				throw new Error('Error clearing session for logout!');
+			}
+		} catch (err) {
+			console.error('Error handling logout: ', err);
+		}
 	};
 
 	const isActive = (path) => {
@@ -37,10 +51,14 @@ function Sidebar({ mcrNo, firstName, clinicName }) {
 						</div>
 						<div className='flex-1 min-w-0'>
 							<p className='text-sm font-semibold text-gray-900 truncate'>
-								Dr. {firstName}
+								Dr. {doctorDetails.firstName}
 							</p>
-							<p className='text-xs text-gray-500 truncate'>MCR: {mcrNo}</p>
-							<p className='text-xs text-gray-500 truncate'>{clinicName}</p>
+							<p className='text-xs text-gray-500 truncate'>
+								MCR: {doctorDetails.mcrNo}
+							</p>
+							<p className='text-xs text-gray-500 truncate'>
+								{doctorDetails.clinic.clinicName}
+							</p>
 						</div>
 					</div>
 				</div>
@@ -49,15 +67,15 @@ function Sidebar({ mcrNo, firstName, clinicName }) {
 				<nav className='flex-1 px-4 py-6'>
 					<div className='space-y-1'>
 						<Link
-							to={`/profile/${mcrNo}`}
+							to={`/profile/${doctorDetails.mcrNo}`}
 							className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
-								isActive(`/profile/${mcrNo}`)
+								isActive(`/profile/${doctorDetails.mcrNo}`)
 									? 'bg-gray-100 text-gray-900 border-l-4 border-gray-600'
 									: 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
 							}`}>
 							<UserCircleIcon
 								className={`w-5 h-5 mr-3 transition-colors ${
-									isActive(`/profile/${mcrNo}`)
+									isActive(`/profile/${doctorDetails.mcrNo}`)
 										? 'text-gray-700'
 										: 'text-gray-400 group-hover:text-gray-600'
 								}`}

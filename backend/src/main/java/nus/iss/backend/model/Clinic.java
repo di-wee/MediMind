@@ -1,5 +1,6 @@
 package nus.iss.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,8 +29,12 @@ public class Clinic {
     private UUID id;
     @Column(name = "Clinic_Name")
     private String clinicName;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "clinic", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Doctor> doctors;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "clinic", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Patient> patients;
 
