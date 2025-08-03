@@ -4,7 +4,7 @@ import nus.iss.backend.dao.MissedDoseResponse;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
-import nus.iss.backend.repostiory.PatientRepository;
+import nus.iss.backend.repository.PatientRepository;
 import nus.iss.backend.service.PatientService;
 import nus.iss.backend.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
