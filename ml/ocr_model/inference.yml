@@ -1,0 +1,28 @@
+Global:
+  use_gpu: false
+  enable_mkldnn: true
+  cpu_threads: 10
+  use_textline_orientation: true  
+  lang: 'en'  
+  det_model_dir: './inference/det/'
+  rec_model_dir: './inference/rec/'
+  cls_model_dir: './inference/cls/'
+
+Det:
+  algorithm: DB
+  det_max_side_len: 960
+
+Rec:
+  algorithm: CRNN
+  rec_image_shape: '3, 48, 320'
+
+cls:
+  cls_image_shape: '3, 48, 192'
+
+Model:
+  Det:
+    name: 'PP-OCRv5_det_server'
+  Rec:
+    name: 'PP-OCRv5_rec_server'
+  Cls:
+    name: 'PP-OCRv5_cls_server'
