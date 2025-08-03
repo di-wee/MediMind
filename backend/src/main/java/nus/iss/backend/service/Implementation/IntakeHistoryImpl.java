@@ -1,5 +1,6 @@
 package nus.iss.backend.service.Implementation;
 
+import nus.iss.backend.dao.IntakeLogResponseWeb;
 import nus.iss.backend.dao.IntakeReqMobile;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.IntakeHistory;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -36,5 +39,10 @@ public class IntakeHistoryImpl implements IntakeHistoryService {
         intakeHistory.setSchedule(intakeReqMobile.getSchedule());
         intakeRepo.saveAndFlush(intakeHistory);
         return intakeHistory;
+    }
+
+    @Override
+    public List<IntakeLogResponseWeb> getIntakeLogsForMedication(UUID medication) {
+        return List.of();
     }
 }

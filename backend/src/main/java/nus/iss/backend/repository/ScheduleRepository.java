@@ -6,8 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface ScheduleRepository extends JpaRepository<Schedule,String> {
+public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
     List<Schedule> findSchedulesByScheduledTime(LocalDateTime scheduledTime);
 }
