@@ -8,7 +8,7 @@ import java.time.LocalTime;
 
 @Getter
 @Setter
-public class IntakeLogResponse {
+public class IntakeLogResponseWeb {
     private LocalDate loggedDate;
     private LocalTime scheduledTime;
     private boolean isTaken;
