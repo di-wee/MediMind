@@ -8,22 +8,11 @@
     android:paddingTop="16dp"
     android:paddingBottom="16dp">
 
-    <!-- Profile Icon -->
-    <ImageView
-        android:id="@+id/profileIcon"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/ic_person"
-        android:background="@drawable/circle_white_bg"
-        android:padding="8dp"
-        android:layout_centerVertical="true" />
-
     <!-- Greeting / Username -->
     <TextView
         android:id="@+id/topGreetingText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/profileIcon"
         android:layout_marginStart="16dp"
         android:layout_centerVertical="true"
         android:text="Hello, Grandpa"
