@@ -1,5 +1,6 @@
 package nus.iss.backend.controller;
 
+import nus.iss.backend.dao.IntakeLogResponseWeb;
 import nus.iss.backend.dao.IntakeReqMobile;
 import nus.iss.backend.dao.MedicationIdList;
 import nus.iss.backend.exceptions.ItemNotFound;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @CrossOrigin
 @RestController
@@ -66,6 +68,18 @@ public class MedicationController {
     }
 
 
+    @GetMapping("/{medicationId}/logs")
+    public ResponseEntity<List<IntakeLogResponseWeb>> getMedicationLog(@PathVariable UUID medicationId) {
+        try {
+            List<IntakeLogResponseWeb> response = intakeHistoryService.getIntakeLogsForMedication(medicationId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        }catch (RuntimeException e) {
+            logger.error("Error in retrieving logs for medication(" + medicationId + ").");
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }
+    }
 
 
 
