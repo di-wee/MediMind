@@ -1,7 +1,7 @@
 package nus.iss.backend.service.Implementation;
 
 import nus.iss.backend.model.Patient;
-import nus.iss.backend.repostiory.PatientRepository;
+import nus.iss.backend.repository.PatientRepository;
 import nus.iss.backend.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
