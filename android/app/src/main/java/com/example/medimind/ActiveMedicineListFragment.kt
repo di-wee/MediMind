@@ -49,6 +49,7 @@ class ActiveMedicineListFragment : Fragment() {
         val sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val patientId = sharedPreferences.getString("patientId", null)
 
+        //for test, I hard code a patientId to make it work, will change after we have sharedpreference
         fetchActiveMedications(patientId)
 
 //        if (patientId != null) {
@@ -61,6 +62,7 @@ class ActiveMedicineListFragment : Fragment() {
     private fun fetchActiveMedications(patientId: String? = null){
         lifecycleScope.launch {
             try {
+                //for test, I hard code a patientId to make it work, will change after we have sharedpreference
                 val realPatientId = patientId ?: "a78c1494-67ac-4e68-8815-b7c1d2eabab0"
                 val response = ApiClient.retrofitService.getPatientMedications(realPatientId)
                 val activeNames = response
