@@ -46,7 +46,7 @@ public class MedicationImpl implements MedicationService {
 
 
     @Override
-    public Medication findMedicationById(UUID id) {
+    public Medication findMedicineById (UUID id) {
         Medication medication = medicationRepo.findById(id).orElse(null);
         if (medication == null) {
             logger.warn("Medication not found!");
@@ -56,6 +56,6 @@ public class MedicationImpl implements MedicationService {
 
     @Override
     public List<Medication> findAllMedications(List<UUID> medIds) {
-        return medicationRepo.findAllByIdIn(medIds);
+        return medicationRepo.findAllById(medIds);
     }
 }
