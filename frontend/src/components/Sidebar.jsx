@@ -14,10 +14,13 @@ function Sidebar() {
 
 	const handleLogout = async () => {
 		try {
-			const response = fetch(import.meta.env.VITE_SERVER + '/api/web/logout', {
-				method: 'POST',
-				credentials: 'include',
-			});
+			const response = await fetch(
+				import.meta.env.VITE_SERVER + 'api/web/logout',
+				{
+					method: 'POST',
+					credentials: 'include',
+				}
+			);
 
 			if (!response.ok) {
 				throw new Error('Error clearing session for logout!');

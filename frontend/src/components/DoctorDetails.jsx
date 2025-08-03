@@ -1,51 +1,72 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 
-import doctorList from '../mockdata/doctorlist.json';
-import { XCircleIcon } from '@heroicons/react/16/solid/index.js';
+import MediMindContext from "../context/MediMindContext.jsx";
+
 
 function DoctorDetails({ mcrNo }) {
-	const [doctorInfo, setDoctorInfo] = useState({
-		firstName: '',
-		lastName: '',
-		mcrNo: '',
-		emailAddress: '',
-		clinicName: '',
-		password: '',
-	});
+	const mediMindCtx = useContext(MediMindContext);
+	const { doctorDetails, setDoctorDetails } = mediMindCtx;
+
+	const [doctorInfo, setDoctorInfo] = useState(doctorDetails);
 
 	const [isEditing, setIsEditing] = useState(false);
 	const [isChangingPassword, setIsChangingPassword] = useState(false);
 	const [password, setPassword] = useState(doctorInfo.password);
-	const [email, setEmail] = useState(doctorInfo.emailAddress);
-	const [clinic, setClinic] = useState(doctorInfo.clinicName);
+	//const [email, setEmail] = useState(doctorInfo.email);
+	//const [clinic, setClinic] = useState(doctorInfo.clinic);
+
 	const [validation, setValidation] = useState({
 		newPassValidation: false,
 		currentPassValidation: false,
 	});
 
-	const [newPassword, setNewPassword] = useState('');
-	const clinicOptions = [
-		'Raffles Medical Centre',
-		'Healthway Clinic',
-		'Mount Elizabeth Medical',
-		'Tan Tock Seng Hospital',
-		'Singapore General Hospital',
-	];
 
-	const handleEditToggle = () => {
+	const [newPassword, setNewPassword] = useState('');
+	const [clinicOptions,setClinicOptions] = useState([]);
+
+	const handleEditToggle = async() => {
+		//call api to save
 		if (isEditing) {
-			//call api to save
-			setIsEditing(false);
+			try{
+				const response = await fetch(
+					import.meta.env.VITE_SERVER+'api/doctor/update', {
+						method: "PUT",
+						headers: {
+							"Content-Type":  "application/json",
+						},
+						body:JSON.stringify({
+							mcrNo:doctorInfo.mcrNo,
+							email:doctorInfo.email,
+							clinic:doctorInfo.clinic
+						}),
+					}
+				);
+				if(!response.ok){
+					const errMsg = await response.text();
+					alert("Failed to update doctor info: "+errMsg)
+					return;
+				}
+				const updateDoctor = await response.json();
+				setDoctorInfo(updateDoctor);
+				setDoctorDetails(updateDoctor);
+				alert("Doctor info updated successfully!");
+			}catch (error){
+				console.error("Update error:", error);
+				alert("Server error");
+			}finally {
+				setIsEditing(false);
+			}
 		} else {
 			setIsEditing(true);
 		}
 	};
-	const handlePasswordToggle = () => {
+
+	const handlePasswordToggle = async () => {
 		if (isChangingPassword) {
-			//if either field is empty dont save just revert
+			//if either field is empty don't save just revert
 			if (password.length === 0 || newPassword.length === 0) {
-				setPassword(doctorInfo.password); // reset to original
 				setNewPassword('');
+				setPassword(doctorInfo.password);
 				setIsChangingPassword(false);
 				setValidation({
 					currentPassValidation: false,
@@ -62,30 +83,71 @@ function DoctorDetails({ mcrNo }) {
 			});
 
 			if (!currentPassValidation && !newPassValidation) {
-				setDoctorInfo((prev) => ({ ...prev, password: newPassword }));
-				setPassword(newPassword);
-				setNewPassword('');
-				setIsChangingPassword(false);
+				//save to db
+				try{
+					const response = await fetch(
+						import.meta.env.VITE_SERVER+'api/doctor/update', {
+							method: "PUT",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body:JSON.stringify({
+								mcrNo:doctorInfo.mcrNo,
+								password:newPassword
+							}),
+						}
+					);
+					if(!response.ok){
+						const errMsg = await response.text();
+						alert("Failed to update doctor info: "+errMsg)
+						return;
+					}
+					const updateDoctor = await response.json();
+					setPassword(newPassword);
+					setDoctorInfo(updateDoctor);
+					setDoctorDetails(updateDoctor);
+					alert("Doctor info updated successfully!");
+				}catch (error){
+					console.error("Update error:", error);
+					alert("Server error");
+				}finally {
+					// reinitialise validation
+					setValidation({ currentPassValidation: false, newPassValidation: false });
+					setIsChangingPassword(false);
+					setNewPassword('');
+				}
 			}
 			console.log(password);
 			console.log(doctorInfo.password);
-			return;
+		}else {
+				setIsChangingPassword(true);
+				setPassword('')
+			console.log("currentpassword: ", doctorInfo.password);
+			}
 		}
-
-		// reinitialise validation
-		setValidation({ currentPassValidation: false, newPassValidation: false });
-		setIsChangingPassword(true);
-	};
 
 	useEffect(() => {
-		const doctor = doctorList.find((d) => d.mcrNo === mcrNo);
-		console.log(doctor);
-		if (doctor) {
-			setDoctorInfo(doctor);
-			setEmail(doctor.emailAddress || '');
-			setClinic(doctor.clinicName || '');
-			setPassword(doctor.password || '');
-		}
+		const fetchAllClinic  = async() =>{
+			try{
+				const response = await fetch(import.meta.env.VITE_SERVER + 'api/web/all-clinics', {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				});
+				if(!response.ok){
+					throw new Error("Failed to fetch clinic list");
+				}
+				const clinicList = await response.json();
+				console.log("📦 clinicList from API:", clinicList);
+				setClinicOptions(clinicList);
+			}catch (error){
+				console.error("Error loading clinics:", error);
+			}
+		};
+		fetchAllClinic();
+		console.log("clinicOptions", clinicOptions);
+
 	}, [mcrNo]);
 
 	return (
@@ -134,8 +196,9 @@ function DoctorDetails({ mcrNo }) {
 								className={`form-editable ${!isEditing ? 'bg-gray-200' : ''}`}
 								type='text'
 								name='email'
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
+								value={doctorInfo.email}
+								onChange={(e)=>(setDoctorInfo(prev=>
+									({...prev,email:e.target.value})))}
 								disabled={!isEditing}
 							/>
 						</div>
@@ -145,19 +208,17 @@ function DoctorDetails({ mcrNo }) {
 								<select
 									className='form-input'
 									name='clinicName'
-									value={clinic}
-									onChange={(e) => setClinic(e.target.value)}>
-									<option
-										value=''
-										disabled>
-										-- Select Clinic --
-									</option>
-									{clinicOptions.map((name, index) => (
-										<option
-											key={index}
-											value={name}>
-											{name}
-										</option>
+									value={doctorInfo.clinic?.id}
+									onChange={(e)=>{
+										const selectedClinic = clinicOptions.find(c=>c.id === e.target.value);
+										if(selectedClinic){
+											setDoctorInfo(prev=>
+												({...prev,clinic:selectedClinic}));
+										}}}
+								>
+									<option value='' disabled>-- Select Clinic --</option>
+									{clinicOptions.map((clinic) => (
+										<option key={clinic.id} value={clinic.id}>{clinic.clinicName}</option>
 									))}
 								</select>
 							) : (
@@ -165,7 +226,7 @@ function DoctorDetails({ mcrNo }) {
 									className={`form-editable ${!isEditing ? 'bg-gray-200' : ''}`}
 									type='text'
 									name='clinicName'
-									value={clinic}
+									value={doctorInfo.clinic?.clinicName||''}
 									disabled
 								/>
 							)}
@@ -233,6 +294,6 @@ function DoctorDetails({ mcrNo }) {
 			</main>
 		</>
 	);
-}
+};
 
 export default DoctorDetails;

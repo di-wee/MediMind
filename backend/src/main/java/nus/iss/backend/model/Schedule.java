@@ -1,5 +1,6 @@
 package nus.iss.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,9 +37,12 @@ public class Schedule {
     @Column(name = "CreationDate")
     private LocalDateTime creationDate;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "Medication_Id",nullable = false)
     private Medication medication;
+
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="Patient_Id",nullable = false)
     private Patient patient;

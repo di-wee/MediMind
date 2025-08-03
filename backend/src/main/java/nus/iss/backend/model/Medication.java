@@ -1,6 +1,7 @@
 package nus.iss.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,7 +47,15 @@ public class Medication{
     @ManyToMany(mappedBy = "medications")
     private List<Patient> patients = new ArrayList<>();
 
+
     @JsonIgnore
     @OneToMany(mappedBy = "medication", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Schedule> schedules;
+
+    @JsonProperty("scheduleIds")
+    public List<UUID> getScheduleIds() {
+        return schedules == null ? List.of() : schedules.stream()
+                .map(Schedule::getId).toList();
+    }
+
 }

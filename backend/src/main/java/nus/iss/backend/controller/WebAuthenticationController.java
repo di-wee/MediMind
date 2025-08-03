@@ -74,13 +74,19 @@ public class WebAuthenticationController {
 
 @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpSession session) {
-        String mcrNo = (String) session.getAttribute("doctorMcr");
-        if (mcrNo == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        try{
+            String mcrNo = (String) session.getAttribute("doctorMcr");
+            if (mcrNo == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            session.invalidate();
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (RuntimeException e) {
+            logger.error("Logout error: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        session.invalidate();
-        return new ResponseEntity<>(HttpStatus.OK);
 }
 
 @PostMapping("/register")
