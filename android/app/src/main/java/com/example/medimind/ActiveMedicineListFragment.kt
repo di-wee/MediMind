@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.medimind.adapters.MedicineAdapter
+import com.example.medimind.data.MedicationResponse
 import com.example.medimind.network.ApiClient
 import kotlinx.coroutines.launch
 
@@ -19,10 +20,7 @@ class ActiveMedicineListFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: MedicineAdapter
-    private var medicineList = mutableListOf<String>()
-
-    // Dummy list of medicines
-//    private val dummyMedicineList = listOf("Panadol", "Aspirin", "Metformin")
+    private var medicineList = mutableListOf<MedicationResponse>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,9 +36,9 @@ class ActiveMedicineListFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         // Set up adapter with click listener to navigate and pass medicineName
-        adapter = MedicineAdapter(medicineList) { medicineName ->
+        adapter = MedicineAdapter(medicineList) { medicine ->
             val bundle = Bundle().apply {
-                putString("medicineName", medicineName)
+                putString("medicineName", medicine.medicationName)
             }
             findNavController().navigate(R.id.action_activeMedicineListFragment_to_viewMedicineDetailsFragment, bundle)
         }
@@ -68,7 +66,6 @@ class ActiveMedicineListFragment : Fragment() {
                 val activeNames = response
                     .filter { it.active }
                     .sortedBy { it.medicationName.lowercase() }
-                    .map { it.medicationName }
 
                 medicineList.clear()
                 medicineList.addAll(activeNames)
