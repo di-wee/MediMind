@@ -7,7 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.medimind.network.ApiClient
+import com.example.medimind.network.RegisterRequest
+import kotlinx.coroutines.launch
 import java.util.*
 
 class RegisterUserFragment : Fragment() {
@@ -21,12 +25,35 @@ class RegisterUserFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
-        // Set up the clinic dropdown (Spinner)
         val clinicSpinner = view.findViewById<Spinner>(R.id.spinnerClinic)
-        val clinicList = listOf("Happy Health Clinic", "Sunshine Medical", "Evergreen Clinic")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, clinicList)
+
+        // Mutable list for clinic names and a mapping for IDs
+        val clinicNames = mutableListOf<String>()
+        val nameToIdMap = mutableMapOf<String, String>()
+
+        // Adapter initially empty until data is fetched
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, clinicNames)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         clinicSpinner.adapter = adapter
+
+        // Fetch clinics dynamically from backend
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = ApiClient.retrofitService.getClinics()
+                clinicNames.clear()
+                nameToIdMap.clear()
+
+                // Populate lists with data from backend
+                response._embedded.clinics.forEach {
+                    clinicNames.add(it.clinicName)
+                    nameToIdMap[it.clinicName] = it.id
+                }
+
+                adapter.notifyDataSetChanged()
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Failed to load clinics: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
 
         // DatePicker for DOB
         val dobTextView = view.findViewById<TextView>(R.id.inputDOB)
@@ -45,20 +72,41 @@ class RegisterUserFragment : Fragment() {
             dpd.show()
         }
 
-        // Back button navigation
+        // Back to login
         view.findViewById<Button>(R.id.backToLoginButton).setOnClickListener {
             findNavController().navigateUp()
         }
 
-        // Register button (placeholder)
+        // Register button action
         view.findViewById<Button>(R.id.registerButton).setOnClickListener {
-            val selectedClinic = clinicSpinner.selectedItem.toString()
-            val selectedDOB = dobTextView.text.toString()
-            Toast.makeText(
-                requireContext(),
-                "Registered with DOB: $selectedDOB\nClinic: $selectedClinic",
-                Toast.LENGTH_SHORT
-            ).show()
+            val email = view.findViewById<EditText>(R.id.inputEmail).text.toString()
+            val password = view.findViewById<EditText>(R.id.inputPassword).text.toString()
+            val nric = view.findViewById<EditText>(R.id.inputNRIC).text.toString()
+            val firstName = view.findViewById<EditText>(R.id.inputFirstName).text.toString()
+            val lastName = view.findViewById<EditText>(R.id.inputLastName).text.toString()
+            val gender = view.findViewById<EditText>(R.id.inputGender).text.toString()
+            val dob = dobTextView.text.toString()
+            val selectedClinicName = clinicSpinner.selectedItem.toString()
+
+            // Build request – sending clinicName (you can switch to clinicId if needed)
+            val request = RegisterRequest(
+                email, password, nric, firstName, lastName,
+                gender, dob, selectedClinicName
+            )
+
+            lifecycleScope.launch {
+                try {
+                    val response = ApiClient.retrofitService.register(request)
+                    Toast.makeText(
+                        requireContext(),
+                        "Registered: ${response.firstName} ${response.lastName}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    findNavController().navigate(R.id.action_registerUserFragment_to_loginFragment)
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Registration failed: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
 }
