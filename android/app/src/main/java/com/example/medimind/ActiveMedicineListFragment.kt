@@ -49,19 +49,20 @@ class ActiveMedicineListFragment : Fragment() {
         val sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val patientId = sharedPreferences.getString("patientId", null)
 
-        if (patientId != null) {
-            fetchActiveMedications(patientId)
-        } else {
-            Toast.makeText(context, "No patientId found", Toast.LENGTH_SHORT).show()
-        }
+        fetchActiveMedications(patientId)
+
+//        if (patientId != null) {
+//            fetchActiveMedications(patientId)
+//        } else {
+//            Toast.makeText(context, "No patientId found", Toast.LENGTH_SHORT).show()
+//        }
     }
 
-    private fun fetchActiveMedications(patientId: String){
+    private fun fetchActiveMedications(patientId: String? = null){
         lifecycleScope.launch {
             try {
-//                val response = ApiClient.retrofitService.getPatientMedications(patientId)
-                //for test, hardcode
-                val response = ApiClient.retrofitService.getPatientMedications("a78c1494-67ac-4e68-8815-b7c1d2eabab0")
+                val realPatientId = patientId ?: "a78c1494-67ac-4e68-8815-b7c1d2eabab0"
+                val response = ApiClient.retrofitService.getPatientMedications(realPatientId)
                 val activeNames = response
                     .filter { it.isActive }
                     .sortedBy { it.medicationName.lowercase() }
@@ -72,7 +73,7 @@ class ActiveMedicineListFragment : Fragment() {
                 adapter.notifyDataSetChanged()
             } catch (e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(context, "Failed to fetch medications", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
