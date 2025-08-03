@@ -2,6 +2,8 @@ package nus.iss.backend.service.Implementation;
 
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.IntakeHistory;
+import nus.iss.backend.model.Medication;
+import nus.iss.backend.model.Patient;
 import nus.iss.backend.model.Schedule;
 import nus.iss.backend.repository.ScheduleRepository;
 import nus.iss.backend.service.ScheduleService;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -67,4 +70,40 @@ public class ScheduleImpl implements ScheduleService {
     public List<Schedule> findSchedulesByScheduledTime(LocalDateTime scheduledTime){
         return scheduleRepo.findSchedulesByScheduledTime(scheduledTime);
     }
+
+    @Override
+    public List<Schedule> findActiveSchedulesByMedication(Medication medication) {
+        return scheduleRepo.findByMedicationAndIsActiveTrue(medication);
+    }
+
+    //this is to keep DB clean, check and delete those too old and inactive schedule data
+    //also make sure related intake history will be deleted at same time
+    @Override
+    public void deleteOldInactiveSchedules(Medication medication, LocalDateTime cutoffDate) {
+        List<Schedule> oldSchedules = scheduleRepo.findByMedicationAndIsActiveFalseAndCreationDateBefore(medication, cutoffDate);
+        for (Schedule s : oldSchedules) {
+            s.getIntakeHistory().size();
+            scheduleRepo.delete(s);
+        }
+    }
+
+    @Override
+    public void deactivateSchedules(List<Schedule> schedules) {
+        for (Schedule s : schedules) {
+            s.setIsActive(false);
+            scheduleRepo.save(s);
+        }
+    }
+
+    @Override
+    public Schedule createSchedule(Medication medication, Patient patient, LocalTime scheduledTime) {
+        Schedule s = new Schedule();
+        s.setMedication(medication);
+        s.setPatient(patient);
+        s.setScheduledTime(scheduledTime);
+        s.setIsActive(true);
+        s.setCreationDate(LocalDateTime.now());
+        return scheduleRepo.save(s);
+    }
+
 }
