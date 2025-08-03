@@ -53,6 +53,7 @@ public class Patient {
     private Clinic clinic;
 
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "Patient_Medication",

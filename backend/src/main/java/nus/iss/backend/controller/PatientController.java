@@ -1,5 +1,7 @@
 package nus.iss.backend.controller;
 
+import nus.iss.backend.dao.MissedDoseResponse;
+import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.Patient;
 import nus.iss.backend.service.PatientService;
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.swing.text.html.Option;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,4 +46,23 @@ public class PatientController {
 
         }
     }
+
+    @GetMapping("/patient/{patientId}/medications")
+    public ResponseEntity<List<MissedDoseResponse>> getPatientMedication(@PathVariable UUID patientId) {
+        try {
+           List<MissedDoseResponse> response = patientService.getPatientMedicationsWithMissedDose(patientId);
+           return new ResponseEntity<>(response, HttpStatus.OK);
+        }catch(ItemNotFound e) {
+            logger.error("Error retrieving patient medication: "+ e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        } catch (RuntimeException e) {
+            logger.error("Error retrieving patient medication: "+ e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }
+    }
+
+
+
 }

@@ -180,8 +180,8 @@ function MedicationLog({ medication, patientId }) {
 		<>
 			<h3 className='font-bold text-lg px-15 '>Medication Intake Log</h3>
 			<h6 className='text-sm px-15 mb-5'>
-				[<b>{medication.medicationName}</b> - {medication.dosage},{' '}
-				{medication.frequency}]
+				[<b>{medication.medicationName}</b> - {medication.intakeQuantity},{' '}
+				{medication.frequency} times a day]
 			</h6>
 			<div className='max-h-96 w-full overflow-y-auto px-15 mx-auto overflow-x-auto mb-10'>
 				<table>
