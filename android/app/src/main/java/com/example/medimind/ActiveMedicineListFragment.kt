@@ -66,7 +66,7 @@ class ActiveMedicineListFragment : Fragment() {
                 val realPatientId = patientId ?: "a78c1494-67ac-4e68-8815-b7c1d2eabab0"
                 val response = ApiClient.retrofitService.getPatientMedications(realPatientId)
                 val activeNames = response
-                    .filter { it.isActive }
+                    .filter { it.active }
                     .sortedBy { it.medicationName.lowercase() }
                     .map { it.medicationName }
 

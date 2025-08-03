@@ -6,6 +6,6 @@ import retrofit2.http.Path
 
 
 interface ApiService {
-    @GET("api/patient/{id}/medications")
+    @GET("api/patient/{id}/medList")
     suspend fun getPatientMedications(@Path("id") patientId: String): List<MedicationResponse>
 }
