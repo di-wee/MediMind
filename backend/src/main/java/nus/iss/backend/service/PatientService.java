@@ -14,7 +14,23 @@ import java.util.UUID;
 @Transactional
 public interface PatientService {
 
+    /**
+     * Find a patient by their UUID.
+     */
     Optional<Patient> findPatientById(UUID id);
 
+    /**
+     * Get all medications for a patient with missed dose info.
+     */
     List<MissedDoseResponse> getPatientMedicationsWithMissedDose(UUID patientId);
+
+    /**
+     * Save a new patient to the database (for registration).
+     */
+    Patient savePatient(Patient patient);
+
+    /**
+     * Find a patient by email and password (for login).
+     */
+    Optional<Patient> findPatientByEmailAndPassword(String email, String password);
 }
