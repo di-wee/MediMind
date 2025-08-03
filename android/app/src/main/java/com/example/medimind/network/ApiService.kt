@@ -4,6 +4,7 @@ import com.example.medimind.data.MedicationResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 // Request body for registration
@@ -24,10 +25,11 @@ data class LoginRequest(
     val password: String
 )
 
-// Patient response (simplified for now)
-data class PatientResponse(
-    val id: String,
+// Request body for updating a patient profile
+// password is nullable; only updated if provided
+data class UpdatePatientRequest(
     val email: String,
+    val password: String?,   // nullable to allow no password change
     val nric: String,
     val firstName: String,
     val lastName: String,
@@ -35,7 +37,24 @@ data class PatientResponse(
     val dob: String
 )
 
-// Response for a single clinic
+// Clinic info included inside a Patient response
+data class ClinicInPatient(
+    val clinicName: String
+)
+
+// Patient response (includes clinic details)
+data class PatientResponse(
+    val id: String,
+    val email: String,
+    val nric: String,
+    val firstName: String,
+    val lastName: String,
+    val gender: String,
+    val dob: String,
+    val clinic: ClinicInPatient? // includes clinic info
+)
+
+// Response for a single clinic (used in spinner list)
 data class ClinicResponse(
     val id: String,
     val clinicName: String
@@ -51,23 +70,30 @@ data class EmbeddedClinics(
 
 interface ApiService {
 
-    // Existing endpoint
+    // Get medications for a patient
     @GET("api/patient/{id}/medications")
     suspend fun getPatientMedications(@Path("id") patientId: String): List<MedicationResponse>
 
-    // Registration
+    // Registration endpoint
     @POST("api/patient/register")
     suspend fun register(@Body request: RegisterRequest): PatientResponse
 
-    // Login
+    // Login endpoint
     @POST("api/patient/login")
     suspend fun login(@Body request: LoginRequest): PatientResponse
 
-    // Fetch patient details
+    // Fetch patient details (returns patient info + clinic)
     @GET("api/patient/{id}")
     suspend fun getPatient(@Path("id") patientId: String): PatientResponse
 
-    // Fetch list of clinics
+    // Update patient details (PUT)
+    @PUT("api/patient/{id}")
+    suspend fun updatePatient(
+        @Path("id") patientId: String,
+        @Body request: UpdatePatientRequest
+    ): PatientResponse
+
+    // Fetch list of clinics (for registration spinner)
     @GET("clinics")
     suspend fun getClinics(): ClinicListResponse
 }

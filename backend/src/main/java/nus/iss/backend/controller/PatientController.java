@@ -131,4 +131,44 @@ public class PatientController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * PUT endpoint to update patient profile.
+     * Allows updating basic details and optionally password.
+     */
+    @PutMapping("/patient/{id}")
+    public ResponseEntity<Patient> updatePatient(
+            @PathVariable UUID id,
+            @RequestBody Map<String, String> updateData) {
+        try {
+            // Find the patient to update
+            Optional<Patient> optionalPatient = patientService.findPatientById(id);
+            if (optionalPatient.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            Patient patient = optionalPatient.get();
+
+            // Update fields from request body
+            if (updateData.containsKey("email")) patient.setEmail(updateData.get("email"));
+            if (updateData.containsKey("nric")) patient.setNric(updateData.get("nric"));
+            if (updateData.containsKey("firstName")) patient.setFirstName(updateData.get("firstName"));
+            if (updateData.containsKey("lastName")) patient.setLastName(updateData.get("lastName"));
+            if (updateData.containsKey("gender")) patient.setGender(updateData.get("gender"));
+            if (updateData.containsKey("dob")) patient.setDob(LocalDate.parse(updateData.get("dob")));
+
+            // Password is optional: only update if provided and non-empty
+            if (updateData.containsKey("password") && updateData.get("password") != null &&
+                !updateData.get("password").isBlank()) {
+                patient.setPassword(updateData.get("password"));
+            }
+
+            // Save updated patient
+            Patient updatedPatient = patientService.savePatient(patient);
+            return new ResponseEntity<>(updatedPatient, HttpStatus.OK);
+
+        } catch (RuntimeException e) {
+            logger.error("Error updating patient: " + e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
