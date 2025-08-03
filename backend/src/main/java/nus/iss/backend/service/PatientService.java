@@ -33,4 +33,6 @@ public interface PatientService {
      * Find a patient by email and password (for login).
      */
     Optional<Patient> findPatientByEmailAndPassword(String email, String password);
+
+    List<Medication> getPatientMedications(UUID patientId);
 }
