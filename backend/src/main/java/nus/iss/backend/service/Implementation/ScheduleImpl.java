@@ -7,10 +7,14 @@ import nus.iss.backend.repostiory.ScheduleRepository;
 import nus.iss.backend.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,7 +22,7 @@ import java.util.UUID;
 @Service
 @Transactional
 public class ScheduleImpl implements ScheduleService {
-
+    private static final Logger logger = LoggerFactory.getLogger(ScheduleImpl.class);
     @Autowired
     ScheduleRepository scheduleRepo;
 
@@ -57,5 +61,10 @@ public class ScheduleImpl implements ScheduleService {
     @Override
     public Optional<Schedule> findScheduleById(UUID id) {
         return scheduleRepo.findById(id);
+    }
+
+    @Override
+    public List<Schedule> findSchedulesByScheduledTime(LocalDateTime scheduledTime){
+        return scheduleRepo.findSchedulesByScheduledTime(scheduledTime);
     }
 }

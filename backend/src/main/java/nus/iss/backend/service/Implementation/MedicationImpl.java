@@ -6,6 +6,8 @@ import nus.iss.backend.model.Schedule;
 import nus.iss.backend.repostiory.MedicationRepository;
 import nus.iss.backend.service.MedicationService;
 import nus.iss.backend.service.ScheduleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,8 @@ import java.util.UUID;
 @Service
 @Transactional
 public class MedicationImpl implements MedicationService {
+    private static final Logger logger = LoggerFactory.getLogger(MedicationImpl.class);
+
     @Autowired
     MedicationRepository medicationRepo;
 
@@ -40,8 +44,18 @@ public class MedicationImpl implements MedicationService {
 
     }
 
+
     @Override
-    public Medication findMedicineById(UUID medicationId) {
-        return medicationRepo.findMedicationById(medicationId);
+    public Medication findMedicationById(UUID id) {
+        Medication medication = medicationRepo.findById(id).orElse(null);
+        if (medication == null) {
+            logger.warn("Medication not found!");
+        }
+        return medication;
+    }
+
+    @Override
+    public List<Medication> findAllMedications(List<UUID> medIds) {
+        return medicationRepo.findAllByIdIn(medIds);
     }
 }

@@ -1,4 +1,4 @@
-package nus.iss.backend.repostiory;
+package nus.iss.backend.repository;
 
 import nus.iss.backend.model.Doctor;
 import org.springframework.data.jpa.repository.JpaRepository;

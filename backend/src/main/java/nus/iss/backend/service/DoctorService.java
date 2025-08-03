@@ -1,9 +1,8 @@
 package nus.iss.backend.service;
 
+import nus.iss.backend.dao.DoctorUpdateReqWeb;
 import nus.iss.backend.dao.RegistrationRequestWeb;
 import nus.iss.backend.model.Doctor;
-import nus.iss.backend.repostiory.DoctorRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,4 +15,6 @@ public interface DoctorService {
     Doctor findDoctorByMcrNo(String mcrNo);
 
     Doctor registerDoctor(RegistrationRequestWeb request);
+
+    Doctor updateDoctor(DoctorUpdateReqWeb request);
 }
