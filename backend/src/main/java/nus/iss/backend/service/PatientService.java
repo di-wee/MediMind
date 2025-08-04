@@ -1,6 +1,7 @@
 package nus.iss.backend.service;
 
 import nus.iss.backend.dao.MissedDoseResponse;
+import nus.iss.backend.dto.IntakeHistoryResponse;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,34 @@ import java.util.UUID;
 @Transactional
 public interface PatientService {
 
+    /**
+     * Find a patient by their UUID.
+     */
     Optional<Patient> findPatientById(UUID id);
 
+    /**
+     * Get all medications for a patient with missed dose info.
+     */
     List<MissedDoseResponse> getPatientMedicationsWithMissedDose(UUID patientId);
+
+    /**
+     * Save a new patient to the database (for registration).
+     */
+    Patient savePatient(Patient patient);
+
+    /**
+     * Find a patient by email and password (for login).
+     */
+    Optional<Patient> findPatientByEmailAndPassword(String email, String password);
+
+    /**
+     * Get list of medications currently assigned to a patient.
+     */
+    List<Medication> getPatientMedications(UUID patientId);
+
+    /**
+     * NEW: Get intake history for a patient.
+     * Returns medication name, scheduled time, taken time, and status.
+     */
+    List<IntakeHistoryResponse> getIntakeHistoryByPatientId(UUID patientId);
 }

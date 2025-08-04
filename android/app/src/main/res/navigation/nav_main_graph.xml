@@ -95,5 +95,22 @@
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.example.medimind.ProfileFragment"
-        android:label="Profile" />
+        android:label="Profile">
+
+        <!-- Action to Edit Profile Fragment -->
+        <action
+            android:id="@+id/action_profileFragment_to_editProfileFragment"
+            app:destination="@id/editProfileFragment" />
+    </fragment>
+
+    <!-- Edit Profile Fragment -->
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.example.medimind.EditProfileFragment"
+        android:label="Edit Profile">
+        <action
+            android:id="@+id/action_editProfileFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+    </fragment>
+
 </navigation>

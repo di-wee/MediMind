@@ -58,4 +58,9 @@ public class MedicationImpl implements MedicationService {
     public List<Medication> findAllMedications(List<UUID> medIds) {
         return medicationRepo.findAllById(medIds);
     }
+
+    @Override
+    public Medication saveMedication(Medication medication) {
+        return medicationRepo.save(medication);
+    }
 }

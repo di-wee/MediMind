@@ -2,8 +2,13 @@ name: "SAST - Static Code Analysis"
 
 on:
   push:
-    branches: [main]
-
+    branches: 
+      - main
+      - frontend-(react)
+      - backend-(java-springboot)
+      - machine-learning
+      - android
+  
 permissions:
   actions: read
   contents: read
