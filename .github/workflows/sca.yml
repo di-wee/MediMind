@@ -1,13 +1,16 @@
-name: "SCA - Dependency Vulnerability Scan"
+name: "SCA - Dependency Vulnerability Scan & Build"
 
 on:
   push:
-    branches: 
+    branches:
       - main
-      - frontend-(react)
-      - backend-(java-springboot)
-      - machine-learning
+      - frontend
+      - backend
       - android
+      - ml
+  pull_request:
+    branches:
+      - main
 
 jobs:
   sca:
@@ -17,86 +20,76 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create artifact folder
-        run: mkdir -p artifacts/sca
-
-      ##################################
-      # React (Node.js) - Snyk SCA
-      ##################################
-      - name: Install Node.js dependencies
-        working-directory: ./frontend
-        run: npm install
-
       - name: Install Snyk CLI
         run: npm install -g snyk
 
       - name: Authenticate Snyk
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
-      - name: Snyk Scan (React - Node.js)
+      # --- React (Node.js) ---
+      - name: Install Node.js dependencies
         working-directory: ./frontend
-        run: |
-          mkdir -p ../artifacts/sca
-          snyk test --file=package.json --json > ../artifacts/sca/snyk-node-report.json || echo '{}' > ../artifacts/sca/snyk-node-report.json
-     
-      - name: Upload Snyk Node Report
-        uses: actions/upload-artifact@v4
+        run: npm install
+      - name: Snyk Scan (React)
+        working-directory: ./frontend
+        run: snyk test --file=package.json --json > snyk-node-report.json || echo '{}' > snyk-node-report.json
+      - uses: actions/upload-artifact@v4
         with:
           name: snyk-node-report
-          path: artifacts/sca/snyk-node-report.json
+          path: frontend/snyk-node-report.json
 
-      ##################################
-      # Java (Spring Boot) - Snyk SCA
-      ##################################
+      # --- Java (Spring Boot) ---
+      - name: Snyk Scan (Java Maven)
+        working-directory: ./backend
+        run: snyk test --file=pom.xml --json-file-output=snyk-java-report.json || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snyk-java-report
+          path: backend/snyk-java-report.json
+
+      # --- Python (ML) ---
+      - name: Install Python dependencies
+        working-directory: ./ml
+        run: |
+          pip install -r requirements.txt
+          pip install torch torchvision torchaudio pip-audit || true
+      - name: Python Dependency Audit (pip-audit)
+        working-directory: ./ml
+        run: pip-audit -r requirements.txt -f json -o pip-audit-report.json || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report
+          path: ml/pip-audit-report.json
+
+      # ---------------------
+      # Automated Build
+      # ---------------------
       - name: Set up Java 21
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Snyk Scan (Java Maven - Spring Boot)
+      - name: Build Spring Boot Backend
         working-directory: ./backend
-        run: snyk test --file=pom.xml --json-file-output=../artifacts/sca/snyk-java-report.json || true
-
-      - name: Upload Snyk Java Report
-        uses: actions/upload-artifact@v4
+        run: mvn clean package -DskipTests
+      - uses: actions/upload-artifact@v4
         with:
-          name: snyk-java-report
-          path: artifacts/sca/snyk-java-report.json
+          name: backend-jar
+          path: backend/target/*.jar
 
-    ##################################
-      # Python (ML) - pip-audit + Notebooks
-      ##################################
-      - name: Install Python dependencies
-        working-directory: ./ml
-        run: |
-          pip install -r requirements.txt
-          pip install torch torchvision torchaudio pip-audit jupyter nbconvert papermill || true
-
-      - name: Python Dependency Audit (pip-audit)
-        working-directory: ./ml
-        run: pip-audit -r requirements.txt -f json -o ../artifacts/sca/pip-audit-report.json || true
-
-      - name: Upload pip-audit Report
-        uses: actions/upload-artifact@v4
+      - name: Build React Frontend
+        working-directory: ./frontend
+        run: npm run build
+      - uses: actions/upload-artifact@v4
         with:
-          name: pip-audit-report
-          path: artifacts/sca/pip-audit-report.json
+          name: frontend-build
+          path: frontend/build/
 
-      - name: Execute & Convert Notebooks to HTML
-        working-directory: ./ml
-        run: |
-          for nb in *.ipynb; do
-            jupyter nbconvert --to html --execute "$nb" --output-dir=../../artifacts/notebooks || true
-          done
-
-      - name: Copy notebooks to artifact folder
-        run: |
-          mkdir -p artifacts/notebooks
-          cp ml/*.ipynb artifacts/notebooks/ || true
-
-      - name: Upload Notebook HTML Reports
-        uses: actions/upload-artifact@v4
+      - name: Build Android App (Debug APK)
+        working-directory: ./android
+        run: ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
         with:
-          name: executed-notebooks
-          path: artifacts/notebooks
+          name: android-apk
+          path: android/app/build/outputs/apk/debug/*.apk
