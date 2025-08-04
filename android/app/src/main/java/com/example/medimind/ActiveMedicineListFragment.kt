@@ -49,6 +49,7 @@ class ActiveMedicineListFragment : Fragment() {
         val patientId = sharedPreferences.getString("patientId", null)
 
         //for test, I hard code a patientId to make it work, will change after we have sharedpreference
+        // Lewis: changed patient ID to 0048c909-b76e-4db3-9c71-fa23df0b4f2e for testing.
         fetchActiveMedications(patientId)
 
 //        if (patientId != null) {

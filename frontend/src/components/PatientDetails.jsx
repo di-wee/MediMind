@@ -1,38 +1,82 @@
 import React, { useEffect, useState } from 'react';
 import MedicationList from './MedicationList';
-import patientList from '../mockdata/patientlist.json';
 
 function PatientDetails({ patientId }) {
 	const [patientInfo, setPatientInfo] = useState({});
+	const [medicationList, setMedicationList] = useState([]);
 
 	//call GET API to retrieve patient's information
 	useEffect(() => {
-		const patient = patientList.find((p) => p.id === parseInt(patientId));
-		console.log(patient);
+		const fetchPatientDetails = async () => {
+			try {
+				console.log('PatientDetails mounted with patientId:', patientId);
+				const response = await fetch(
+					import.meta.env.VITE_SERVER + `api/patient/${patientId}`,
+					{
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					}
+				);
 
-		// Compute derived fields
-		const fullName = `${patient.firstName} ${patient.lastName}`;
-		const dob = new Date(patient.dob);
-		const today = new Date();
+				if (response.ok) {
+					const patient = await response.json();
+					console.log(patient);
 
-		let age = today.getFullYear() - dob.getFullYear();
-		if (
-			today.getMonth() < dob.getMonth() ||
-			(today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())
-		) {
-			age--;
-		}
+					// compute derived fields
+					const fullName = `${patient.firstName} ${patient.lastName}`;
+					const dob = new Date(patient.dob);
+					const today = new Date();
 
-		setPatientInfo({
-			...patient,
-			fullName,
-			age,
-		});
+					let age = today.getFullYear() - dob.getFullYear();
+					//if patient's birthday hasnt passed, then to keep them a year younger
+					if (
+						today.getMonth() < dob.getMonth() ||
+						(today.getMonth() === dob.getMonth() &&
+							today.getDate() < dob.getDate())
+					) {
+						age--;
+					}
+
+					setPatientInfo({
+						...patient,
+						fullName,
+						age,
+					});
+				}
+			} catch (err) {
+				console.error('Error fetching patient details: ', err);
+			}
+		};
+
+		const fetchPatientMedicationList = async () => {
+			try {
+				const response = await fetch(
+					import.meta.env.VITE_SERVER + `api/patient/${patientId}/medications`,
+					{
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					}
+				);
+
+				if (response.ok) {
+					const medication = await response.json();
+					setMedicationList(medication);
+				}
+			} catch (err) {
+				console.error('Error in retrieving medication list of patient: ', err);
+			}
+		};
+		fetchPatientDetails();
+		fetchPatientMedicationList();
 	}, [patientId]);
 
 	return (
 		<>
-			<main className='w-full flex-1 mt-5 bg-gray-50 min-h-screen'>
+			<main className='w-full flex-1 bg-gray-50 min-h-screen'>
 				<div className='shadow-xl bg-white py-8 m-5 rounded-xl'>
 					<h2 className='font-bold text-lg px-15 '>Patient Details</h2>
 					<div className='patient-details'>
@@ -42,7 +86,7 @@ function PatientDetails({ patientId }) {
 								className='form-input'
 								type='text'
 								name='patientName'
-								value={patientInfo.fullName}
+								value={patientInfo.fullName || ''}
 								readOnly
 							/>
 						</div>
@@ -52,7 +96,7 @@ function PatientDetails({ patientId }) {
 								className='form-input'
 								type='text'
 								name='patientNRIC'
-								value={patientInfo.nric}
+								value={patientInfo.nric || ''}
 								readOnly
 							/>
 						</div>
@@ -64,7 +108,7 @@ function PatientDetails({ patientId }) {
 								className='form-input'
 								type='text'
 								name='patientDob'
-								value={patientInfo.dob}
+								value={patientInfo.dob || ''}
 								readOnly
 							/>
 						</div>
@@ -74,14 +118,18 @@ function PatientDetails({ patientId }) {
 								className='form-input'
 								type='text'
 								name='patientAge'
-								value={patientInfo.age}
+								value={patientInfo.age ?? ''}
 								readOnly
 							/>
 						</div>
 					</div>
 				</div>
 				<div className='mt-8'>
-					<MedicationList patientId={patientId} />
+					<MedicationList
+						patientId={patientId}
+						medicationList={medicationList}
+						setMedicationList={setMedicationList}
+					/>
 				</div>
 			</main>
 		</>

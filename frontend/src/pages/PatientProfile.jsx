@@ -1,19 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import PatientDetails from '../components/PatientDetails';
 function PatientProfile() {
 	const { patientId } = useParams();
+
 	return (
 		<>
 			<div className='h-screen overflow-hidden bg-gray-50 grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[256px_1fr]'>
 				<div>
-					<Sidebar
-						mcrNo='M12345A'
-						firstName='Jenny'
-						clinicName='Raffles Medical Centre'
-					/>
+					<Sidebar />
 				</div>
 
 				<div className='flex flex-col overflow-hidden'>

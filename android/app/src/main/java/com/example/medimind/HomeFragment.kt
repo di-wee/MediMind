@@ -1,6 +1,7 @@
 package com.example.medimind
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -15,14 +16,17 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import com.example.medimind.network.ApiClient
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import android.graphics.Color
 import android.view.Gravity
-import androidx.navigation.findNavController
 
 class HomeFragment : Fragment() {
 
@@ -85,15 +89,46 @@ class HomeFragment : Fragment() {
     ): View? = inflater.inflate(R.layout.fragment_home, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Top navbar greeting
-        val greeting = view.findViewById<TextView>(R.id.topGreetingText)
-        greeting.text = "Hello, Grandpa"
+        // Top navbar greeting (updated to fetch firstName)
+        val greetingTextView = view.findViewById<TextView>(R.id.topGreetingText)
 
-        // Logout action
+        val sharedPref = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val patientId = sharedPref.getString("patientId", null)
+
+        if (patientId != null) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val profile = ApiClient.retrofitService.getPatient(patientId)
+                    greetingTextView.text = "Hello, ${profile.firstName}"
+                } catch (e: Exception) {
+                    greetingTextView.text = "Hello"
+                    Toast.makeText(
+                        requireContext(),
+                        "Failed to load profile: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        } else {
+            greetingTextView.text = "Hello"
+        }
+
+        // Logout button: clear session and navigate to login
         val logoutButton = view.findViewById<Button>(R.id.logoutButton)
         logoutButton.setOnClickListener {
-            val rootNavController = requireActivity().findNavController(R.id.nav_host_fragment)
-            rootNavController.navigate(R.id.action_global_logout)
+            // 1. Clear SharedPreferences
+            val editor = sharedPref.edit()
+            editor.clear()
+            editor.apply()
+
+            Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
+
+            // 2. Navigate back to login screen and clear the back stack
+            val navController = requireActivity().findNavController(R.id.nav_host_fragment)
+            val navOptions = androidx.navigation.NavOptions.Builder()
+                .setPopUpTo(R.id.mainFragment, true) // Clear everything up to mainFragment
+                .build()
+            navController.navigate(R.id.loginFragment, null, navOptions)
         }
 
         // Today label
