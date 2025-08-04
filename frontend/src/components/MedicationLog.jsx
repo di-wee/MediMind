@@ -54,23 +54,52 @@ function MedicationLog({ medication, patientId }) {
 	const handleEditClick = (log) => {
 		//storing the edited row id and note content into state
 		setEditingRowId(log.id);
-		setEditedNote(log.notes);
+		setEditedNote(log.doctorNotes);
 	};
 
-	const handleSaveClick = () => {
+	const handleSaveClick = async () => {
 		//this is to keep the state most up to date when being edited
 		//
 		//logic: using the prev state of the medication log, and mapping (rebasing it into a new
 		// array) if the log.id matches the id of the row being edited, we will replace
 		// the note key value with editedNote, else we will just show the existing log
-		setLogList((prev) =>
-			prev.map((log) =>
-				log.id === editingRowId ? { ...log, notes: editedNote } : log
-			)
-		);
-		//re-initialising state
-		setEditingRowId(null);
-		setEditedNote('');
+
+		try {
+			const response = await fetch(
+				import.meta.env.VITE_SERVER + `api/logs/save/doctor-notes`,
+				{
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						intakeHistoryId: editingRowId,
+						editedNote,
+					}),
+				}
+			);
+
+			if (response.ok) {
+				const data = await response.json();
+				setLogList((prev) =>
+					prev.map((log) =>
+						log.id === editingRowId ? { ...log, doctorNotes: editedNote } : log
+					)
+				);
+				setDisplayList((prev) =>
+					prev.map((log) =>
+						log.id === editingRowId ? { ...log, doctorNotes: editedNote } : log
+					)
+				);
+				//re-initialising state
+				setEditingRowId(null);
+				setEditedNote('');
+			}
+		} catch (err) {
+			console.error('Error in saving doctor notes: ', err);
+		}
+
+		alert('Doctor note have been saved!');
 	};
 
 	const handleFunnelClick = (col) => {
@@ -166,11 +195,12 @@ function MedicationLog({ medication, patientId }) {
 							log.scheduledTime.slice(3, 5) +
 							' HRs';
 						return {
-							id: idx + 1, //no id set initially cos this is a combination of log + schedule
+							id: log.intakeHistoryId,
 							loggedDate: log.loggedDate,
 							scheduledTime: formattedTime,
 							doctorNotes: log.doctorNotes || '',
 							taken: log.taken,
+							scheduleId: log.scheduleId,
 						};
 					});
 
@@ -202,6 +232,10 @@ function MedicationLog({ medication, patientId }) {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, [filterRef]);
+
+	useEffect(() => {
+		console.log(logList);
+	}, [displayList]);
 
 	return (
 		<>
