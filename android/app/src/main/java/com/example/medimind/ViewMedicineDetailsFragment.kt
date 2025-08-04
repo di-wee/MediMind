@@ -7,8 +7,12 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.medimind.network.ApiClient
+import kotlinx.coroutines.launch
 
 class ViewMedicineDetailsFragment : Fragment() {
 
@@ -56,7 +60,26 @@ class ViewMedicineDetailsFragment : Fragment() {
         }
 
         view.findViewById<Button>(R.id.btnDelete).setOnClickListener {
-            Toast.makeText(context, "Delete Button selected", Toast.LENGTH_SHORT).show()
+            AlertDialog.Builder(requireContext())
+                .setTitle("Remove Medication")
+                .setMessage("Are you sure you want to remove this medication?")
+                .setPositiveButton("Yes") {_, _ ->
+                    lifecycleScope.launch {
+                        try {
+                            val api = ApiClient.retrofitService
+                            api.deactivateMedication(medicineId)
+                            Toast.makeText(requireContext(), "Medication removed", Toast.LENGTH_SHORT).show()
+                            findNavController().popBackStack()
+                        } catch (e: Exception) {
+                            Toast.makeText(requireContext(), "Failed to remove: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                .setNegativeButton("No", null)
+                .show()
+
+            //TODO: deactivate the medication will also deactivate all the related schedules,
+            //here also need to reset the alarm and notification
         }
 
         view.findViewById<Button>(R.id.btnBack).setOnClickListener {

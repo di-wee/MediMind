@@ -4,6 +4,7 @@ import com.example.medimind.data.EditMedRequest
 import com.example.medimind.data.EditMedResponse
 import com.example.medimind.data.MedicationResponse
 import com.example.medimind.data.IntakeHistoryResponse
+import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -83,7 +84,7 @@ interface ApiService {
 
     // LST:
     @POST("api/medication/edit/save")
-    suspend fun saveEditedMedication(@Body body: EditMedRequest): Void
+    suspend fun saveEditedMedication(@Body body: EditMedRequest): ResponseBody
 
     // Registration endpoint
     @POST("api/patient/register")
@@ -112,6 +113,9 @@ interface ApiService {
     @GET("api/patients/{patientId}/intake-history")
     suspend fun getIntakeHistory(@Path("patientId") patientId: String): List<IntakeHistoryResponse>
 
+    //LST: deactivate medication
+    @PUT("api/medication/{medicationId}/deactivate")
+    suspend fun deactivateMedication(@Path("medicationId") medId: String): ResponseBody
 
 
 }
