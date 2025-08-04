@@ -27,7 +27,7 @@ jobs:
         run: |
           npm install
           if npm run | grep -q "lint"; then
-             npm run lint > ../artifacts/lint/eslint-report.txt 2>&1 || true
+            npm run lint > ../artifacts/lint/eslint-report.txt 2>&1 || true
           else
             echo "No lint script defined" > ../artifacts/lint/eslint-report.txt
           fi
