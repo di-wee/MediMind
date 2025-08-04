@@ -25,12 +25,15 @@ class ViewMedicineDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         medicineName = arguments?.getString("medicineName") ?: "Unknown Medicine"
+        val medicineId = arguments?.getString("medicineId") ?: return
+
         view.findViewById<TextView>(R.id.medicineNameTitle).text = medicineName
 
         // Navigate to EditMedicineDetailsFragment passing medicineName
         view.findViewById<Button>(R.id.btnEditDetails).setOnClickListener {
             val bundle = Bundle().apply {
                 putString("medicineName", medicineName)
+                putString("medicineId", medicineId)
             }
             findNavController().navigate(
                 R.id.action_viewMedicineDetailsFragment_to_editMedicineDetailsFragment,

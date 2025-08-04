@@ -1,6 +1,9 @@
 package com.example.medimind.network
 
+import com.example.medimind.data.EditMedRequest
+import com.example.medimind.data.EditMedResponse
 import com.example.medimind.data.MedicationResponse
+import com.example.medimind.data.IntakeHistoryResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -70,9 +73,17 @@ data class EmbeddedClinics(
 
 interface ApiService {
 
-    // Get medications for a patient
-    @GET("api/patient/{id}/medications")
+    // LST: Get medications for a patient
+    @GET("api/patient/{id}/medList")
     suspend fun getPatientMedications(@Path("id") patientId: String): List<MedicationResponse>
+
+    // LST:
+    @GET("api/medication/{medicationId}/edit")
+    suspend fun getMedicationEditDetails(@Path("medicationId") medId: String): EditMedResponse
+
+    // LST:
+    @POST("api/medication/edit/save")
+    suspend fun saveEditedMedication(@Body body: EditMedRequest): Void
 
     // Registration endpoint
     @POST("api/patient/register")
@@ -96,4 +107,11 @@ interface ApiService {
     // Fetch list of clinics (for registration spinner)
     @GET("clinics")
     suspend fun getClinics(): ClinicListResponse
+
+    // Get intake history for a patient
+    @GET("api/patients/{patientId}/intake-history")
+    suspend fun getIntakeHistory(@Path("patientId") patientId: String): List<IntakeHistoryResponse>
+
+
+
 }
