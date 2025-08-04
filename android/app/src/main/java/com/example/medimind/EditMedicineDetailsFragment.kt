@@ -26,6 +26,8 @@ class EditMedicineDetailsFragment : Fragment() {
     private lateinit var saveButton: Button
     private lateinit var medicineName: String
     private lateinit var medicineId: String
+    private var initialTimes: List<String> = emptyList()
+    private var initialFrequency: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,7 +53,9 @@ class EditMedicineDetailsFragment : Fragment() {
             try {
                 val details = ApiClient.retrofitService.getMedicationEditDetails(medicineId)
                 frequencyInput.setText(details.frequency.toString())
-                generateTimeFields(details.frequency, details.activeSchedulesTimes)
+                initialFrequency = details.frequency
+                initialTimes = details.activeSchedulesTimes.sorted()
+                generateTimeFields(initialFrequency, initialTimes)
             } catch (e: Exception) {
                 Toast.makeText(context, "Frequency loading failed", Toast.LENGTH_SHORT).show()
                 frequencyInput.setText("3")
@@ -77,13 +81,14 @@ class EditMedicineDetailsFragment : Fragment() {
         timeInputContainer.removeAllViews()
 
         val inflater = LayoutInflater.from(requireContext())
-//        val defaultTime = listOf("0900", "1300", "1800", "2100", "2300")
+
+        val sortedTimes = presetTimes.sorted()
 
         for (i in 1..frequency) {
             var timeBox = inflater.inflate(R.layout.time_input_box, timeInputContainer, false) as EditText
             timeBox.hint = "HHMM"
             timeBox.inputType = InputType.TYPE_CLASS_NUMBER
-            timeBox.setText(presetTimes.getOrNull(i - 1) ?: "")
+            timeBox.setText(sortedTimes.getOrNull(i - 1) ?: "")
             timeInputContainer.addView(timeBox)
         }
     }
@@ -96,14 +101,40 @@ class EditMedicineDetailsFragment : Fragment() {
         }
 
         val times = mutableListOf<String>()
+        val seen = mutableSetOf<String>()
+
         for (i in 0 until timeInputContainer.childCount) {
             val editText = timeInputContainer.getChildAt(i) as EditText
-            val time = editText.text.toString().trim()
-            if (!time.matches(Regex("\\d{4}"))) {
-                Toast.makeText(context, "Time format should be 4 digits, like 0900", Toast.LENGTH_SHORT).show()
+            var time = editText.text.toString().trim()
+
+            if (time.matches(Regex("\\d{4}"))) {
+                time = time.substring(0,2) + ":" + time.substring(2,4)
+            }else if (!time.matches(Regex("\\d{2}:\\d{2}"))) {
+                Toast.makeText(context, "Time format should be HHMM, like0900", Toast.LENGTH_SHORT).show()
                 return
             }
+
+            val parts = time.split(":")
+            val hour = parts[0].toIntOrNull()
+            val minute = parts[1].toIntOrNull()
+            if (hour !in 0..23 || minute !in 0..59) {
+                Toast.makeText(context, "Invalid time: $time", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            if (!seen.add(time)) {
+                Toast.makeText(context, "Duplicate time: $time", Toast.LENGTH_SHORT).show()
+                return
+            }
+
             times.add(time)
+        }
+
+        times.sort()
+
+        if (freq == initialFrequency && times == initialTimes) {
+            Toast.makeText(context, "No changes detected", Toast.LENGTH_SHORT).show()
+            return
         }
 
         val sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
@@ -137,4 +168,6 @@ class EditMedicineDetailsFragment : Fragment() {
             }
         }
     }
+
+    //TODO: reset alarm and notification--shiying part
 }
