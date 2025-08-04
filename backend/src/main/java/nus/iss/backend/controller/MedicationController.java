@@ -9,10 +9,7 @@ import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
 import nus.iss.backend.model.Schedule;
-import nus.iss.backend.service.IntakeHistoryService;
-import nus.iss.backend.service.MedicationService;
-import nus.iss.backend.service.PatientService;
-import nus.iss.backend.service.ScheduleService;
+import nus.iss.backend.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +40,8 @@ public class MedicationController {
     private ScheduleService scheduleService;
     @Autowired
     private IntakeHistoryService intakeHistoryService;
+    @Autowired
+    private MedicationEditService medicationEditService;
 
     @GetMapping("/medList")
     public ResponseEntity<List<Medication>> getMedications(@RequestBody MedicationIdList MedIds) {
@@ -96,49 +95,20 @@ public class MedicationController {
 
     @PostMapping("/edit/save")
     public ResponseEntity<?> saveEditMedication(@RequestBody EditMedicationRequest req) {
-        Medication med = medicationService.findMedicineById(req.getMedicationId());
-        if (med == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Medication not found");
-        }
-
-        Optional<Patient> patientOpt = patientService.findPatientById(req.getPatientId());
-        if (patientOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patient not found");
-        }
-        Patient patient = patientOpt.get();
-
-        //every time will clean all inactive schedules(created more than 90 days) and related intakeHistory
-        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(90);
-        scheduleService.deleteOldInactiveSchedules(med, cutoffDate);
-
-        //then deactivate the active schedules before create new ones
-        List<Schedule> activeSchedules = scheduleService.findActiveSchedulesByMedication(med);
-        scheduleService.deactivateSchedules(activeSchedules);
-
-        //then update new frequency
-        med.setFrequency(req.getFrequency());
-        medicationService.saveMedication(med);
-
-        //then create new schedules
-        DateTimeFormatter formatterNoColon = DateTimeFormatter.ofPattern("HHmm");
-        DateTimeFormatter formatterWithColon = DateTimeFormatter.ofPattern("HH:mm");
-
+        // time format validation
         for (String timeStr : req.getTimes()) {
-            System.out.println("Received time string: '" + timeStr + "' with length " + timeStr.length());
-            LocalTime time;
-            if (timeStr.contains(":")){
-                time = LocalTime.parse(timeStr,formatterWithColon);
-            } else {
-                time = LocalTime.parse(timeStr, formatterNoColon);
+            if (!timeStr.matches("^\\d{4}$") && !timeStr.matches("^\\d{2}:\\d{2}$")) {
+                return ResponseEntity.badRequest().body("Invalid time format: " + timeStr);
             }
-            scheduleService.createSchedule(med, patient, time);
         }
 
-        //last step: reset the alarm and notification things,
-        // leave to shiying to implement, probably will implement in android part, not sure
-
-        return ResponseEntity.ok("Medication details updated successfully");
-
+        try {
+            return medicationEditService.processEditMedication(req);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to save medication details");
+        }
      }
 
 
