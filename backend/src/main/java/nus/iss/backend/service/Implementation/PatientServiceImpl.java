@@ -87,4 +87,13 @@ public class PatientServiceImpl implements PatientService {
     public Optional<Patient> findPatientByEmailAndPassword(String email, String password) {
         return patientRepo.findByEmailAndPassword(email, password);
     }
+
+    @Override
+    public List<Medication> getPatientMedications(UUID patientId) {
+        Optional<Patient> pt = patientRepo.findById(patientId);
+        if (pt.isEmpty()) {
+            throw new ItemNotFound("Patient not found!");
+        }
+        return pt.get().getMedications();
+    }
 }

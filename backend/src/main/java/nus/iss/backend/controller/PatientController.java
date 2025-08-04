@@ -4,6 +4,7 @@ import nus.iss.backend.dao.MissedDoseResponse;
 import nus.iss.backend.dto.RegisterPatientRequest;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.Clinic;
+import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
 import nus.iss.backend.repository.ClinicRepository;
 import nus.iss.backend.service.PatientService;
@@ -168,6 +169,20 @@ public class PatientController {
 
         } catch (RuntimeException e) {
             logger.error("Error updating patient: " + e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/patient/{patientId}/medList")
+    public ResponseEntity<List<Medication>> getMedListForPatient(@PathVariable UUID patientId) {
+        try {
+            List<Medication> medicationList = patientService.getPatientMedications(patientId);
+            return new ResponseEntity<>(medicationList, HttpStatus.OK);
+        } catch (ItemNotFound e) {
+            logger.error("Patient not found: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (RuntimeException e) {
+            logger.error("Error retrieving patient medication: "+ e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
