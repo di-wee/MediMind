@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -119,8 +120,17 @@ public class MedicationController {
         medicationService.saveMedication(med);
 
         //then create new schedules
+        DateTimeFormatter formatterNoColon = DateTimeFormatter.ofPattern("HHmm");
+        DateTimeFormatter formatterWithColon = DateTimeFormatter.ofPattern("HH:mm");
+
         for (String timeStr : req.getTimes()) {
-            LocalTime time = LocalTime.parse(timeStr);
+            System.out.println("Received time string: '" + timeStr + "' with length " + timeStr.length());
+            LocalTime time;
+            if (timeStr.contains(":")){
+                time = LocalTime.parse(timeStr,formatterWithColon);
+            } else {
+                time = LocalTime.parse(timeStr, formatterNoColon);
+            }
             scheduleService.createSchedule(med, patient, time);
         }
 
