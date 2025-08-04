@@ -105,19 +105,22 @@ public class ScheduleImpl implements ScheduleService {
         return scheduleRepo.save(s);
     }
 
-    // For Android Android API to get all active recurring daily schedules for a patient
+ // For Android API to get all active recurring daily schedules for a patient
     @Override
     public List<ScheduleResponse> getDailyScheduleForPatient(UUID patientId) {
         List<Schedule> schedules = scheduleRepo.findActiveSchedulesByPatientId(patientId);
 
-        // map Schedule → ScheduleResponse for Android consumption
-        return schedules.stream().map(schedule -> {
-            ScheduleResponse dto = new ScheduleResponse();
-            dto.setScheduledTime(schedule.getScheduledTime().toString());
-            dto.setMedicationName(schedule.getMedication().getMedicationName());
-            dto.setQuantity(schedule.getMedication().getIntakeQuantity()); // if not available, use 1
-            dto.setIsActive(schedule.getIsActive());
-            return dto;
-        }).collect(Collectors.toList());
+        // Filter out schedules where the associated medication is inactive
+        return schedules.stream()
+            .filter(schedule -> schedule.getMedication() != null && schedule.getMedication().isActive())
+            .map(schedule -> {
+                ScheduleResponse dto = new ScheduleResponse();
+                dto.setScheduledTime(schedule.getScheduledTime().toString());
+                dto.setMedicationName(schedule.getMedication().getMedicationName());
+                dto.setQuantity(schedule.getMedication().getIntakeQuantity()); // if not available, use 1
+                dto.setIsActive(schedule.getIsActive());
+                return dto;
+            })
+            .collect(Collectors.toList());
     }
 }
