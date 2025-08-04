@@ -17,7 +17,7 @@ class ReminderWorker(context: Context, params: WorkerParameters) : Worker(contex
         val medId = inputData.getInt("med_id", -1)
         if (medId == -1) return Result.failure()
 
-        // 可选：发送广播再次触发 ReminderReceiver
+
         val intent = Intent(context, ReminderReceiver::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
             putExtra("from_worker", true)

@@ -4,6 +4,7 @@ import nus.iss.backend.dao.IntakeLogResponseWeb;
 import nus.iss.backend.dao.IntakeReqMobile;
 import nus.iss.backend.dao.MedicationIdList;
 import nus.iss.backend.dto.EditMedicationRequest;
+import nus.iss.backend.dto.newMedicationReq;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.model.Medication;
@@ -145,7 +146,35 @@ public class MedicationController {
 
         }
     }
-
-
+    @PostMapping("/save")
+    public ResponseEntity<?> saveMedication(@RequestBody newMedicationReq req) {
+        try{
+            Patient patient =  patientService.findPatientById(req.getPatientId()).orElse(null);
+            if(patient==null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("patient not found");
+            }
+            //save new medication
+            List<Patient> patients = new ArrayList<>();
+            patients.add(patient);
+            Medication med = new Medication();
+            med.setMedicationName(req.getMedicationName());
+            med.setActive(true);
+            med.setFrequency(req.getFrequency());
+            med.setNotes(req.getNotes());
+            med.setTiming(req.getTiming());
+            med.setInstructions(req.getInstructions());
+            med.setPatients(patients);
+            medicationService.saveMedication(med);
+            //save new schedule
+            for (String timeStr : req.getTimes()) {
+                LocalTime time = LocalTime.parse(timeStr);
+                scheduleService.createSchedule(med,patient,time);
+            }
+            return ResponseEntity.ok(med);
+        }catch (RuntimeException e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }
