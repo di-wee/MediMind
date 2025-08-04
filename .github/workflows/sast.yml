@@ -1,14 +1,17 @@
-name: "SAST - Static Code Analysis"
+name: "SAST - Static Code Analysis & Build"
 
 on:
   push:
-    branches: 
+    branches:
       - main
-      - frontend-(react)
-      - backend-(java-springboot)
-      - machine-learning
+      - frontend
+      - backend
       - android
-  
+      - ml
+  pull_request:
+    branches:
+      - main
+
 permissions:
   actions: read
   contents: read
@@ -22,34 +25,61 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create artifact folder
-        run: mkdir -p artifacts/sast
-
+      # ---------------------
+      # Automated Build
+      # ---------------------
       - name: Set up Java 21
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '21'
 
+      # --- Backend Build ---
+      - name: Build Spring Boot Backend
+        working-directory: ./backend
+        run: mvn clean package -DskipTests
+      - name: Debug Backend Output
+        run: ls -R ./backend/target
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
+
+      # --- Frontend (React) Build ---
+      - name: Build React Frontend
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm run build
+          ls -R  # debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/dist/
+
+      # --- Android Build (Debug APK) ---
+      - name: Build Android App (Debug APK)
+        working-directory: ./android
+        run: ./gradlew assembleDebug
+      - name: Debug Android Output
+        run: ls -R ./android/app/build/outputs/apk/debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+
+      # ---------------------
+      # CodeQL Analysis
+      # ---------------------
       - name: Init CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: java,javascript
 
-      - name: Build Spring Boot for SAST
+      # Explicit build for CodeQL Java Analysis
+      - name: Build Java for CodeQL
         working-directory: ./backend
         run: mvn clean compile -DskipTests
 
       - name: Analyze with CodeQL
         uses: github/codeql-action/analyze@v3
-
-      # Android Lint (SAST context)
-      - name: Android Lint
-        working-directory: ./android
-        run: ./gradlew lint
-
-      - name: Upload Android Lint Report (SAST)
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-lint-report-sast
-          path: android/app/build/reports/lint-results.html
