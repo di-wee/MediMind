@@ -77,7 +77,7 @@ public class MedicationEditServiceImpl implements MedicationEditService {
             scheduleService.createSchedule(med, patient, time);
         }
 
-        //last step: reset the alarm and notification things,
+        //TODO:last step: reset the alarm and notification things,
         // leave to shiying to implement, probably will implement in android part, not sure
 
         return ResponseEntity.ok("Medication details updated successfully");
