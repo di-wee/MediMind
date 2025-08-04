@@ -5,6 +5,7 @@ import nus.iss.backend.dto.EditMedicationRequest;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
 import nus.iss.backend.model.Schedule;
+import nus.iss.backend.service.MedicationEditService;
 import nus.iss.backend.service.MedicationService;
 import nus.iss.backend.service.PatientService;
 import nus.iss.backend.service.ScheduleService;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class MedicationEditServiceImpl implements MedicationService {
+public class MedicationEditServiceImpl implements MedicationEditService {
 
     @Autowired
     private MedicationService medicationService;
