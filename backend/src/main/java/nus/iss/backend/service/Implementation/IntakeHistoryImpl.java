@@ -2,23 +2,29 @@ package nus.iss.backend.service.Implementation;
 
 import nus.iss.backend.dao.IntakeLogResponseWeb;
 import nus.iss.backend.dao.IntakeReqMobile;
+import nus.iss.backend.dao.UpdateDoctorNotesReq;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.model.Patient;
 import nus.iss.backend.repository.IntakeRepository;
 import nus.iss.backend.repository.PatientRepository;
 import nus.iss.backend.service.IntakeHistoryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @Transactional
 public class IntakeHistoryImpl implements IntakeHistoryService {
+    private static final Logger logger = LoggerFactory.getLogger(IntakeHistoryImpl.class);
 
     @Autowired
     private IntakeRepository intakeRepo;
@@ -42,7 +48,37 @@ public class IntakeHistoryImpl implements IntakeHistoryService {
     }
 
     @Override
-    public List<IntakeLogResponseWeb> getIntakeLogsForMedication(UUID medication) {
-        return List.of();
+    public List<IntakeLogResponseWeb> getIntakeLogsForMedication(UUID medicationId) {
+        List<IntakeHistory> historyList = intakeRepo.findBySchedule_Medication_Id(medicationId);
+
+        if (historyList.isEmpty()) {
+            logger.warn("No intake history for medication(" +medicationId+")." );
+            return Collections.emptyList();
+        }
+
+        return historyList.stream().map(hx -> {
+            IntakeLogResponseWeb dto = new IntakeLogResponseWeb();
+            dto.setLoggedDate(hx.getLoggedDate());
+            dto.setScheduledTime(hx.getSchedule().getScheduledTime());
+            dto.setTaken(hx.isTaken());
+            dto.setDoctorNotes(hx.getDoctorNote());
+            dto.setScheduleId(hx.getSchedule().getId());
+            dto.setIntakeHistoryId(hx.getId());
+            return dto;
+        }).toList();
+    }
+
+    @Override
+    public IntakeHistory updateCreateDoctorNote(UpdateDoctorNotesReq request) {
+       Optional<IntakeHistory> lg = intakeRepo.findById(request.getIntakeHistoryId());
+       if (lg.isEmpty()) {
+           throw new ItemNotFound("Log with ID(" + request.getIntakeHistoryId() + ") does not exist.");
+       }
+       IntakeHistory log = lg.get();
+       log.setDoctorNote(request.getEditedNote());
+       intakeRepo.saveAndFlush(log);
+
+       return log;
+
     }
 }
