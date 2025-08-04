@@ -3,6 +3,7 @@ package com.example.medimind
 import android.content.Context
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -119,12 +120,19 @@ class EditMedicineDetailsFragment : Fragment() {
             times = times
         )
 
+        Log.d("EditMedRequest", request.toString())
+
         lifecycleScope.launch {
             try {
+                Log.d("EditMedRequest", "Before sending request at: ${System.currentTimeMillis()}")
                 ApiClient.retrofitService.saveEditedMedication(request)
+                Log.d("EditMedRequest", "After sending request at: ${System.currentTimeMillis()}")
+                Log.d("EditMedRequest", "Request sent: $request")
                 Toast.makeText(context,"Successfully save!", Toast.LENGTH_SHORT).show()
                 parentFragmentManager.popBackStack()
             } catch (e: Exception) {
+                Log.d("EditMedError", "Failed to send request", e)
+                Log.e("EditMedError", "Failed to send request: ${e.message}", e)
                 Toast.makeText(context, "Save Failed!", Toast.LENGTH_SHORT).show()
             }
         }
