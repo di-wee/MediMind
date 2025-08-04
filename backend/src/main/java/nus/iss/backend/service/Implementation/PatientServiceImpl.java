@@ -6,7 +6,7 @@ import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
-import nus.iss.backend.repository.IntakeHistoryRepository;
+import nus.iss.backend.repository.IntakeRepository;
 import nus.iss.backend.repository.PatientRepository;
 import nus.iss.backend.service.PatientService;
 import nus.iss.backend.service.ScheduleService;
@@ -31,7 +31,7 @@ public class PatientServiceImpl implements PatientService {
     private ScheduleService scheduleService;
 
     @Autowired
-    private IntakeHistoryRepository intakeHistoryRepository;
+    private IntakeRepository intakeRepository;
 
     @Override
     public Optional<Patient> findPatientById(UUID id) {
@@ -84,7 +84,7 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public List<IntakeHistoryResponse> getIntakeHistoryByPatientId(UUID patientId) {
         // 1. Load all history entries
-        List<IntakeHistory> records = intakeHistoryRepository.findByPatientId(patientId);
+        List<IntakeHistory> records = intakeRepository.findByPatient_Id(patientId);
 
         // 2. Map each to a DTO, combining loggedDate + scheduledTime into a LocalDateTime
         List<IntakeHistoryResponse> dtoList = records.stream()

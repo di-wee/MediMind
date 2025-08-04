@@ -6,6 +6,7 @@ import nus.iss.backend.dto.IntakeHistoryResponse;            // DTO for intake h
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.service.IntakeHistoryService;
+import nus.iss.backend.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class IntakeHistoryController {
 
     @Autowired
     private IntakeHistoryService intakeHistoryService;
+
+    @Autowired
+    PatientService patientService;
 
     /**
      * Existing PUT endpoint for saving doctor notes on an intake log.
@@ -53,7 +57,7 @@ public class IntakeHistoryController {
         try {
             // Delegate to service to fetch and map entity to DTO
             List<IntakeHistoryResponse> history =
-                    intakeHistoryService.getIntakeHistoryByPatientId(patientId);
+                    patientService.getIntakeHistoryByPatientId(patientId);
             return ResponseEntity.ok(history);
 
         } catch (ItemNotFound e) {

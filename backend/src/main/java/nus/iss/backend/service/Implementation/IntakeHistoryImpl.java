@@ -81,37 +81,5 @@ public class IntakeHistoryImpl implements IntakeHistoryService {
         return log;
     }
 
-    /**
-     * NEW: implements the interface’s getIntakeHistoryByPatientId(UUID) method
-     * to retrieve and map all intake-history records for a patient.
-     */
-    @Override
-    public List<IntakeHistoryResponse> getIntakeHistoryByPatientId(UUID patientId) {
-        // 1. Fetch entities for this patient (make sure your IntakeRepository
-        //    defines a method findByPatient_Id(UUID) or similar)
-        List<IntakeHistory> records = intakeRepo.findByPatient_Id(patientId);
 
-        // 2. Map each entity to our DTO
-        List<IntakeHistoryResponse> dtoList = records.stream()
-            .map(record -> {
-                // Combine the logged date with the schedule’s time-of-day
-                LocalDateTime scheduledDateTime =
-                    record.getLoggedDate().atTime(record.getSchedule().getScheduledTime());
-                boolean isTaken = record.isTaken();
-                String medName = record.getSchedule().getMedication().getMedicationName();
-
-                return new IntakeHistoryResponse(
-                    medName,
-                    scheduledDateTime,
-                    scheduledDateTime,
-                    isTaken
-                );
-            })
-            .toList();
-
-        // 3. Sort by scheduledTime before returning
-        return dtoList.stream()
-            .sorted(Comparator.comparing(IntakeHistoryResponse::getScheduledTime))
-            .toList();
-    }
 }

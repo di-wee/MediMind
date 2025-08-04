@@ -30,9 +30,5 @@ public interface IntakeHistoryService {
      */
     IntakeHistory updateCreateDoctorNote(UpdateDoctorNotesReq request);
 
-    /**
-     * NEW: Retrieve intake-history records for a given patient.
-     * Returns a list of DTOs containing medicationName, scheduledTime, takenTime, and status.
-     */
-    List<IntakeHistoryResponse> getIntakeHistoryByPatientId(UUID patientId);
+
 }
