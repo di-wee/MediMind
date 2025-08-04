@@ -18,6 +18,7 @@
             android:textStyle="bold"
             android:layout_marginBottom="24dp" />
 
+        <!-- Email -->
         <EditText
             android:id="@+id/inputEmail"
             android:layout_width="match_parent"
@@ -25,6 +26,7 @@
             android:hint="Email (Username)"
             android:inputType="textEmailAddress" />
 
+        <!-- Password -->
         <EditText
             android:id="@+id/inputPassword"
             android:layout_width="match_parent"
@@ -33,6 +35,16 @@
             android:inputType="textPassword"
             android:layout_marginTop="16dp" />
 
+        <!-- Confirm Password -->
+        <EditText
+            android:id="@+id/inputConfirmPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Confirm Password"
+            android:inputType="textPassword"
+            android:layout_marginTop="16dp" />
+
+        <!-- NRIC -->
         <EditText
             android:id="@+id/inputNRIC"
             android:layout_width="match_parent"
@@ -40,6 +52,7 @@
             android:hint="NRIC (e.g. S1234567A)"
             android:layout_marginTop="16dp" />
 
+        <!-- First Name -->
         <EditText
             android:id="@+id/inputFirstName"
             android:layout_width="match_parent"
@@ -47,6 +60,7 @@
             android:hint="First Name"
             android:layout_marginTop="16dp" />
 
+        <!-- Last Name -->
         <EditText
             android:id="@+id/inputLastName"
             android:layout_width="match_parent"
@@ -54,11 +68,11 @@
             android:hint="Last Name"
             android:layout_marginTop="16dp" />
 
-        <EditText
-            android:id="@+id/inputGender"
+        <!-- Gender dropdown -->
+        <Spinner
+            android:id="@+id/spinnerGender"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Gender (Male/Female/Other)"
             android:layout_marginTop="16dp" />
 
         <!-- DOB picker as a clickable TextView -->
@@ -80,6 +94,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp" />
 
+        <!-- Register Button -->
         <Button
             android:id="@+id/registerButton"
             android:layout_width="match_parent"
@@ -87,6 +102,7 @@
             android:text="Register"
             android:layout_marginTop="24dp" />
 
+        <!-- Back to Login Button -->
         <Button
             android:id="@+id/backToLoginButton"
             android:layout_width="match_parent"
