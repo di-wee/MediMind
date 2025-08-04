@@ -3,6 +3,7 @@ package com.example.medimind.network
 import com.example.medimind.data.EditMedRequest
 import com.example.medimind.data.EditMedResponse
 import com.example.medimind.data.MedicationResponse
+import com.example.medimind.data.IntakeHistoryResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -106,4 +107,11 @@ interface ApiService {
     // Fetch list of clinics (for registration spinner)
     @GET("clinics")
     suspend fun getClinics(): ClinicListResponse
+
+    // Get intake history for a patient
+    @GET("api/patients/{patientId}/intake-history")
+    suspend fun getIntakeHistory(@Path("patientId") patientId: String): List<IntakeHistoryResponse>
+
+
+
 }
