@@ -1,5 +1,6 @@
 package nus.iss.backend.controller;
 
+import nus.iss.backend.dao.ScheduleListReq;
 import nus.iss.backend.model.Schedule;
 import nus.iss.backend.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @CrossOrigin
@@ -19,10 +21,9 @@ public class ScheduleController {
     ScheduleService scheduleService;
 
     @GetMapping("/find")
-    public ResponseEntity<List<Schedule>> getSchedulesByTime(@RequestParam("time")
-                                                                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                                 LocalDateTime time) {
-        List<Schedule> schedules = scheduleService.findSchedulesByScheduledTime(time);
+    public ResponseEntity<List<Schedule>> getSchedulesByTime(@RequestBody ScheduleListReq req) {
+        List<Schedule> schedules = scheduleService.findSchedulesByPatientIdandScheduledTime
+                (req.getTime(),req.getPatientId());
         if (schedules.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

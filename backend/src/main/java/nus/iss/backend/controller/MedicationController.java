@@ -58,7 +58,7 @@ public class MedicationController {
         }
 
     }
-    @PostMapping("/createmedLog")
+    @PostMapping("/createMedLog")
     public ResponseEntity<List<IntakeHistory>> createMedicationLog(@RequestBody List<IntakeReqMobile> medLogReqMobiles) {
         try{
             List<IntakeHistory> intakeHistories = new ArrayList<>();
@@ -113,23 +113,27 @@ public class MedicationController {
 
         //then deactivate the active schedules before create new ones
         List<Schedule> activeSchedules = scheduleService.findActiveSchedulesByMedication(med);
+        List<UUID> deactivatedScheduleIds = activeSchedules.stream()
+                .map(Schedule::getId).toList();
         scheduleService.deactivateSchedules(activeSchedules);
 
         //then update new frequency
         med.setFrequency(req.getFrequency());
         medicationService.saveMedication(med);
 
+        List<UUID> newScheduleIds = new ArrayList<>();
         //then create new schedules
         for (String timeStr : req.getTimes()) {
             LocalTime time = LocalTime.parse(timeStr);
-            scheduleService.createSchedule(med, patient, time);
+            Schedule newSchedule = scheduleService.createSchedule(med, patient, time);
+            newScheduleIds.add(newSchedule.getId());
         }
 
-        //last step: reset the alarm and notification things,
-        // leave to shiying to implement, probably will implement in android part, not sure
-
-        return ResponseEntity.ok("Medication details updated successfully");
-
+        Map<String, List<UUID>> result = new HashMap<>();
+        result.put("deActivatedIds", deactivatedScheduleIds);
+        result.put("newIds", newScheduleIds);
+        
+        return ResponseEntity.ok(result);
      }
 
 
@@ -154,17 +158,7 @@ public class MedicationController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("patient not found");
             }
             //save new medication
-            List<Patient> patients = new ArrayList<>();
-            patients.add(patient);
-            Medication med = new Medication();
-            med.setMedicationName(req.getMedicationName());
-            med.setActive(true);
-            med.setFrequency(req.getFrequency());
-            med.setNotes(req.getNotes());
-            med.setTiming(req.getTiming());
-            med.setInstructions(req.getInstructions());
-            med.setPatients(patients);
-            medicationService.saveMedication(med);
+            Medication med = medicationService.createMedication(req);
             //save new schedule
             for (String timeStr : req.getTimes()) {
                 LocalTime time = LocalTime.parse(timeStr);

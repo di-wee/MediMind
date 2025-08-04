@@ -16,10 +16,12 @@ class ReminderReceiver : BroadcastReceiver() {
         Log.d("ReminderReceiver", "== ReminderReceiver onReceive TRIGGERED ==")
 
         val timeMillis = intent.getLongExtra("time_millis", -1)
-        if (timeMillis == -1L) return
+        val patientId = intent.getIntExtra("patient_id",-1)
+        if (timeMillis == -1L|| patientId== -1) return
 
         val activityIntent = Intent(context, ReminderActivity::class.java).apply {
             putExtra("time_millis", timeMillis)
+            putExtra("patient_id", patientId)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
 

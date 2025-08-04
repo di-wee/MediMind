@@ -15,13 +15,14 @@ class ReminderWorker(context: Context, params: WorkerParameters) : Worker(contex
     override fun doWork(): Result {
         val context = applicationContext
         val medId = inputData.getInt("med_id", -1)
-        if (medId == -1) return Result.failure()
-
+        val patientId = inputData.getString("patient_id")
+        if (medId == -1|| patientId==null) return Result.failure()
 
         val intent = Intent(context, ReminderReceiver::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
             putExtra("from_worker", true)
             putExtra("med_id", medId)
+            putExtra("patientId",patientId)
         }
         context.sendBroadcast(intent)
 

@@ -1,5 +1,6 @@
 package com.example.medimind
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -7,6 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
+import com.example.medimind.ReminderUtils.scheduleAlarm
+import com.example.medimind.network.ApiClient
+import com.example.medimind.network.newMedicationRequest
+import kotlinx.coroutines.launch
+import java.util.Calendar
 
 
 class NewMedManualFragment : Fragment() {
@@ -31,15 +39,112 @@ class NewMedManualFragment : Fragment() {
         backBtnFromManual.setOnClickListener{
             parentFragmentManager.popBackStack()
         }
+        val sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val patientId = sharedPreferences.getString("patientId", null)
 
-        val medicationName = view.findViewById<TextView>(R.id.medicationNameInputManual)
-        val dosage = view.findViewById<TextView>(R.id.dosageInputManual)
-        val frequency = view.findViewById<TextView>(R.id.frequencyInputManual)
+        val medicationNameInput = view.findViewById<TextView>(R.id.medicationNameInputManual)
+        val dosageInput = view.findViewById<TextView>(R.id.dosageInputManual)
+        val frequencyInput = view.findViewById<TextView>(R.id.frequencyInputManual)
+        val instructionInput = view.findViewById<TextView>(R.id.instructionInputManual)
+        val noteInput = view.findViewById<TextView>(R.id.noteInput)
+
+        var instruction = instructionInput.text.toString()
+        var note = noteInput.text.toString()
+
+        var frequency = frequencyInput.text.toString().toIntOrNull()?:0
+        //generate default times
+        var times = generateDefaultTimes(frequency)
+        //convert generated times to timeMillis List
+        var timeMillis = convertToScheduleList(times)
+        //set alarm in alarmManager
+        if (patientId != null) {
+            for (timeMilli in timeMillis) {
+                scheduleAlarm(requireContext(), timeMilli, patientId)
+            }
+        } else {
+            Toast.makeText(requireContext(), "Patient ID is missing", Toast.LENGTH_SHORT).show()
+        }
 
         val saveBtnFromManual = view.findViewById<Button>(R.id.btnSaveFromManual)
         saveBtnFromManual.setOnClickListener{
-            //toDo and save info to database
+            //save new medication to database and set new alarm
+            val medicationName = medicationNameInput.text.toString()
+            val dosage = dosageInput.text.toString()
+            if (patientId == null || medicationName.isBlank() || dosage.isBlank() || frequency == 0) {
+                Toast.makeText(requireContext(), "Please fill in all fields correctly", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val request = newMedicationRequest(
+                medicationName = medicationName,
+                patientId = patientId,
+                dosage = dosage,
+                frequency = frequency,
+                Timing = "",
+                instructions = instruction ,
+                notes = note,
+                isActive = true,
+                times = times
+            )
 
+            lifecycleScope.launch {
+                try {
+                    val service = ApiClient.retrofitService
+                    service.saveMedication(request)
+                    Toast.makeText(requireContext(), "Medication saved", Toast.LENGTH_SHORT).show()
+
+                    parentFragmentManager.popBackStack()
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
+    fun generateDefaultTimes(frequency: Int): List<String> {
+        val times = mutableListOf<String>()
+
+        try {
+            if (frequency <= 0) return emptyList()
+
+            if (frequency == 1) {
+                times.add("0900")
+            } else {
+                val totalMinutes = 12 * 60
+                val freqGap = totalMinutes / (frequency - 1)
+
+                for (i in 0 until frequency) {
+                    val timeInMinutes = 540 + i * freqGap
+                    val hour = timeInMinutes / 60
+                    val minute = timeInMinutes % 60
+                    val timeStr = String.format("%02d%02d", hour, minute)  // HHMM format
+                    times.add(timeStr)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return times
+    }
+    fun convertToScheduleList(timeStrings: List<String>): List<Long> {
+        val timeMillis = mutableListOf<Long>()
+
+        val now = Calendar.getInstance()
+        for (time in timeStrings) {
+            val hour = time.substring(0, 2).toInt()
+            val minute = time.substring(2, 4).toInt()
+
+            val cal = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, hour)
+                set(Calendar.MINUTE, minute)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+                if (before(now)) {
+                    add(Calendar.DATE, 1) // 如果已经过了，就调成明天
+                }
+            }
+
+            timeMillis.add(cal.timeInMillis)
+        }
+        return timeMillis
+    }
+
 }

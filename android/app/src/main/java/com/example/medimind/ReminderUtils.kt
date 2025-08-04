@@ -13,15 +13,16 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.example.medimind.data.Schedule
 import com.example.medimind.reminder.ReminderWorker
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 object ReminderUtils {
 
-    fun scheduleAlarm(context: Context, schedule: Schedule) {
+    fun scheduleAlarm(context: Context, timeMilli: Long, patientId: String) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         Log.d("ReminderUtils", "== Alarm Schedule Called ==")
-        Log.d("ReminderUtils", "timeMillis = ${schedule.timeMillis}")
+        Log.d("ReminderUtils", "timeMillis = ${timeMilli}")
         Log.d("ReminderUtils", "canScheduleExact = ${
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
                 alarmManager.canScheduleExactAlarms()
@@ -29,10 +30,11 @@ object ReminderUtils {
         }")
 
         val intent = Intent(context, ReminderReceiver::class.java).apply {
-            putExtra("time_millis", schedule.timeMillis)
+            putExtra("time_millis", timeMilli)
+            putExtra("patient_id",patientId)
         }
 
-        val requestCode = schedule.timeMillis.hashCode()
+        val requestCode = timeMilli.hashCode()
 
         val existingIntent = PendingIntent.getBroadcast(
             context,
@@ -41,9 +43,10 @@ object ReminderUtils {
             PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
         )
 
-        //if (existingIntent != null) {
-           // return // exists,will not be registered repeatedly
-        //}
+        if (existingIntent != null) {
+            Log.d("Alarm", "Alarm for ${Date(timeMilli)} already exists, skipping.")
+            return
+        }
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -56,7 +59,7 @@ object ReminderUtils {
             if (alarmManager.canScheduleExactAlarms()) {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
-                    schedule.timeMillis,
+                    timeMilli,
                     pendingIntent
                 )
             } else {
@@ -69,19 +72,32 @@ object ReminderUtils {
         } else {
             alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
-                schedule.timeMillis,
+                timeMilli,
                 pendingIntent
             )
         }
     }
 
+    fun cancelAlarm(context: Context, scheduleId: String) {
+        val intent = Intent(context, ReminderReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            scheduleId.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.cancel(pendingIntent)
+    }
+
     /**
      * Delay the reminder of a certain medication by 15 minutes (executed by ReminderWorker）
      */
-    fun snoozeReminder(context: Context, medId: Int) {
+    fun snoozeReminder(context: Context, medId: String, patientId: String) {
         val request = OneTimeWorkRequestBuilder<ReminderWorker>()
             .setInitialDelay(15, TimeUnit.MINUTES)
             .setInputData(workDataOf("med_id" to medId))
+            .setInputData(workDataOf("patient_id" to patientId))
             .build()
 
         WorkManager.getInstance(context).enqueue(request)

@@ -16,7 +16,7 @@ import java.util.UUID;
 @Service
 @Transactional
 public interface ScheduleService {
-     List<Schedule> findSchedulesByScheduledTime(LocalDateTime scheduledTime);
+    List<Schedule> findSchedulesByPatientIdandScheduledTime(LocalTime scheduledTime, UUID patientId);
 
     Boolean hasMissedDose(UUID scheduleId);
 

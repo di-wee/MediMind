@@ -18,6 +18,9 @@ import androidx.lifecycle.lifecycleScope
 import com.example.medimind.data.EditMedRequest
 import com.example.medimind.network.ApiClient
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 
 class EditMedicineDetailsFragment : Fragment() {
     private lateinit var frequencyInput: EditText
@@ -156,7 +159,25 @@ class EditMedicineDetailsFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 Log.d("EditMedRequest", "Before sending request at: ${System.currentTimeMillis()}")
-                ApiClient.retrofitService.saveEditedMedication(request)
+                //cancel the deActive alarm
+                val result = ApiClient.retrofitService.saveEditedMedication(request)
+                val deactivatedIds = result["deActivatedIds"] ?: emptyList()
+                val newScheduleIds = result["newIds"] ?: emptyList()
+                for (id in result) {
+                    ReminderUtils.cancelAlarm(requireContext(), id)
+                }
+                //save edited new alarm
+                val timeMillisList = times.map { time ->
+                    val parts = time.split(":")
+                    val hour = parts[0].toInt()
+                    val minute = parts[1].toInt()
+                    val localTime = LocalTime.of(hour, minute)
+                    val zoned = localTime.atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
+                    zoned.toInstant().toEpochMilli()
+                }
+                for (timeMillis in timeMillisList) {
+                    ReminderUtils.scheduleAlarm(requireContext(), timeMillis, patientId)
+                }
                 Log.d("EditMedRequest", "After sending request at: ${System.currentTimeMillis()}")
                 Log.d("EditMedRequest", "Request sent: $request")
                 Toast.makeText(context,"Successfully save!", Toast.LENGTH_SHORT).show()
@@ -169,5 +190,4 @@ class EditMedicineDetailsFragment : Fragment() {
         }
     }
 
-    //TODO: reset alarm and notification--shiying part
 }
