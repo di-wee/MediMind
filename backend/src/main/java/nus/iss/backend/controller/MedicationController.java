@@ -130,7 +130,7 @@ public class MedicationController {
 
 
 
-    //LST: to deactivate the medication
+    //LST: to deactivate the medication and all related schedules
     @PutMapping("/{medicationId}/deactivate")
     public ResponseEntity<String> deactivateMedication(@PathVariable UUID medicationId) {
         Medication med = medicationService.findMedicineById(medicationId);
@@ -141,7 +141,11 @@ public class MedicationController {
         med.setActive(false);
         medicationService.saveMedication(med);
 
-        return ResponseEntity.ok("Medication deactivated successfully");
+        List<Schedule> schedules = scheduleService.findActiveSchedulesByMedication(med);
+
+        scheduleService.deactivateSchedules(schedules);
+
+        return ResponseEntity.ok("Medication and related schedules deactivated successfully");
     }
 
 
