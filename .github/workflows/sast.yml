@@ -38,6 +38,8 @@ jobs:
       - name: Build Spring Boot Backend
         working-directory: ./backend
         run: mvn clean package -DskipTests
+      - name: Debug Backend Output
+        run: ls -R ./backend/target
       - uses: actions/upload-artifact@v4
         with:
           name: backend-jar
@@ -47,17 +49,20 @@ jobs:
       - name: Build React Frontend
         working-directory: ./frontend
         run: |
-          npm install
-          npm run build
+          npm ci
+          CI=false npm run build
+          ls -R  # debug
       - uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: frontend/build/
+          path: build/
 
       # --- Android Build (Debug APK) ---
       - name: Build Android App (Debug APK)
         working-directory: ./android
         run: ./gradlew assembleDebug
+      - name: Debug Android Output
+        run: ls -R ./android/app/build/outputs/apk/debug
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk
