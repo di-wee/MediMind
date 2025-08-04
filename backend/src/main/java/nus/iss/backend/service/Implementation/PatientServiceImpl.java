@@ -17,31 +17,41 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class PatientImpl implements PatientService {
+public class PatientServiceImpl implements PatientService {
+
     @Autowired
-    PatientRepository patientRepo;
+    private PatientRepository patientRepo;
+
     @Autowired
     private ScheduleService scheduleService;
 
+    /**
+     * Find a patient by their UUID.
+     */
     @Override
     public Optional<Patient> findPatientById(UUID id) {
         return patientRepo.findById(id);
-
     }
 
+    /**
+     * Retrieve all medications for a given patient, including information
+     * on whether any doses have been missed.
+     */
     @Override
     public List<MissedDoseResponse> getPatientMedicationsWithMissedDose(UUID patientId) {
+        // Fetch patient, throw exception if not found
         Optional<Patient> pt = patientRepo.findById(patientId);
         if (pt.isEmpty()) {
             throw new ItemNotFound("Patient not found!");
         }
         Patient patient = pt.get();
 
+        // Retrieve medications from the patient entity
         List<Medication> medicationList = patient.getMedications();
 
+        // Convert medications to MissedDoseResponse DTOs
         return medicationList.stream()
                 .map(medication -> {
-                    //mapping medication into the new DTO Response format that includes missedDose
                     MissedDoseResponse dto = new MissedDoseResponse();
                     dto.setId(medication.getId());
                     dto.setMedicationName(medication.getMedicationName());
@@ -52,18 +62,38 @@ public class PatientImpl implements PatientService {
                     dto.setNotes(medication.getNotes());
                     dto.setTiming(medication.getTiming());
 
-                    //check missed dose using schedules
+                    // Check whether any schedule linked to this medication has a missed dose
                     boolean hasMissed = medication.getSchedules().stream()
                             .anyMatch(sch -> scheduleService.hasMissedDose(sch.getId()));
 
                     dto.setMissedDose(hasMissed);
 
                     return dto;
-
                 }).toList();
-
-
     }
 
+    /**
+     * Save a new patient to the database (used for registration).
+     */
+    @Override
+    public Patient savePatient(Patient patient) {
+        return patientRepo.save(patient);
+    }
 
+    /**
+     * Find a patient by email and password (used for login).
+     */
+    @Override
+    public Optional<Patient> findPatientByEmailAndPassword(String email, String password) {
+        return patientRepo.findByEmailAndPassword(email, password);
+    }
+
+    @Override
+    public List<Medication> getPatientMedications(UUID patientId) {
+        Optional<Patient> pt = patientRepo.findById(patientId);
+        if (pt.isEmpty()) {
+            throw new ItemNotFound("Patient not found!");
+        }
+        return pt.get().getMedications();
+    }
 }

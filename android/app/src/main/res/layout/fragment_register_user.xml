@@ -80,13 +80,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp" />
 
-        <EditText
-            android:id="@+id/inputPhone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Phone (+65xxxxxxxx)"
-            android:layout_marginTop="16dp" />
-
         <Button
             android:id="@+id/registerButton"
             android:layout_width="match_parent"
