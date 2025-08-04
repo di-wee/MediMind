@@ -15,7 +15,7 @@ data class RegisterRequest(
     val lastName: String,
     val gender: String,
     val dob: String,
-    val clinicName: String // or clinicId if you choose
+    val clinicName: String
 )
 
 // Request body for login
