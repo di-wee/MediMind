@@ -1,6 +1,7 @@
 package com.example.medimind
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -15,16 +16,21 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import com.example.medimind.network.ApiClient
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import android.graphics.Color
+import android.view.Gravity
 
 class HomeFragment : Fragment() {
 
-
-    //Pris: buttons under add new Med FAB
+    // Buttons under add new Med FAB
     private lateinit var addMedButton: FloatingActionButton
     private lateinit var cameraButton: FloatingActionButton
     private lateinit var galleryButton: FloatingActionButton
@@ -32,40 +38,36 @@ class HomeFragment : Fragment() {
     private lateinit var cameraBtnText: TextView
     private lateinit var galleryBtnText: TextView
     private lateinit var manualBtnText: TextView
-    //camera
+    // Camera image box
     private lateinit var cameraBox: ImageView
 
-
-    //Pris: adding animation for add new med button to open and close(found in res/animation file)
-    private val rotateOpen by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_open_anim)}
-    private val rotateClose by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_close_anim)}
-    private val fromBottom by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.from_bottom_anim)}
-    private val toBottom by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.to_bottom_anim)}
+    // Animations for FAB
+    private val rotateOpen by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_open_anim) }
+    private val rotateClose by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_close_anim) }
+    private val fromBottom by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.from_bottom_anim) }
+    private val toBottom by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.to_bottom_anim) }
     private var clicked = false
 
-    //Pris:camera
+    // Camera permission code and launcher
     private val CAMERA_PERMISSION_CODE = 1
     private lateinit var takePictureLauncher: ActivityResultLauncher<Uri>
     private var imageUri: Uri? = null
 
-    //Pris:gallery launcher
+    // Gallery launcher
     private lateinit var pickImageLauncher: ActivityResultLauncher<String>
     private var pendingImageUri: Uri? = null
     private var shouldNavigateToImageDetails = false
 
-
-    //Lewis: calendar
+    // Calendar formats and state
     private val dayFormat = SimpleDateFormat("EEE", Locale.getDefault())
     private val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
     private val fullDateFormat = SimpleDateFormat("dd MMM", Locale.getDefault())
     private var selectedDateView: View? = null
     private var selectedCalendar: Calendar? = null
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Camera result
         takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { result ->
             if (result && imageUri != null) {
                 pendingImageUri = imageUri
@@ -73,7 +75,6 @@ class HomeFragment : Fragment() {
             }
         }
 
-// Gallery result
         pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             if (uri != null) {
                 pendingImageUri = uri
@@ -85,19 +86,49 @@ class HomeFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_home, container, false)
-    }
+    ): View? = inflater.inflate(R.layout.fragment_home, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Top navbar greeting
-        val greeting = view.findViewById<TextView>(R.id.topGreetingText)
-        greeting.text = "Hello, Grandpa"
+        // Top navbar greeting (updated to fetch firstName)
+        val greetingTextView = view.findViewById<TextView>(R.id.topGreetingText)
 
-        // Logout action
+        val sharedPref = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val patientId = sharedPref.getString("patientId", null)
+
+        if (patientId != null) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val profile = ApiClient.retrofitService.getPatient(patientId)
+                    greetingTextView.text = "Hello, ${profile.firstName}"
+                } catch (e: Exception) {
+                    greetingTextView.text = "Hello"
+                    Toast.makeText(
+                        requireContext(),
+                        "Failed to load profile: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        } else {
+            greetingTextView.text = "Hello"
+        }
+
+        // Logout button: clear session and navigate to login
         val logoutButton = view.findViewById<Button>(R.id.logoutButton)
         logoutButton.setOnClickListener {
-            findNavController().navigate(R.id.action_mainFragment_to_loginFragment)
+            // 1. Clear SharedPreferences
+            val editor = sharedPref.edit()
+            editor.clear()
+            editor.apply()
+
+            Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
+
+            // 2. Navigate back to login screen and clear the back stack
+            val navController = requireActivity().findNavController(R.id.nav_host_fragment)
+            val navOptions = androidx.navigation.NavOptions.Builder()
+                .setPopUpTo(R.id.mainFragment, true) // Clear everything up to mainFragment
+                .build()
+            navController.navigate(R.id.loginFragment, null, navOptions)
         }
 
         // Today label
@@ -108,14 +139,14 @@ class HomeFragment : Fragment() {
         val calendarStrip = view.findViewById<LinearLayout>(R.id.calendarStrip)
         populateCalendarStrip(calendarStrip)
 
-        // add Medication Button
+        // Buttons
         addMedButton = view.findViewById(R.id.addMedButton)
         cameraButton = view.findViewById(R.id.cameraButton)
         galleryButton = view.findViewById(R.id.galleryButton)
         manualButton = view.findViewById(R.id.manualButton)
-        cameraBtnText = view.findViewById<TextView>(R.id.cameraBtnText)
-        galleryBtnText = view.findViewById<TextView>(R.id.galleryBtnText)
-        manualBtnText = view.findViewById<TextView>(R.id.manualBtnText)
+        cameraBtnText = view.findViewById(R.id.cameraBtnText)
+        galleryBtnText = view.findViewById(R.id.galleryBtnText)
+        manualBtnText = view.findViewById(R.id.manualBtnText)
 
         addMedButton.setOnClickListener { onAddMedButtonClicked() }
 
@@ -129,35 +160,27 @@ class HomeFragment : Fragment() {
             Toast.makeText(requireContext(), "Gallery button clicked", Toast.LENGTH_SHORT).show()
         }
 
-        //it was being set to use parentFragmentManager instead of nav controller
         manualButton.setOnClickListener {
-            val fragment = NewMedManualFragment()
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.main_fragment_container, fragment)
-                .addToBackStack(null)
-                .commit()
+            // Navigate to manual medication entry fragment
+            findNavController().navigate(R.id.action_homeFragment_to_newMedManualFragment)
         }
 
-        //camera
+        // Camera image box
         cameraBox = view.findViewById(R.id.cameraBox)
     }
 
-    //Pris:adding camera
-    //create URI to save the camera photo
     private fun createUri(): Uri {
         val imageFile = File(requireContext().filesDir, "camera_photo.jpg")
         return FileProvider.getUriForFile(
             requireContext(),
-            "${requireActivity().packageName}.fileprovider",  // Match your AndroidManifest
+            "${requireActivity().packageName}.fileprovider",
             imageFile
         )
     }
 
-    //camera permission check and launch
     private fun checkCameraPermissionAndOpenCamera() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
+            != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                 requireActivity(),
                 arrayOf(Manifest.permission.CAMERA),
@@ -170,31 +193,19 @@ class HomeFragment : Fragment() {
         }
     }
 
-    //handle camera permission result
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == CAMERA_PERMISSION_CODE &&
-            grantResults.isNotEmpty() &&
-            grantResults[0] == PackageManager.PERMISSION_GRANTED
-        ) {
+            grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             val uri = createUri()
             imageUri = uri
-            takePictureLauncher.launch(uri) // <- Non-null Uri
+            takePictureLauncher.launch(uri)
         } else {
-            Toast.makeText(requireContext(), "Please allow camera permission", Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(requireContext(), "Please allow camera permission", Toast.LENGTH_SHORT).show()
         }
     }
-
-//        val addMedButton = view.findViewById<Button>(R.id.addMedButton)
-//        addMedButton.setOnClickListener {
-//            Toast.makeText(context, "Add a med clicked", Toast.LENGTH_SHORT).show()
-//        }
-
 
     private fun populateCalendarStrip(calendarLayout: LinearLayout) {
         val today = Calendar.getInstance()
@@ -205,60 +216,64 @@ class HomeFragment : Fragment() {
         for (i in 0..6) {
             val dayCopy = calendar.clone() as Calendar
 
-            val dayView = TextView(requireContext()).apply {
-                val day = dayFormat.format(dayCopy.time)
-                val date = dateFormat.format(dayCopy.time)
-                text = "$day\n$date"
-                setPadding(24, 8, 24, 8)
-                textAlignment = View.TEXT_ALIGNMENT_CENTER
-
-                setOnClickListener {
-                    selectedDateView?.setBackgroundColor(0x00000000)
-                    (selectedDateView as? TextView)?.setTextColor(
-                        ContextCompat.getColor(requireContext(), android.R.color.black)
-                    )
-
-                    setBackgroundColor(
-                        ContextCompat.getColor(
-                            requireContext(),
-                            android.R.color.holo_blue_light
-                        )
-                    )
-                    setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
-
-                    selectedDateView = this
-                    selectedCalendar = dayCopy
-
-                    Toast.makeText(
-                        context,
-                        "Selected: ${SimpleDateFormat("EEE, dd MMM").format(dayCopy.time)}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
-                if (isSameDay(dayCopy, today)) {
-                    post { performClick() }
-                } else {
-                    setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
-                }
+            val container = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER_HORIZONTAL
+                setPadding(16, 8, 16, 8)
             }
 
-            calendarLayout.addView(dayView)
+            val dayText = TextView(requireContext()).apply {
+                text = dayFormat.format(dayCopy.time)
+                textSize = 14f
+                setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+                gravity = Gravity.CENTER
+            }
+
+            val dateText = TextView(requireContext()).apply {
+                text = dateFormat.format(dayCopy.time)
+                textSize = 14f
+                setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+                gravity = Gravity.CENTER
+            }
+
+            container.addView(dayText)
+            container.addView(dateText)
+
+            container.setOnClickListener {
+                (selectedDateView as? LinearLayout)?.let { prev ->
+                    val prevDate = prev.getChildAt(1) as TextView
+                    prevDate.background = null
+                    prevDate.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+                    val prevDay = prev.getChildAt(0) as TextView
+                    prevDay.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+                }
+
+                dateText.background = ContextCompat.getDrawable(requireContext(), R.drawable.circle_blue_bg)
+                dateText.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+                dayText.setTextColor(Color.parseColor("#1E88E5")) // blue text for selected day
+
+                selectedDateView = container
+                selectedCalendar = dayCopy
+            }
+
+            if (isSameDay(dayCopy, today)) {
+                container.post { container.performClick() }
+            }
+
+            calendarLayout.addView(container)
             calendar.add(Calendar.DAY_OF_MONTH, 1)
         }
     }
 
-    private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean {
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+    private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean =
+        cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
-    }
 
     private fun onAddMedButtonClicked() {
         setVisibility(clicked)
         setAnimation(clicked)
         clicked = !clicked
     }
-
 
     private fun setVisibility(clicked: Boolean) {
         if (!clicked) {
@@ -276,7 +291,6 @@ class HomeFragment : Fragment() {
             galleryBtnText.visibility = View.INVISIBLE
             manualBtnText.visibility = View.INVISIBLE
         }
-
     }
 
     private fun setAnimation(clicked: Boolean) {
@@ -297,37 +311,19 @@ class HomeFragment : Fragment() {
             manualBtnText.startAnimation(toBottom)
             addMedButton.startAnimation(rotateClose)
         }
-
     }
 
     override fun onResume() {
         super.onResume()
 
-        //childFragmentManager was being used, NavController was bypassed and is not opening HomeFragment
-        //hence have to Call mainFragment to open imageDetailsFragment
-        //i am navigating camera,photogallery and manualKeyIn from homeFragment to imageDetailsFragment
         if (shouldNavigateToImageDetails && pendingImageUri != null) {
-            val fragment = ImageDetailsFragment().apply {
-                arguments = Bundle().apply {
-                    putString("imageUri", pendingImageUri.toString())
-                }
+            val bundle = Bundle().apply {
+                putString("imageUri", pendingImageUri.toString())
             }
-
-            val parent = parentFragment
-            if (parent is MainFragment) {
-                parent.openFragment(fragment)  //use MainFragment's method to open
-            } else {
-                Toast.makeText(requireContext(), "Failed to open image details", Toast.LENGTH_SHORT).show()
-            }
+            findNavController().navigate(R.id.action_homeFragment_to_imageDetailsFragment, bundle)
 
             shouldNavigateToImageDetails = false
             pendingImageUri = null
         }
     }
-
 }
-
-
-
-
-

@@ -1,31 +1,39 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:background="@color/lavender_background"
-    android:padding="16dp"
-    android:gravity="center_vertical"
-    android:baselineAligned="false">
+    android:minHeight="72dp"
+    android:background="#1E88E5"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp">
 
+    <!-- Greeting / Username -->
     <TextView
         android:id="@+id/topGreetingText"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_weight="1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_centerVertical="true"
         android:text="Hello, Grandpa"
-        android:textColor="@android:color/black"
-        android:textSize="25sp"
+        android:textColor="@android:color/white"
+        android:textSize="22sp"
         android:textStyle="bold" />
 
-    <Button
+    <!-- Logout Button -->
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/logoutButton"
         android:layout_width="wrap_content"
-        android:layout_height="36dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/logout_button_white_bg"
+        android:drawableStart="@drawable/ic_logout"
+        android:drawablePadding="8dp"
         android:text="Logout"
         android:textSize="14sp"
-        android:textColor="@android:color/black"
-        android:background="@drawable/logout_button_bg"
+        android:textColor="#1E88E5"
         android:textAllCaps="false"
-        android:paddingHorizontal="16dp"/>
-</LinearLayout>
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"/>
+</RelativeLayout>

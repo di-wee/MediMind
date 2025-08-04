@@ -1,10 +1,13 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/app_background_light"
     android:gravity="top">
 
     <!-- Top NavBar (Hello + Logout Button) -->
@@ -13,157 +16,156 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <!-- Static App Welcome -->
-    <TextView
-        android:text="Welcome to MediMind"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"/>
-
-        <!-- Horizontal Calendar Strip -->
-    <HorizontalScrollView
+    <!-- Scroll container for content below the navbar -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:layout_marginBottom="16dp">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:paddingBottom="72dp">  <!-- Added bottom padding to prevent overlap -->
 
         <LinearLayout
-            android:id="@+id/calendarStrip"
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </HorizontalScrollView>
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <!-- Today Label -->
-    <TextView
-        android:id="@+id/todayLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Today, 24 Jul"
-        android:textStyle="italic"
-        android:textSize="16sp"
-        android:layout_marginBottom="24dp" />
+            <!-- Horizontal Calendar Strip container -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/white"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginBottom="8dp">
 
-    <!-- Add new Med Button to push it to bottom (Pris edited) -->
-<!--    <Button-->
-<!--        android:id="@+id/addMedButton"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="Add a med"-->
-<!--        android:layout_margin="16dp"/>-->
+                <!-- Horizontal Calendar Strip -->
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none"
+                    android:fillViewport="true"
+                    android:layout_marginBottom="8dp">
 
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+                    <LinearLayout
+                        android:id="@+id/calendarStrip"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </HorizontalScrollView>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+                <!-- Today Label -->
+                <TextView
+                    android:id="@+id/todayLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Today, 24 Jul"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@color/md_theme_light_primary"
+                    android:layout_marginBottom="8dp" />
+            </LinearLayout>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/addMedButton"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/add_new_med"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:contentDescription="Add new med"
-            android:focusable="true"
-            tools:layout_editor_absoluteX="291dp"
-            tools:layout_editor_absoluteY="386dp" />
+            <!-- Bottom FAB container -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/addBtnText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:text="Add New Med"
-            app:layout_constraintBottom_toBottomOf="@+id/addMedButton"
-            app:layout_constraintEnd_toStartOf="@+id/addMedButton"
-            app:layout_constraintTop_toTopOf="@+id/addMedButton"
-            app:layout_constraintVertical_bias="0.513" />
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/addMedButton"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginBottom="24dp"
+                    app:srcCompat="@drawable/add_new_med"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:contentDescription="Add new med"
+                    android:focusable="true" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/cameraButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/design_default_color_background"
-            android:visibility="invisible"
-            android:clickable="true"
-            android:focusable="true"
-            app:srcCompat="@drawable/camera"
-            app:layout_constraintBottom_toTopOf="@+id/addMedButton"
-            app:layout_constraintEnd_toEndOf="@+id/addMedButton"
-            tools:layout_editor_absoluteX="308dp"
-            tools:layout_editor_absoluteY="526dp" />
+                <TextView
+                    android:id="@+id/addBtnText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:text="Add New Med"
+                    app:layout_constraintBottom_toBottomOf="@+id/addMedButton"
+                    app:layout_constraintEnd_toStartOf="@+id/addMedButton"
+                    app:layout_constraintTop_toTopOf="@+id/addMedButton"
+                    app:layout_constraintVertical_bias="0.513" />
 
-        <TextView
-            android:id="@+id/cameraBtnText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:text="Camera"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@+id/cameraButton"
-            app:layout_constraintEnd_toStartOf="@+id/cameraButton"
-            app:layout_constraintTop_toTopOf="@+id/cameraButton"/>
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/cameraButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/design_default_color_background"
+                    android:visibility="invisible"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:srcCompat="@drawable/camera"
+                    app:layout_constraintBottom_toTopOf="@+id/addMedButton"
+                    app:layout_constraintEnd_toEndOf="@+id/addMedButton" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/galleryButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/design_default_color_background"
-            android:visibility="invisible"
-            android:clickable="true"
-            android:focusable="true"
-            app:srcCompat="@drawable/gallery"
-            app:layout_constraintBottom_toTopOf="@+id/cameraButton"
-            app:layout_constraintEnd_toEndOf="@+id/cameraButton"
-            tools:layout_editor_absoluteX="308dp"
-            tools:layout_editor_absoluteY="448dp" />
+                <TextView
+                    android:id="@+id/cameraBtnText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:text="Camera"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/cameraButton"
+                    app:layout_constraintEnd_toStartOf="@+id/cameraButton"
+                    app:layout_constraintTop_toTopOf="@+id/cameraButton" />
 
-        <TextView
-            android:id="@+id/galleryBtnText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:text="Gallery"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@+id/galleryButton"
-            app:layout_constraintEnd_toStartOf="@+id/galleryButton"
-            app:layout_constraintTop_toTopOf="@+id/galleryButton"/>
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/galleryButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/design_default_color_background"
+                    android:visibility="invisible"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:srcCompat="@drawable/gallery"
+                    app:layout_constraintBottom_toTopOf="@+id/cameraButton"
+                    app:layout_constraintEnd_toEndOf="@+id/cameraButton" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/manualButton"
-            app:layout_constraintBottom_toTopOf="@+id/galleryButton"
-            app:layout_constraintEnd_toEndOf="@+id/galleryButton"
-            app:srcCompat="@drawable/manual_key_in"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/design_default_color_background"
-            android:clickable="true"
-            android:focusable="true"
-            android:visibility="invisible"
-            tools:layout_editor_absoluteX="291dp"
-            tools:layout_editor_absoluteY="386dp" />
+                <TextView
+                    android:id="@+id/galleryBtnText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:text="Gallery"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/galleryButton"
+                    app:layout_constraintEnd_toStartOf="@+id/galleryButton"
+                    app:layout_constraintTop_toTopOf="@+id/galleryButton" />
 
-        <TextView
-            android:id="@+id/manualBtnText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:text="Key in Manually"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@+id/manualButton"
-            app:layout_constraintEnd_toStartOf="@+id/manualButton"
-            app:layout_constraintTop_toTopOf="@+id/manualButton"/>
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/manualButton"
+                    app:layout_constraintBottom_toTopOf="@+id/galleryButton"
+                    app:layout_constraintEnd_toEndOf="@+id/galleryButton"
+                    app:srcCompat="@drawable/manual_key_in"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/design_default_color_background"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="invisible" />
 
+                <TextView
+                    android:id="@+id/manualBtnText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:text="Key in Manually"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/manualButton"
+                    app:layout_constraintEnd_toStartOf="@+id/manualButton"
+                    app:layout_constraintTop_toTopOf="@+id/manualButton" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

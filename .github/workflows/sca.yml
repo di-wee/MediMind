@@ -2,7 +2,12 @@ name: "SCA - Dependency Vulnerability Scan"
 
 on:
   push:
-    branches: [main]
+    branches: 
+      - main
+      - frontend-(react)
+      - backend-(java-springboot)
+      - machine-learning
+      - android
 
 jobs:
   sca:

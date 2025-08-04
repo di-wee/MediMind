@@ -5,13 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
-import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.medimind.databinding.FragmentWebviewBinding
 import android.util.Log
 import android.widget.Toast
-
 
 class WebViewFragment : Fragment() {
 
@@ -28,11 +27,11 @@ class WebViewFragment : Fragment() {
         return binding.root
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        url = arguments?.getString(Constants.EXTERNAL_URL)
+        // Use literal string "EXTERNAL_URL" here to get the URL argument
+        url = arguments?.getString("EXTERNAL_URL")
 
         Log.d("WebViewFragment", "Received URL: $url")
         Toast.makeText(requireContext(), "Loading: $url", Toast.LENGTH_SHORT).show()
@@ -41,7 +40,7 @@ class WebViewFragment : Fragment() {
         binding.webview.settings.javaScriptEnabled = true
 
         binding.webview.webChromeClient = object : WebChromeClient() {
-            override fun onProgressChanged(view: WebView?, newProgress: Int) {
+            override fun onProgressChanged(view: android.webkit.WebView?, newProgress: Int) {
                 binding.progressBar.visibility = if (newProgress == 100) View.GONE else View.VISIBLE
                 binding.progressBar.progress = newProgress
             }
@@ -56,24 +55,12 @@ class WebViewFragment : Fragment() {
         }
 
         binding.btnBackWebView.setOnClickListener {
-            requireActivity().supportFragmentManager.popBackStack()
-            }
+            findNavController().popBackStack()
+        }
     }
-
-
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    companion object {
-        fun newInstance(url: String): WebViewFragment {
-            val fragment = WebViewFragment()
-            val args = Bundle()
-            args.putString(Constants.EXTERNAL_URL, url)
-            fragment.arguments = args
-            return fragment
-        }
     }
 }
