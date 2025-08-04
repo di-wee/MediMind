@@ -6,9 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.navigation.fragment.findNavController
+import android.widget.TextView
+
 
 class NewMedManualFragment : Fragment() {
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,18 +24,22 @@ class NewMedManualFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_new_med_manual, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view:View, savedInstanceState: Bundle?){
         super.onViewCreated(view, savedInstanceState)
 
         val backBtnFromManual = view.findViewById<Button>(R.id.btnBackFromManual)
-        backBtnFromManual.setOnClickListener {
-            // Use NavController to navigate back
-            findNavController().navigateUp()
+        backBtnFromManual.setOnClickListener{
+            parentFragmentManager.popBackStack()
         }
 
+        val medicationName = view.findViewById<TextView>(R.id.medicationNameInputManual)
+        val dosage = view.findViewById<TextView>(R.id.dosageInputManual)
+        val frequency = view.findViewById<TextView>(R.id.frequencyInputManual)
+
         val saveBtnFromManual = view.findViewById<Button>(R.id.btnSaveFromManual)
-        saveBtnFromManual.setOnClickListener {
-            // TODO: Implement saving logic to database
+        saveBtnFromManual.setOnClickListener{
+            //toDo and save info to database
+
         }
     }
 }
