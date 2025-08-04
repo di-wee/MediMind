@@ -2,7 +2,12 @@ name: "Linting CI"
 
 on:
   push:
-    branches: [main]
+    branches: 
+      - main
+      - frontend-(react)
+      - backend-(java-springboot)
+      - machine-learning
+      - android
 
 jobs:
   lint:
