@@ -113,6 +113,9 @@ interface ApiService {
     @GET("api/patients/{patientId}/intake-history")
     suspend fun getIntakeHistory(@Path("patientId") patientId: String): List<IntakeHistoryResponse>
 
+    //LST: deactivate medication
+    @PUT("api/medication/{medicationId}/deactivate")
+    suspend fun deactivateMedication(@Path("medicationId") medId: String): ResponseBody
 
 
 }
