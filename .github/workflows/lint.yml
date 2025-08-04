@@ -84,6 +84,7 @@ jobs:
       - name: Build React Frontend
         working-directory: ./frontend
         run: |
+          npm install
           npm run build
       - uses: actions/upload-artifact@v4
         with:
