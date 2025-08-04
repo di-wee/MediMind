@@ -1,5 +1,6 @@
 package nus.iss.backend.service.Implementation;
 
+import nus.iss.backend.dto.ScheduleResponse; // added for Android API to use
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.model.Medication;
@@ -7,8 +8,6 @@ import nus.iss.backend.model.Patient;
 import nus.iss.backend.model.Schedule;
 import nus.iss.backend.repository.ScheduleRepository;
 import nus.iss.backend.service.ScheduleService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +20,14 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class ScheduleImpl implements ScheduleService {
+
     private static final Logger logger = LoggerFactory.getLogger(ScheduleImpl.class);
+
     @Autowired
     ScheduleRepository scheduleRepo;
 
@@ -38,7 +40,7 @@ public class ScheduleImpl implements ScheduleService {
         Schedule schedule = sch.get();
         List<IntakeHistory> historyList = schedule.getIntakeHistory();
 
-        //if theres no intake history, then theres no missed dose
+        // if there's no intake history, then there's no missed dose
         if (historyList == null || historyList.isEmpty()) {
             return false;
         }
@@ -48,17 +50,14 @@ public class ScheduleImpl implements ScheduleService {
         int currentMonth = today.getMonthValue();
         int currentYear = today.getYear();
 
-        //so first filtering for intake logs of current month and year and checking if any of it
-        //has isTaken false (means its been missed), if yes, return true
+        // filter intake logs of current month/year and check if any isTaken == false
         return historyList.stream()
                 .filter(hx ->
-                                hx.getLoggedDate() != null &&
-                                        hx.getLoggedDate().getMonthValue() == currentMonth &&
-                                        hx.getLoggedDate().getYear() == currentYear
-                        )
+                        hx.getLoggedDate() != null &&
+                        hx.getLoggedDate().getMonthValue() == currentMonth &&
+                        hx.getLoggedDate().getYear() == currentYear
+                )
                 .anyMatch(hx -> !hx.isTaken());
-
-
     }
 
     @Override
@@ -76,13 +75,13 @@ public class ScheduleImpl implements ScheduleService {
         return scheduleRepo.findByMedicationAndIsActiveTrue(medication);
     }
 
-    //this is to keep DB clean, check and delete those too old and inactive schedule data
-    //also make sure related intake history will be deleted at same time
+    // this is to keep DB clean, check and delete too old and inactive schedule data
+    // also make sure related intake history will be deleted at same time
     @Override
     public void deleteOldInactiveSchedules(Medication medication, LocalDateTime cutoffDate) {
         List<Schedule> oldSchedules = scheduleRepo.findByMedicationAndIsActiveFalseAndCreationDateBefore(medication, cutoffDate);
         for (Schedule s : oldSchedules) {
-            s.getIntakeHistory().size();
+            s.getIntakeHistory().size(); // force loading intake history
             scheduleRepo.delete(s);
         }
     }
@@ -106,4 +105,19 @@ public class ScheduleImpl implements ScheduleService {
         return scheduleRepo.save(s);
     }
 
+    // For Android Android API to get all active recurring daily schedules for a patient
+    @Override
+    public List<ScheduleResponse> getDailyScheduleForPatient(UUID patientId) {
+        List<Schedule> schedules = scheduleRepo.findActiveSchedulesByPatientId(patientId);
+
+        // map Schedule → ScheduleResponse for Android consumption
+        return schedules.stream().map(schedule -> {
+            ScheduleResponse dto = new ScheduleResponse();
+            dto.setScheduledTime(schedule.getScheduledTime().toString());
+            dto.setMedicationName(schedule.getMedication().getMedicationName());
+            dto.setQuantity(schedule.getMedication().getIntakeQuantity()); // if not available, use 1
+            dto.setIsActive(schedule.getIsActive());
+            return dto;
+        }).collect(Collectors.toList());
+    }
 }
