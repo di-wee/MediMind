@@ -1,9 +1,12 @@
 package nus.iss.backend.service;
 
+import nus.iss.backend.dto.NERModelOutput;
 import nus.iss.backend.model.Medication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,4 +21,7 @@ public interface MedicationService {
     Medication findMedicineById (UUID medicationId);
 
     Medication saveMedication(Medication medication);
+
+    // For OCR + NER integration
+    NERModelOutput sendToFastAPI(MultipartFile file) throws IOException;
 }

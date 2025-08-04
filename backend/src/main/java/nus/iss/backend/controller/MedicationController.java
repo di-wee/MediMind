@@ -3,6 +3,7 @@ package nus.iss.backend.controller;
 import nus.iss.backend.dao.IntakeReqMobile;
 import nus.iss.backend.dao.MedicationIdList;
 import nus.iss.backend.dto.EditMedicationRequest;
+import nus.iss.backend.dto.NERModelOutput;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.model.Medication;
@@ -18,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -146,6 +149,12 @@ public class MedicationController {
         scheduleService.deactivateSchedules(schedules);
 
         return ResponseEntity.ok("Medication and related schedules deactivated successfully");
+    }
+
+    @PostMapping("/predict")
+    public ResponseEntity<NERModelOutput> predict(@RequestParam("file") MultipartFile file) throws IOException {
+        NERModelOutput result = medicationService.sendToFastAPI(file);
+        return ResponseEntity.ok(result);
     }
 
 
