@@ -49,13 +49,13 @@ jobs:
       - name: Build React Frontend
         working-directory: ./frontend
         run: |
-          npm ci
-          CI=false npm run build
+          npm install
+          npm run build
           ls -R  # debug
       - uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: build/
+          path: dist/
 
       # --- Android Build (Debug APK) ---
       - name: Build Android App (Debug APK)
