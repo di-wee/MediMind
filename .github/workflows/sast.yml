@@ -63,5 +63,10 @@ jobs:
         with:
           languages: java,javascript
 
+      # --- Build Step for Java ---
+      - name: Build Java for CodeQL
+        working-directory: ./backend
+        run: mvn clean compile -DskipTests
+      
       - name: Analyze with CodeQL
         uses: github/codeql-action/analyze@v3
