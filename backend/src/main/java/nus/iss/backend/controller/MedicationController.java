@@ -130,6 +130,20 @@ public class MedicationController {
 
 
 
+    //LST: to deactivate the medication
+    @PutMapping("/{medicationId}/deactivate")
+    public ResponseEntity<String> deactivateMedication(@PathVariable UUID medicationId) {
+        Medication med = medicationService.findMedicineById(medicationId);
+        if (med == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Medication not found");
+        }
+
+        med.setActive(false);
+        medicationService.saveMedication(med);
+
+        return ResponseEntity.ok("Medication deactivated successfully");
+    }
+
 
 
 }
