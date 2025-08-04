@@ -10,8 +10,6 @@ data class MedicationResponse(
     val timing: String?,
     val instructions: String?,
     val notes:String?,
-    @SerializedName("active")
-    val isActive: Boolean,
-    @SerializedName("missedDose")
-    val missedDose:Boolean
+    val active: Boolean,
+    val scheduleIds: List<String>
 )
