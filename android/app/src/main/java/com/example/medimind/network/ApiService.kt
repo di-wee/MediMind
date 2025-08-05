@@ -77,6 +77,13 @@ data class EmbeddedClinics(
     val clinics: List<ClinicResponse>
 )
 
+data class ScheduleItem(
+    val scheduledTime: String,
+    val medicationName: String,
+    val quantity: String,
+    val isActive: Boolean
+)
+
 data class newMedicationRequest(
     val medicationName:String,
     val patientId: String,
@@ -203,4 +210,7 @@ interface ApiService {
     @POST("api/medication/createMedLog")
     suspend fun createMedicationLog(@Body request: IntakeMedRequest): IntakeResponse
 
+    // Get daily recurring medication schedule
+    @GET("api/schedule/daily/{patientId}")
+    suspend fun getDailySchedule(@Path("patientId") patientId: String): List<ScheduleItem>
 }

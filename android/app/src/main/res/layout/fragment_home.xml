@@ -68,6 +68,19 @@
                     android:layout_marginBottom="8dp" />
             </LinearLayout>
 
+            <!-- RecyclerView for medication schedule -->
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/scheduleRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                />
+            <!-- End new block -->
+
             <!-- Bottom FAB container -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"

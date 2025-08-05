@@ -1,6 +1,9 @@
 package nus.iss.backend.controller;
 
-import nus.iss.backend.dao.*;
+import nus.iss.backend.dao.IntakeLogResponseWeb;
+import nus.iss.backend.dao.IntakeReqMobile;
+import nus.iss.backend.dao.MedicationIdList;
+import nus.iss.backend.dao.ImageOutput;
 import nus.iss.backend.dto.EditMedicationRequest;
 import nus.iss.backend.dto.newMedicationReq;
 import nus.iss.backend.exceptions.ItemNotFound;
@@ -18,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +89,6 @@ public class MedicationController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
     //for my edit  med detail page to show frequency and timer
     @GetMapping("{medicationId}/edit")
     public ResponseEntity<?> getMedicationEditDetails(@PathVariable UUID medicationId) {
@@ -108,6 +112,12 @@ public class MedicationController {
 
     @PostMapping("/edit/save")
     public ResponseEntity<?> saveEditMedication(@RequestBody EditMedicationRequest req) {
+        // time format validation
+        for (String timeStr : req.getTimes()) {
+            if (!timeStr.matches("^\\d{4}$") && !timeStr.matches("^\\d{2}:\\d{2}$")) {
+                return ResponseEntity.badRequest().body("Invalid time format: " + timeStr);
+            }
+        }
         Medication med = medicationService.findMedicineById(req.getMedicationId());
         if (med == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Medication not found");
@@ -145,9 +155,15 @@ public class MedicationController {
         response.setNewSchedules(newSchedules);
         response.setDeActivatedIds(deactivatedScheduleIds);
         return ResponseEntity.ok(response);
-     }
 
-
+        try {
+            return medicationService.processEditMedication(req);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to save medication details");
+        }
+    }
 
     @GetMapping("/{medicationId}/logs")
     public ResponseEntity<List<IntakeLogResponseWeb>> getMedicationLog(@PathVariable UUID medicationId) {
@@ -155,7 +171,7 @@ public class MedicationController {
             List<IntakeLogResponseWeb> response = intakeHistoryService.getIntakeLogsForMedication(medicationId);
             return new ResponseEntity<>(response, HttpStatus.OK);
 
-        }catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             logger.error("Error in retrieving logs for medication(" + medicationId + ").");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
@@ -186,5 +202,30 @@ public class MedicationController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+// LST: to deactivate the medication and all related schedules
+@PutMapping("/{medicationId}/deactivate")
+public ResponseEntity<String> deactivateMedication(@PathVariable UUID medicationId) {
+    Medication med = medicationService.findMedicineById(medicationId);
+    if (med == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Medication not found");
+    }
+
+    med.setActive(false);
+    medicationService.saveMedication(med);
+
+    List<Schedule> schedules = scheduleService.findActiveSchedulesByMedication(med);
+
+    scheduleService.deactivateSchedules(schedules);
+
+    return ResponseEntity.ok("Medication and related schedules deactivated successfully");
+}
+
+// Pris: prediction from the ML model
+@PostMapping("/predict")
+public ResponseEntity<ImageOutput> predict(@RequestParam("file") MultipartFile file) throws IOException {
+    ImageOutput result = medicationService.sendToFastAPI(file);
+    return ResponseEntity.ok(result);
+}
+
 
 }

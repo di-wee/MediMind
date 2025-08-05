@@ -2,6 +2,7 @@ package nus.iss.backend.controller;
 
 import nus.iss.backend.dao.ScheduleFindResponse;
 import nus.iss.backend.dao.ScheduleListReq;
+import nus.iss.backend.dto.ScheduleResponse; // ✅ Import the Android DTO
 import nus.iss.backend.model.Schedule;
 import nus.iss.backend.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @CrossOrigin
 @RestController
 @RequestMapping("/api/schedule")
 public class ScheduleController {
+
     @Autowired
     ScheduleService scheduleService;
 
@@ -44,3 +47,15 @@ public class ScheduleController {
     }
 }
 
+    // ✅ [Android API] Get daily schedule for a patient (recurring daily times)
+    @GetMapping("/daily/{patientId}")
+    public ResponseEntity<List<ScheduleResponse>> getDailySchedule(
+            @PathVariable UUID patientId
+    ) {
+        List<ScheduleResponse> dailySchedule = scheduleService.getDailyScheduleForPatient(patientId);
+        if (dailySchedule.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return ResponseEntity.ok(dailySchedule);
+    }
+}
