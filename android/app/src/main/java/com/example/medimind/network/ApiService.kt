@@ -85,11 +85,10 @@ data class newMedicationRequest(
     val patientId: String,
     val dosage: String,
     val frequency: Int,
-    val Timing:String,
     val instructions:String,
     val notes:String,
     val isActive:Boolean,
-    val times:String
+    val time:String
     )
 
 data class MedicationIdListRequest(
@@ -191,7 +190,7 @@ interface ApiService {
     suspend fun getMedications(@Body request: MedicationIdListRequest): List<MedResponse>
 
     // save new medication
-    @PUT("api/medication/save")
+    @POST("api/medication/save")
     suspend fun saveMedication(@Body request: newMedicationRequest): SaveMedicationResponse
 
     //get active schedule list by timeMillis & patientId

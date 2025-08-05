@@ -159,7 +159,7 @@ public class MedicationController {
             saveResponse.setMedId(med.getId());
             return ResponseEntity.ok(saveResponse);
         }catch (RuntimeException e) {
-            logger.error(e.getMessage());
+            logger.error("Exception occurred:", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

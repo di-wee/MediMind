@@ -192,7 +192,6 @@ public class MedicationImpl implements MedicationService {
         med.setIntakeQuantity(req.getDosage());
         med.setFrequency(req.getFrequency());
         med.setNotes(req.getNotes());
-        med.setTiming(req.getTiming());
         med.setInstructions(req.getInstructions());
         med.setPatients(patients);
         medicationRepo.save(med);

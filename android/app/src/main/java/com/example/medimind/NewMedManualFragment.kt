@@ -77,11 +77,10 @@ class NewMedManualFragment : Fragment() {
                             patientId = patientId,
                             dosage = dosage,
                             frequency = frequency,
-                            Timing = "",
                             instructions = instruction,
                             notes = note,
                             isActive = true,
-                            times = time
+                            time = time
                         )
                         val saveMedicationResponse = service.saveMedication(request)
                         //convert generated times to timeMillis List
@@ -117,7 +116,7 @@ class NewMedManualFragment : Fragment() {
                     val timeInMinutes = 540 + i * freqGap
                     val hour = timeInMinutes / 60
                     val minute = timeInMinutes % 60
-                    val timeStr = String.format("%02d%02d", hour, minute)  // HHMM format
+                    val timeStr = String.format("%02d:%02d", hour, minute)  // HH:MM format
                     times.add(timeStr)
                 }
             }
@@ -129,18 +128,16 @@ class NewMedManualFragment : Fragment() {
     fun convertToScheduleList(time: String): Long {
 
         val now = Calendar.getInstance()
-            val hour = time.substring(0, 2).toInt()
-            val minute = time.substring(2, 4).toInt()
-
-            val cal = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, hour)
-                set(Calendar.MINUTE, minute)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-                if (before(now)) {
+        val (hour, minute) = time.split(":").map { it.toInt() }
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+            if (before(now)) {
                     add(Calendar.DATE, 1)
-                }
             }
+        }
             return cal.timeInMillis
     }
 
