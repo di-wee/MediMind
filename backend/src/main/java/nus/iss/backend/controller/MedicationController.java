@@ -1,9 +1,6 @@
 package nus.iss.backend.controller;
 
-import nus.iss.backend.dao.IntakeLogResponseWeb;
-import nus.iss.backend.dao.IntakeReqMobile;
-import nus.iss.backend.dao.MedicationIdList;
-import nus.iss.backend.dao.ImageOutput;
+import nus.iss.backend.dao.*;
 import nus.iss.backend.dto.EditMedicationRequest;
 import nus.iss.backend.dto.newMedicationReq;
 import nus.iss.backend.exceptions.ItemNotFound;
@@ -118,44 +115,6 @@ public class MedicationController {
                 return ResponseEntity.badRequest().body("Invalid time format: " + timeStr);
             }
         }
-        Medication med = medicationService.findMedicineById(req.getMedicationId());
-        if (med == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Medication not found");
-        }
-
-        Optional<Patient> patientOpt = patientService.findPatientById(req.getPatientId());
-        if (patientOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patient not found");
-        }
-        Patient patient = patientOpt.get();
-
-        //every time will clean all inactive schedules(created more than 90 days) and related intakeHistory
-        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(90);
-        scheduleService.deleteOldInactiveSchedules(med, cutoffDate);
-
-        //then deactivate the active schedules before create new ones
-        List<Schedule> activeSchedules = scheduleService.findActiveSchedulesByMedication(med);
-        List<UUID> deactivatedScheduleIds = activeSchedules.stream()
-                .map(Schedule::getId).toList();
-        scheduleService.deactivateSchedules(activeSchedules);
-
-        //then update new frequency
-        med.setFrequency(req.getFrequency());
-        medicationService.saveMedication(med);
-
-        List<Schedule> newSchedules = new ArrayList<>();
-        //then create new schedules
-        for (String timeStr : req.getTimes()) {
-            LocalTime time = LocalTime.parse(timeStr);
-            Schedule newSchedule = scheduleService.createSchedule(med, patient, time);
-            newSchedules.add(newSchedule);
-        }
-
-        saveEditMedResponse response = new saveEditMedResponse();
-        response.setNewSchedules(newSchedules);
-        response.setDeActivatedIds(deactivatedScheduleIds);
-        return ResponseEntity.ok(response);
-
         try {
             return medicationService.processEditMedication(req);
         } catch (IllegalArgumentException e) {

@@ -16,8 +16,6 @@ import java.util.UUID;
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
 
-    List<Schedule> findSchedulesByScheduledTime(LocalDateTime scheduledTime);
-
     @Query("SELECT s FROM Schedule s " +
             "WHERE s.scheduledTime = :scheduledTime " +
             "AND s.patient.id = :patientId " +

@@ -6,13 +6,10 @@ import nus.iss.backend.dto.ScheduleResponse; // ✅ Import the Android DTO
 import nus.iss.backend.model.Schedule;
 import nus.iss.backend.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -45,8 +42,6 @@ public class ScheduleController {
         }
         return ResponseEntity.ok(responseList);
     }
-}
-
     // ✅ [Android API] Get daily schedule for a patient (recurring daily times)
     @GetMapping("/daily/{patientId}")
     public ResponseEntity<List<ScheduleResponse>> getDailySchedule(
@@ -58,4 +53,5 @@ public class ScheduleController {
         }
         return ResponseEntity.ok(dailySchedule);
     }
+
 }

@@ -1,5 +1,6 @@
 package nus.iss.backend.service.Implementation;
 
+import nus.iss.backend.dao.saveEditMedResponse;
 import nus.iss.backend.dto.newMedicationReq;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +13,9 @@ import nus.iss.backend.model.Schedule;
 import nus.iss.backend.repository.MedicationRepository;
 import nus.iss.backend.repository.PatientRepository;
 import nus.iss.backend.service.MedicationService;
+import nus.iss.backend.service.PatientService;
 import nus.iss.backend.service.ScheduleService;
+import nus.iss.backend.util.ImageToApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +101,7 @@ public class MedicationImpl implements MedicationService {
     public Medication saveMedication(Medication medication) {
         return medicationRepo.save(medication);
     }
+    
 
     @Override
     public ImageOutput sendToFastAPI(MultipartFile file) throws IOException {
@@ -149,12 +153,15 @@ public class MedicationImpl implements MedicationService {
 
         //then deactivate the active schedules before create new ones
         List<Schedule> activeSchedules = scheduleService.findActiveSchedulesByMedication(med);
+        List<UUID> deactivatedScheduleIds = activeSchedules.stream()
+                .map(Schedule::getId).toList();
         scheduleService.deactivateSchedules(activeSchedules);
 
         //then update new frequency
         med.setFrequency(req.getFrequency());
         this.saveMedication(med);
 
+        List<Schedule> newSchedules = new ArrayList<>();
         //then create new schedules
         for (String timeStr : req.getTimes()) {
             LocalTime time;
@@ -168,13 +175,14 @@ public class MedicationImpl implements MedicationService {
                 throw new IllegalArgumentException("Invalid time format: " + timeStr);
             }
 
-            scheduleService.createSchedule(med, patient, time);
+            Schedule newSchedule= scheduleService.createSchedule(med, patient, time);
+            newSchedules.add(newSchedule);
         }
 
-        //TODO:last step: reset the alarm and notification things,
-        // leave to shiying to implement, probably will implement in android part, not sure
-
-        return ResponseEntity.ok("Medication details updated successfully");
+        saveEditMedResponse response = new saveEditMedResponse();
+        response.setNewSchedules(newSchedules);
+        response.setDeActivatedIds(deactivatedScheduleIds);
+        return ResponseEntity.ok(response);
     }
 
     @Override
