@@ -12,7 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.medimind.adapters.MedicineAdapter
-import com.example.medimind.data.MedicationResponse
+import com.example.medimind.service.MedicationResponse
 import com.example.medimind.network.ApiClient
 import kotlinx.coroutines.launch
 
@@ -48,23 +48,17 @@ class ActiveMedicineListFragment : Fragment() {
         val sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val patientId = sharedPreferences.getString("patientId", null)
 
-        //for test, I hard code a patientId to make it work, will change after we have sharedpreference
-        // Lewis: changed patient ID to 0048c909-b76e-4db3-9c71-fa23df0b4f2e for testing.
-        fetchActiveMedications(patientId)
-
-//        if (patientId != null) {
-//            fetchActiveMedications(patientId)
-//        } else {
-//            Toast.makeText(context, "No patientId found", Toast.LENGTH_SHORT).show()
-//        }
+        if (patientId != null) {
+            fetchActiveMedications(patientId)
+        } else {
+            Toast.makeText(context, "No patientId found", Toast.LENGTH_SHORT).show()
+        }
     }
 
-    private fun fetchActiveMedications(patientId: String? = null){
+    private fun fetchActiveMedications(patientId: String){
         lifecycleScope.launch {
             try {
-                //for test, I hard code a patientId to make it work, will change after we have sharedpreference
-                val realPatientId = patientId ?: "a78c1494-67ac-4e68-8815-b7c1d2eabab0"
-                val response = ApiClient.retrofitService.getPatientMedications(realPatientId)
+                val response = ApiClient.retrofitService.getPatientMedications(patientId)
                 val activeNames = response
                     .filter { it.active }
                     .sortedBy { it.medicationName.lowercase() }

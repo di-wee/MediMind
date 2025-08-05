@@ -14,7 +14,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.medimind.adapter.DateAdapter
-import com.example.medimind.data.IntakeHistoryResponse
+import com.example.medimind.service.IntakeHistoryResponse
 import com.example.medimind.model.DateGroup
 import com.example.medimind.model.IntakeGroup
 import com.example.medimind.model.MedicineIntakeItem

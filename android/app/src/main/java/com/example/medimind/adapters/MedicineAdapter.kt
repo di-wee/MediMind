@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.medimind.R
-import com.example.medimind.data.MedicationResponse
+import com.example.medimind.service.MedicationResponse
 
 class MedicineAdapter(
     private val medicines: List<MedicationResponse>,
