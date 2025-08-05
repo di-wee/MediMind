@@ -43,6 +43,8 @@ class EditMedicineDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         frequencyInput = view.findViewById(R.id.frequencyInput)
+        frequencyInput.inputType = InputType.TYPE_CLASS_NUMBER
+
         timeInputContainer = view.findViewById(R.id.timeInputContainer)
         backButton = view.findViewById(R.id.btnBack)
         saveButton = view.findViewById(R.id.btnSave)
@@ -68,7 +70,14 @@ class EditMedicineDetailsFragment : Fragment() {
 
         frequencyInput.addTextChangedListener {
             val freq = frequencyInput.text.toString().toIntOrNull() ?: 0
-            generateTimeFields(freq)
+            if (freq in 1..10) {
+                generateTimeFields(freq)
+            } else {
+                timeInputContainer.removeAllViews()
+                if (freq > 10) {
+                    Toast.makeText(context, "Max frequency is 10", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         backButton.setOnClickListener {
@@ -100,6 +109,10 @@ class EditMedicineDetailsFragment : Fragment() {
         val freq = frequencyInput.text.toString().toIntOrNull()
         if (freq == null || freq <= 0) {
             Toast.makeText(context, "Please enter valid frequency", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (freq > 10) {
+            Toast.makeText(context, "Frequency too high (max 10 times per day)", Toast.LENGTH_SHORT).show()
             return
         }
 
