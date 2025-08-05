@@ -1,6 +1,8 @@
 package nus.iss.backend.service;
 
+import nus.iss.backend.dto.EditMedicationRequest;
 import nus.iss.backend.model.Medication;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,4 +20,6 @@ public interface MedicationService {
     Medication findMedicineById (UUID medicationId);
 
     Medication saveMedication(Medication medication);
+
+    ResponseEntity<?> processEditMedication(EditMedicationRequest req);
 }
