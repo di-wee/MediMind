@@ -46,7 +46,7 @@ class NewMedManualFragment : Fragment() {
         val dosageInput = view.findViewById<TextView>(R.id.dosageInputManual)
         val frequencyInput = view.findViewById<TextView>(R.id.frequencyInputManual)
         val instructionInput = view.findViewById<TextView>(R.id.instructionInputManual)
-        val noteInput = view.findViewById<TextView>(R.id.noteInput)
+        val noteInput = view.findViewById<TextView>(R.id.noteInputManual)
 
         var instruction = instructionInput.text.toString()
         var note = noteInput.text.toString()
