@@ -1,5 +1,6 @@
 package nus.iss.backend.service.Implementation;
 
+import nus.iss.backend.dto.newMedicationReq;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nus.iss.backend.dao.ImageOutput;
@@ -9,6 +10,7 @@ import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
 import nus.iss.backend.model.Schedule;
 import nus.iss.backend.repository.MedicationRepository;
+import nus.iss.backend.repository.PatientRepository;
 import nus.iss.backend.service.MedicationService;
 import nus.iss.backend.service.PatientService;
 import nus.iss.backend.service.ScheduleService;
@@ -16,6 +18,8 @@ import nus.iss.backend.util.ImageToApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
@@ -28,6 +32,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpHeaders;
 
+import java.util.ArrayList;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -43,6 +48,9 @@ public class MedicationImpl implements MedicationService {
 
     @Autowired
     MedicationRepository medicationRepo;
+
+    @Autowired
+    PatientRepository patientRepo;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -92,6 +100,7 @@ public class MedicationImpl implements MedicationService {
     public Medication saveMedication(Medication medication) {
         return medicationRepo.save(medication);
     }
+    
 
     @Override
     public ImageOutput sendToFastAPI(MultipartFile file) throws IOException {
@@ -123,6 +132,7 @@ public class MedicationImpl implements MedicationService {
     }
 
 
+    //LST: all the steps will work like "all or nothing"
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ResponseEntity<?> processEditMedication(EditMedicationRequest req) {
@@ -150,6 +160,7 @@ public class MedicationImpl implements MedicationService {
         this.saveMedication(med);
 
         //then create new schedules
+        //the formatters are for HHMM and HH:MM
         for (String timeStr : req.getTimes()) {
             LocalTime time;
             try {
@@ -161,13 +172,30 @@ public class MedicationImpl implements MedicationService {
             } catch (Exception e) {
                 throw new IllegalArgumentException("Invalid time format: " + timeStr);
             }
-
             scheduleService.createSchedule(med, patient, time);
         }
+        return ResponseEntity.ok().build();
+    }
 
-        //TODO:last step: reset the alarm and notification things,
-        // leave to shiying to implement, probably will implement in android part, not sure
-
-        return ResponseEntity.ok("Medication details updated successfully");
+    @Override
+    public Medication createMedication(newMedicationReq req){
+        Patient patient = patientRepo.findPatientById(req.getPatientId());
+        if(patient==null) {
+            logger.warn("Patient not found!");
+        }
+        //save new medication
+        List<Patient> patients = new ArrayList<>();
+        patients.add(patient);
+        Medication med = new Medication();
+        med.setMedicationName(req.getMedicationName());
+        med.setActive(true);
+        med.setIntakeQuantity(req.getDosage());
+        med.setFrequency(req.getFrequency());
+        med.setNotes(req.getNotes());
+        med.setTiming(req.getTiming());
+        med.setInstructions(req.getInstructions());
+        med.setPatients(patients);
+        medicationRepo.save(med);
+        return med;
     }
 }

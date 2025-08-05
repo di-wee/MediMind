@@ -7,8 +7,10 @@ import nus.iss.backend.dto.IntakeHistoryResponse;    // ← DTO for patient inta
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.model.Patient;
+import nus.iss.backend.model.Schedule;
 import nus.iss.backend.repository.IntakeRepository;
 import nus.iss.backend.repository.PatientRepository;
+import nus.iss.backend.repository.ScheduleRepository;
 import nus.iss.backend.service.IntakeHistoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +36,13 @@ public class IntakeHistoryImpl implements IntakeHistoryService {
     @Autowired
     private PatientRepository patientRepo;
 
+    @Autowired
+    private ScheduleRepository scheduleRepo;
+
     @Override
     public IntakeHistory createIntakeHistory(IntakeReqMobile intakeReqMobile) {
+        Schedule schedule = scheduleRepo.findById(intakeReqMobile.getScheduleId())
+                .orElseThrow(() -> new RuntimeException("Schedule not found"));
         Patient patient = patientRepo.findById(intakeReqMobile.getPatientId())
             .orElseThrow(() -> new ItemNotFound("Patient not found!"));
         IntakeHistory intakeHistory = new IntakeHistory();
@@ -43,7 +50,7 @@ public class IntakeHistoryImpl implements IntakeHistoryService {
         intakeHistory.setLoggedDate(intakeReqMobile.getLoggedDate());
         intakeHistory.setDoctorNote("");
         intakeHistory.setTaken(intakeReqMobile.isTaken());
-        intakeHistory.setSchedule(intakeReqMobile.getSchedule());
+        intakeHistory.setSchedule(schedule);
         intakeRepo.saveAndFlush(intakeHistory);
         return intakeHistory;
     }

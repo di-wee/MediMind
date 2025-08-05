@@ -31,7 +31,6 @@ class LoginFragment : Fragment() {
         val loginButton = view.findViewById<Button>(R.id.loginButton)
         val bypassButton = view.findViewById<Button>(R.id.bypassButton)
         val registerButton = view.findViewById<Button>(R.id.registerButton)
-        val debugButton = view.findViewById<Button>(R.id.debugButton)
 
         // Login button -> validate credentials with backend
         loginButton.setOnClickListener {
@@ -77,9 +76,5 @@ class LoginFragment : Fragment() {
             findNavController().navigate(R.id.action_loginFragment_to_registerUserFragment)
         }
 
-        // Debug button -> navigate to debug screen
-        debugButton.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_debugFragment)
-        }
     }
 }

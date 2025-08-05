@@ -1,7 +1,7 @@
 package com.example.medimind.viewmodel
 
 import androidx.lifecycle.*
-import com.example.medimind.data.IntakeHistoryResponse
+import com.example.medimind.service.IntakeHistoryResponse
 import com.example.medimind.network.ApiClient
 import kotlinx.coroutines.launch
 

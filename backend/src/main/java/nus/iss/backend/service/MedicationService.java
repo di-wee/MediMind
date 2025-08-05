@@ -1,5 +1,6 @@
 package nus.iss.backend.service;
 
+import nus.iss.backend.dto.newMedicationReq;
 import nus.iss.backend.dao.ImageOutput;
 import nus.iss.backend.dto.EditMedicationRequest;
 import nus.iss.backend.model.Medication;
@@ -23,6 +24,8 @@ public interface MedicationService {
     Medication findMedicineById(UUID medicationId);
 
     Medication saveMedication(Medication medication);
+
+    Medication createMedication(newMedicationReq req);
 
     // For OCR + NER integration
     ImageOutput sendToFastAPI(MultipartFile file) throws IOException;

@@ -18,6 +18,9 @@ import androidx.lifecycle.lifecycleScope
 import com.example.medimind.data.EditMedRequest
 import com.example.medimind.network.ApiClient
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 
 class EditMedicineDetailsFragment : Fragment() {
     private lateinit var frequencyInput: EditText
@@ -40,6 +43,8 @@ class EditMedicineDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         frequencyInput = view.findViewById(R.id.frequencyInput)
+        frequencyInput.inputType = InputType.TYPE_CLASS_NUMBER
+
         timeInputContainer = view.findViewById(R.id.timeInputContainer)
         backButton = view.findViewById(R.id.btnBack)
         saveButton = view.findViewById(R.id.btnSave)
@@ -65,7 +70,14 @@ class EditMedicineDetailsFragment : Fragment() {
 
         frequencyInput.addTextChangedListener {
             val freq = frequencyInput.text.toString().toIntOrNull() ?: 0
-            generateTimeFields(freq)
+            if (freq in 1..10) {
+                generateTimeFields(freq)
+            } else {
+                timeInputContainer.removeAllViews()
+                if (freq > 10) {
+                    Toast.makeText(context, "Max frequency is 10", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         backButton.setOnClickListener {
@@ -97,6 +109,10 @@ class EditMedicineDetailsFragment : Fragment() {
         val freq = frequencyInput.text.toString().toIntOrNull()
         if (freq == null || freq <= 0) {
             Toast.makeText(context, "Please enter valid frequency", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (freq > 10) {
+            Toast.makeText(context, "Frequency too high (max 10 times per day)", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -156,7 +172,9 @@ class EditMedicineDetailsFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 Log.d("EditMedRequest", "Before sending request at: ${System.currentTimeMillis()}")
+
                 ApiClient.retrofitService.saveEditedMedication(request)
+
                 Log.d("EditMedRequest", "After sending request at: ${System.currentTimeMillis()}")
                 Log.d("EditMedRequest", "Request sent: $request")
                 Toast.makeText(context,"Successfully save!", Toast.LENGTH_SHORT).show()
@@ -167,7 +185,18 @@ class EditMedicineDetailsFragment : Fragment() {
                 Toast.makeText(context, "Save Failed!", Toast.LENGTH_SHORT).show()
             }
         }
+
+        for (timeStr in times) {
+            val parts = timeStr.split(":")
+            val hour = parts[0].toInt()
+            val minute = parts[1].toInt()
+            val localTime = LocalTime.of(hour, minute)
+            val zoned = localTime.atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
+            val timeMillis = zoned.toInstant().toEpochMilli()
+
+            //save edited new alarm
+            ReminderUtils.scheduleAlarm(context = requireContext(), timeMilli = timeMillis, patientId = patientId)
+        }
     }
 
-    //TODO: reset alarm and notification--shiying part
 }
