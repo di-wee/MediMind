@@ -43,8 +43,6 @@ public class MedicationController {
     private ScheduleService scheduleService;
     @Autowired
     private IntakeHistoryService intakeHistoryService;
-    @Autowired
-    private MedicationEditService medicationEditService;
 
     @GetMapping("/medList")
     public ResponseEntity<List<Medication>> getMedications(@RequestBody MedicationIdList MedIds) {
@@ -108,7 +106,7 @@ public class MedicationController {
         }
 
         try {
-            return medicationEditService.processEditMedication(req);
+            return medicationService.processEditMedication(req);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
