@@ -66,8 +66,8 @@ public class ScheduleImpl implements ScheduleService {
     }
 
     @Override
-    public List<Schedule> findSchedulesByScheduledTime(LocalDateTime scheduledTime){
-        return scheduleRepo.findSchedulesByScheduledTime(scheduledTime);
+    public List<Schedule> findSchedulesByPatientIdandScheduledTime(LocalTime scheduledTime, UUID patientId){
+        return scheduleRepo.findSchedulesByPatientIdandScheduledTime(scheduledTime, patientId);
     }
 
     @Override

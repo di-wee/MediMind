@@ -18,6 +18,9 @@ import androidx.lifecycle.lifecycleScope
 import com.example.medimind.data.EditMedRequest
 import com.example.medimind.network.ApiClient
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 
 class EditMedicineDetailsFragment : Fragment() {
     private lateinit var frequencyInput: EditText
@@ -156,7 +159,26 @@ class EditMedicineDetailsFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 Log.d("EditMedRequest", "Before sending request at: ${System.currentTimeMillis()}")
-                ApiClient.retrofitService.saveEditedMedication(request)
+
+                val response = ApiClient.retrofitService.saveEditedMedication(request)
+
+                val deActivatedIds = response.deActivatedIds
+                val newSchedules = response.newSchedules
+                for (schedule in newSchedules) {
+                    val timeStr = schedule.scheduledTime ?: continue
+                    val scheduleId = schedule.id ?: continue
+
+                    val parts = timeStr.split(":")
+                    val hour = parts[0].toInt()
+                    val minute = parts[1].toInt()
+                    val localTime = LocalTime.of(hour, minute)
+                    val zoned = localTime.atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
+                    val timeMillis = zoned.toInstant().toEpochMilli()
+
+                    //save edited new alarm
+                    ReminderUtils.scheduleAlarm(context = requireContext(), timeMilli = timeMillis, patientId = patientId)
+                }
+
                 Log.d("EditMedRequest", "After sending request at: ${System.currentTimeMillis()}")
                 Log.d("EditMedRequest", "Request sent: $request")
                 Toast.makeText(context,"Successfully save!", Toast.LENGTH_SHORT).show()
@@ -169,5 +191,4 @@ class EditMedicineDetailsFragment : Fragment() {
         }
     }
 
-    //TODO: reset alarm and notification--shiying part
 }
