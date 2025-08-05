@@ -104,7 +104,7 @@ public class MedicationImpl implements MedicationService {
         body.add("file", fileResource);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-        String fastapiUrl = "http://192.168.0.115:8000/predict_image"; // Replace with your local FastAPI IP
+        String fastapiUrl = "http://0.0.0.0:8000/predict_image"; // Replace with your local FastAPI IP
 
         ResponseEntity<String> response = restTemplate.postForEntity(fastapiUrl, requestEntity, String.class);
 
