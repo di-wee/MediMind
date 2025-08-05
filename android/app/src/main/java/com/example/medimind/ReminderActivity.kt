@@ -2,6 +2,11 @@ package com.example.medimind
 
 import android.content.Context
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +26,8 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import android.graphics.Typeface
+
 
 class ReminderActivity : AppCompatActivity() {
 
@@ -43,18 +50,29 @@ class ReminderActivity : AppCompatActivity() {
                 val service = ApiClient.retrofitService
 
                 val scheduleListRequest = ScheduleListRequest(time,patientId)
-                val schedules = service.getSchedulesByTime(scheduleListRequest)
-                if (schedules.isEmpty()) {
+                val response = service.getSchedulesByTime(scheduleListRequest)
+                if (!response.isSuccessful || response.body().isNullOrEmpty()) {
                     finish()
                     return@launch
                 }
-                val medIdList = schedules.map { it.medicationId }.distinct()
-                val medToSchedule = schedules.associateBy { it.medicationId }
+                val schedules = response.body()!!
+                for (schedule in schedules) {
+                    Log.d("ReminderActivity", "Schedule: id=${schedule.scheduleId}, medicationId=${schedule.medicineId}")
+                }
+
+                val medIdList = schedules.map { it.medicineId }.distinct()
+                Log.d("ReminderActivity", "medIdList = $medIdList")
+                val medToSchedule = schedules.associateBy { it.medicineId }
                 val medicationIdListRequest = MedicationIdListRequest(medIdList)
                 val meds = service.getMedications(medicationIdListRequest)
+                Log.d("ReminderActivity", "Fetched ${meds.size} medications: $meds")
                 val details = meds.map {
-                    "${it.medicationName}（${it.intakeQuantity}）\n" +
-                            "Instruction：${it.instructions.ifBlank { "" }}"
+                    val title = "${it.medicationName}"
+                    val intake = "${it.intakeQuantity}Tables "
+                    val instruction = "Instruction：${it.instructions.ifBlank { "" }}"
+                    val note = "Notes:${it.note.ifBlank { "" }}"
+
+                    buildStyledSpannable(title, intake, instruction, note)
                 }.toTypedArray()
                 val selected = BooleanArray(details.size)
 
@@ -74,14 +92,14 @@ class ReminderActivity : AppCompatActivity() {
                                           loggedDate= LocalTime.now(),
                                             isTaken= true,
                                             patientId= patientId,
-                                            scheduleId= schedule.id
+                                            scheduleId= schedule.scheduleId
                                         )
                                         service.createMedicationLog(intakeMedRequest)
-                                        clearSnoozeCount(this@ReminderActivity,schedule.id)
+                                        clearSnoozeCount(this@ReminderActivity,schedule.scheduleId)
                                     } else {
-                                        val count =getSnoozeCount(this@ReminderActivity,schedule.id)
+                                        val count =getSnoozeCount(this@ReminderActivity,schedule.scheduleId)
                                         if(count < 1){
-                                            increaseSnoozeCount(this@ReminderActivity,schedule.id)
+                                            increaseSnoozeCount(this@ReminderActivity,schedule.scheduleId)
                                             ReminderUtils.snoozeReminder(
                                                 this@ReminderActivity,
                                                 meds[i].id,
@@ -92,11 +110,11 @@ class ReminderActivity : AppCompatActivity() {
                                                 loggedDate= LocalTime.now(),
                                                 isTaken= false,
                                                 patientId= patientId,
-                                                scheduleId= schedule.id
+                                                scheduleId= schedule.scheduleId
                                             )
                                             service.createMedicationLog(intakeMedRequest)
                                         }
-                                        clearSnoozeCount(this@ReminderActivity, schedule.id)
+                                        clearSnoozeCount(this@ReminderActivity, schedule.scheduleId)
                                     }
                                 }
                                 finish()
@@ -106,16 +124,16 @@ class ReminderActivity : AppCompatActivity() {
                             lifecycleScope.launch(Dispatchers.IO) {
                                 meds.forEach { med->
                                     val schedule = medToSchedule[med.id] ?: return@forEach
-                                    val count = getSnoozeCount(this@ReminderActivity, schedule.id)
+                                    val count = getSnoozeCount(this@ReminderActivity, schedule.scheduleId)
                                     if(count<4){
-                                        increaseSnoozeCount(this@ReminderActivity,schedule.id)
+                                        increaseSnoozeCount(this@ReminderActivity,schedule.scheduleId)
                                         ReminderUtils.snoozeReminder(this@ReminderActivity, med.id, patientId)
                                     }else{
                                         val intakeMedRequest = IntakeMedRequest(
                                             loggedDate= LocalTime.now(),
                                             isTaken= false,
                                             patientId= patientId,
-                                            scheduleId= schedule.id
+                                            scheduleId= schedule.scheduleId
                                         )
                                         service.createMedicationLog(intakeMedRequest)
                                         Toast.makeText(this@ReminderActivity,
@@ -161,6 +179,38 @@ class ReminderActivity : AppCompatActivity() {
     fun getSnoozeCount(context: Context,scheduleId:String):Int{
         val prefs = context.getSharedPreferences("SnoozePrefs", Context.MODE_PRIVATE)
         return prefs.getInt(scheduleId, 0)
+    }
+    fun buildStyledSpannable(
+        title: String,
+        intake: String,
+        instruction: String,
+        note: String
+    ): SpannableString {
+        val fullText = "$title:$intake\n$instruction\n$note"
+        val spannable = SpannableString(fullText)
+
+        val titleLineEnd = title.length + 1 + intake.length
+        spannable.setSpan(
+            RelativeSizeSpan(1.2f),
+            0,
+            titleLineEnd,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        spannable.setSpan(
+            StyleSpan(Typeface.BOLD),
+            0,
+            titleLineEnd,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        spannable.setSpan(
+            RelativeSizeSpan(0.85f),
+            titleLineEnd + 1,
+            fullText.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        return spannable
     }
 
 }

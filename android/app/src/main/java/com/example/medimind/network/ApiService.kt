@@ -5,6 +5,7 @@ import com.example.medimind.service.EditMedResponse
 import com.example.medimind.service.MedicationResponse
 import com.example.medimind.service.IntakeHistoryResponse
 import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -88,7 +89,7 @@ data class newMedicationRequest(
     val instructions:String,
     val notes:String,
     val isActive:Boolean,
-    val time:String
+    val times:List<String>
     )
 
 data class MedicationIdListRequest(
@@ -105,10 +106,10 @@ data class MedResponse(
     val isActive: Boolean
 )
 data class ScheduleResponse(
-    val id:String,
+    val scheduleId:String,
     val scheduledTime: String,
     val isActive:Boolean,
-    val medicationId: String,
+    val medicineId: String,
 )
 
 data class IntakeMedRequest(
@@ -186,16 +187,17 @@ interface ApiService {
     suspend fun deactivateMedication(@Path("medicationId") medId: String): ResponseBody
 
     //get medication from medId list
-    @GET("api/medication/medList")
+    @POST("api/medication/medList")
     suspend fun getMedications(@Body request: MedicationIdListRequest): List<MedResponse>
 
     // save new medication
     @POST("api/medication/save")
-    suspend fun saveMedication(@Body request: newMedicationRequest): SaveMedicationResponse
+    suspend fun saveMedication(@Body request: newMedicationRequest): ResponseBody
 
     //get active schedule list by timeMillis & patientId
-    @GET("api/schedule/find")
-    suspend fun getSchedulesByTime(@Body request:ScheduleListRequest): List<ScheduleResponse>
+    @POST("api/schedule/find")
+    suspend fun getSchedulesByTime(@Body request: ScheduleListRequest): Response<List<ScheduleResponse>>
+
     //create intakeHistory after alarm
     @POST("api/medication/createMedLog")
     suspend fun createMedicationLog(@Body request: IntakeMedRequest): IntakeResponse

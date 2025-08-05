@@ -10,5 +10,5 @@ import java.util.UUID;
 @Getter
 @Setter
 public class MedicationIdList {
-    private List<UUID> medicationIdList;
+    private List<UUID> medicationIds;
 }

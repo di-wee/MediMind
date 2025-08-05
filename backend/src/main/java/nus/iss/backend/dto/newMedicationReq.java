@@ -16,5 +16,5 @@ public class newMedicationReq {
     private String instructions;
     private String notes;
     private Boolean isActive;
-    private String time;
+    private List<String> times;
 }

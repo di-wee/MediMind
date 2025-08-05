@@ -1,6 +1,8 @@
 package com.example.medimind
 
+import android.Manifest
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -9,12 +11,14 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.medimind.ReminderUtils.scheduleAlarm
 import com.example.medimind.network.ApiClient
 import com.example.medimind.network.newMedicationRequest
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import androidx.core.content.edit
 
 
 class NewMedManualFragment : Fragment() {
@@ -71,7 +75,7 @@ class NewMedManualFragment : Fragment() {
                 try {
                     //save to db
                     val service = ApiClient.retrofitService
-                    for (time in times) {
+
                         val request = newMedicationRequest(
                             medicationName = medicationName,
                             patientId = patientId,
@@ -80,10 +84,11 @@ class NewMedManualFragment : Fragment() {
                             instructions = instruction,
                             notes = note,
                             isActive = true,
-                            time = time
+                            times = times
                         )
-                        val saveMedicationResponse = service.saveMedication(request)
+                         service.saveMedication(request)
                         //convert generated times to timeMillis List
+                    for (time in times) {
                         var timeMilli = convertToScheduleList(time)
                         //set alarm in alarmManager
                         //set new alarm
@@ -91,6 +96,7 @@ class NewMedManualFragment : Fragment() {
                     }
                     Toast.makeText(requireContext(), "Medication saved", Toast.LENGTH_SHORT)
                         .show()
+                    requestNotificationPermissionIfNeeded()
                     parentFragmentManager.popBackStack()
                 } catch (e: Exception) {
                     Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG)
@@ -107,7 +113,7 @@ class NewMedManualFragment : Fragment() {
             if (frequency <= 0) return emptyList()
 
             if (frequency == 1) {
-                times.add("0900")
+                times.add("09:00")
             } else {
                 val totalMinutes = 12 * 60
                 val freqGap = totalMinutes / (frequency - 1)
@@ -139,6 +145,22 @@ class NewMedManualFragment : Fragment() {
             }
         }
             return cal.timeInMillis
+    }
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val prefs = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            val asked = prefs.getBoolean("asked_notification_permission", false)
+            if (!asked) {
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    1001
+                )
+                prefs.edit {
+                    putBoolean("asked_notification_permission", true)
+                }
+            }
+        }
     }
 
 }
