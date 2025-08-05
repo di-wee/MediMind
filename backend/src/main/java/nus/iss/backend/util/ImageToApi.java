@@ -20,6 +20,10 @@ public class ImageToApi extends InputStreamResource {
     }
 
     // We don't know the size beforehand, so return -1
+    // springBoot restTemplate use this func to pre-compute size of file,
+    // set HTTP header content length and stream the file in multipart data
+    // wehave to override it tell spring to just stream it dont calculate
+    // if remove this it will cut off prematurely when upload to fastApi
     @Override
     public long contentLength() {
         return -1;

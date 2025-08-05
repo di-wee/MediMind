@@ -1,6 +1,6 @@
 package nus.iss.backend.service;
 
-import nus.iss.backend.dto.NERModelOutput;
+import nus.iss.backend.dao.ImageOutput;
 import nus.iss.backend.model.Medication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +18,10 @@ public interface MedicationService {
 
     Boolean hasMedicineMissedDose(UUID medicationId);
 
-    Medication findMedicineById (UUID medicationId);
+    Medication findMedicineById(UUID medicationId);
 
     Medication saveMedication(Medication medication);
 
     // For OCR + NER integration
-    NERModelOutput sendToFastAPI(MultipartFile file) throws IOException;
+    ImageOutput sendToFastAPI(MultipartFile file) throws IOException;
 }

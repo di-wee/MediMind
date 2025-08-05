@@ -2,7 +2,7 @@ package nus.iss.backend.service.Implementation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import nus.iss.backend.dto.NERModelOutput;
+import nus.iss.backend.dao.ImageOutput;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Schedule;
@@ -25,7 +25,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpHeaders;
 
-
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +40,7 @@ public class MedicationImpl implements MedicationService {
     @Autowired
     ScheduleService scheduleService;
 
-    //found in appConfig
+    // found in appConfig
     @Autowired
     private RestTemplate restTemplate;
 
@@ -53,7 +52,7 @@ public class MedicationImpl implements MedicationService {
         }
         List<Schedule> scheduleList = meds.getSchedules();
 
-        //if no schedule means theres no missed dose
+        // if no schedule means theres no missed dose
         if (scheduleList == null || scheduleList.isEmpty()) {
             return false;
         }
@@ -63,9 +62,8 @@ public class MedicationImpl implements MedicationService {
 
     }
 
-
     @Override
-    public Medication findMedicineById (UUID id) {
+    public Medication findMedicineById(UUID id) {
         Medication medication = medicationRepo.findById(id).orElse(null);
         if (medication == null) {
             logger.warn("Medication not found!");
@@ -84,7 +82,7 @@ public class MedicationImpl implements MedicationService {
     }
 
     @Override
-    public NERModelOutput sendToFastAPI(MultipartFile file) throws IOException {
+    public ImageOutput sendToFastAPI(MultipartFile file) throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
@@ -102,7 +100,7 @@ public class MedicationImpl implements MedicationService {
         JsonNode root = mapper.readTree(response.getBody());
         JsonNode extracted = root.get("extracted_info");
 
-        NERModelOutput result = new NERModelOutput();
+        ImageOutput result = new ImageOutput();
         result.setMedicationName(extracted.path("medication_name").asText(""));
         result.setIntakeQuantity(extracted.path("intake_quantity").asText(""));
         result.setFrequency(Integer.parseInt(extracted.path("frequency").asText("")));
