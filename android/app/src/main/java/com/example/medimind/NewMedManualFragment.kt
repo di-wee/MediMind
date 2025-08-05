@@ -54,47 +54,43 @@ class NewMedManualFragment : Fragment() {
         var frequency = frequencyInput.text.toString().toIntOrNull()?:0
         //generate default times
         var times = generateDefaultTimes(frequency)
-        //convert generated times to timeMillis List
-        var timeMillis = convertToScheduleList(times)
-        //set alarm in alarmManager
-        if (patientId != null) {
-            for (timeMilli in timeMillis) {
-                scheduleAlarm(requireContext(), timeMilli, patientId)
-            }
-        } else {
-            Toast.makeText(requireContext(), "Patient ID is missing", Toast.LENGTH_SHORT).show()
-        }
+        for(time in times){
+            //convert generated times to timeMillis List
+            var timeMilli = convertToScheduleList(time)
+            //set alarm in alarmManager
+            val saveBtnFromManual = view.findViewById<Button>(R.id.btnSaveFromManual)
+            saveBtnFromManual.setOnClickListener{
+                //save new medication to database and set new alarm
+                val medicationName = medicationNameInput.text.toString()
+                val dosage = dosageInput.text.toString()
+                if (patientId == null || medicationName.isBlank() || dosage.isBlank() || frequency == 0) {
+                    Toast.makeText(requireContext(), "Please fill in all fields correctly", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                val request = newMedicationRequest(
+                    medicationName = medicationName,
+                    patientId = patientId,
+                    dosage = dosage,
+                    frequency = frequency,
+                    Timing = "",
+                    instructions = instruction ,
+                    notes = note,
+                    isActive = true,
+                    times = time
+                )
 
-        val saveBtnFromManual = view.findViewById<Button>(R.id.btnSaveFromManual)
-        saveBtnFromManual.setOnClickListener{
-            //save new medication to database and set new alarm
-            val medicationName = medicationNameInput.text.toString()
-            val dosage = dosageInput.text.toString()
-            if (patientId == null || medicationName.isBlank() || dosage.isBlank() || frequency == 0) {
-                Toast.makeText(requireContext(), "Please fill in all fields correctly", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            val request = newMedicationRequest(
-                medicationName = medicationName,
-                patientId = patientId,
-                dosage = dosage,
-                frequency = frequency,
-                Timing = "",
-                instructions = instruction ,
-                notes = note,
-                isActive = true,
-                times = times
-            )
-
-            lifecycleScope.launch {
-                try {
-                    val service = ApiClient.retrofitService
-                    service.saveMedication(request)
-                    Toast.makeText(requireContext(), "Medication saved", Toast.LENGTH_SHORT).show()
-
-                    parentFragmentManager.popBackStack()
-                } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                lifecycleScope.launch {
+                    try {
+                        //save to db
+                        val service = ApiClient.retrofitService
+                        val saveMedicationResponse = service.saveMedication(request)
+                        Toast.makeText(requireContext(), "Medication saved", Toast.LENGTH_SHORT).show()
+                        //set new alarm
+                        scheduleAlarm(requireContext(), timeMilli, patientId)
+                        parentFragmentManager.popBackStack()
+                    } catch (e: Exception) {
+                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
         }
@@ -124,11 +120,9 @@ class NewMedManualFragment : Fragment() {
         }
         return times
     }
-    fun convertToScheduleList(timeStrings: List<String>): List<Long> {
-        val timeMillis = mutableListOf<Long>()
+    fun convertToScheduleList(time: String): Long {
 
         val now = Calendar.getInstance()
-        for (time in timeStrings) {
             val hour = time.substring(0, 2).toInt()
             val minute = time.substring(2, 4).toInt()
 
@@ -138,13 +132,10 @@ class NewMedManualFragment : Fragment() {
                 set(Calendar.SECOND, 0)
                 set(Calendar.MILLISECOND, 0)
                 if (before(now)) {
-                    add(Calendar.DATE, 1) // 如果已经过了，就调成明天
+                    add(Calendar.DATE, 1)
                 }
             }
-
-            timeMillis.add(cal.timeInMillis)
-        }
-        return timeMillis
+            return cal.timeInMillis
     }
 
 }

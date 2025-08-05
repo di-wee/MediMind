@@ -78,18 +78,6 @@ object ReminderUtils {
         }
     }
 
-    fun cancelAlarm(context: Context, scheduleId: String) {
-        val intent = Intent(context, ReminderReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            scheduleId.hashCode(),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.cancel(pendingIntent)
-    }
-
     /**
      * Delay the reminder of a certain medication by 15 minutes (executed by ReminderWorker）
      */

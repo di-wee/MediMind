@@ -86,7 +86,7 @@ data class newMedicationRequest(
     val instructions:String,
     val notes:String,
     val isActive:Boolean,
-    val times:List<String>
+    val times:String
     )
 
 data class MedicationIdListRequest(
@@ -106,9 +106,7 @@ data class ScheduleResponse(
     val id:String,
     val scheduledTime: String,
     val isActive:Boolean,
-    val creationTime: String,
     val medicationId: String,
-    val patientId: String
 )
 
 data class IntakeMedRequest(
@@ -132,7 +130,21 @@ data class ScheduleListRequest(
     val patientId:String
 )
 
+data class editMedResponse (
+    val deActivatedIds: List<String>,
+    val newSchedules:List<ScheduleResponse>
+)
+
+data class SaveMedicationResponse(
+    val ScheduleId: String,
+    val time: String,
+    val MedicationId: String,
+    val MedicationName:String
+)
+
 interface ApiService {
+    //Sorry guys,please do not use the response types in "data" and check the response body structure in the backend
+
     // LST: Get medications for a patient
     @GET("api/patient/{id}/medList")
     suspend fun getPatientMedications(@Path("id") patientId: String): List<MedicationResponse>
@@ -143,7 +155,7 @@ interface ApiService {
 
     // LST:
     @POST("api/medication/edit/save")
-    suspend fun saveEditedMedication(@Body body: EditMedRequest): Map<List<String>, List<String>>
+    suspend fun saveEditedMedication(@Body body: EditMedRequest): editMedResponse
 
     // Registration endpoint
     @POST("api/patient/register")
@@ -182,14 +194,13 @@ interface ApiService {
 
     // save new medication
     @PUT("api/medication/save")
-    suspend fun saveMedication(@Body request: newMedicationRequest): Void
+    suspend fun saveMedication(@Body request: newMedicationRequest): SaveMedicationResponse
 
-    //get schedule list by timeMillis
+    //get active schedule list by timeMillis & patientId
     @GET("api/schedule/find")
     suspend fun getSchedulesByTime(@Body request:ScheduleListRequest): List<ScheduleResponse>
-
+    //create intakeHistory after alarm
     @POST("api/medication/createMedLog")
-    suspend fun createMedicationLog(@Body request: IntakeMedRequest): List<IntakeResponse>
-
+    suspend fun createMedicationLog(@Body request: IntakeMedRequest): IntakeResponse
 
 }

@@ -1,8 +1,6 @@
 package nus.iss.backend.controller;
 
-import nus.iss.backend.dao.IntakeLogResponseWeb;
-import nus.iss.backend.dao.IntakeReqMobile;
-import nus.iss.backend.dao.MedicationIdList;
+import nus.iss.backend.dao.*;
 import nus.iss.backend.dto.EditMedicationRequest;
 import nus.iss.backend.dto.newMedicationReq;
 import nus.iss.backend.exceptions.ItemNotFound;
@@ -28,6 +26,7 @@ import java.util.UUID;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @CrossOrigin
 @RestController
@@ -45,13 +44,25 @@ public class MedicationController {
     private IntakeHistoryService intakeHistoryService;
 
     @GetMapping("/medList")
-    public ResponseEntity<List<Medication>> getMedications(@RequestBody MedicationIdList MedIds) {
+    public ResponseEntity<List<MedicationResponse>> getMedications(@RequestBody MedicationIdList MedIds) {
         try{
             List<Medication> medications =  medicationService.findAllMedications(MedIds.getMedicationIdList());
             if (MedIds.getMedicationIdList().isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity<>(medications,HttpStatus.OK);
+            List<MedicationResponse> responseList = new ArrayList<>();
+            for (Medication med : medications) {
+                MedicationResponse res = new MedicationResponse();
+                res.setId(med.getId());
+                res.setMedicationName(med.getMedicationName());
+                res.setIntakeQuantity(med.getIntakeQuantity());
+                res.setFrequency(med.getFrequency());
+                res.setTiming(med.getTiming());
+                res.setInstructions(med.getInstructions());
+                res.setNotes(med.getNotes());
+                res.setActive(med.isActive());
+                responseList.add(res);}
+            return new ResponseEntity<>(responseList,HttpStatus.OK);
         }catch (RuntimeException e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -59,14 +70,15 @@ public class MedicationController {
 
     }
     @PostMapping("/createMedLog")
-    public ResponseEntity<List<IntakeHistory>> createMedicationLog(@RequestBody List<IntakeReqMobile> medLogReqMobiles) {
+    public ResponseEntity<IntakeResponseMobile> createMedicationLog(@RequestBody IntakeReqMobile medLogReqMobile) {
         try{
-            List<IntakeHistory> intakeHistories = new ArrayList<>();
-            medLogReqMobiles.forEach(medLogReqMobile -> {
-                IntakeHistory saveHistory = intakeHistoryService.createIntakeHistory(medLogReqMobile);
-                intakeHistories.add(saveHistory);
-            });
-            return new ResponseEntity<>(intakeHistories,HttpStatus.OK);
+            intakeHistoryService.createIntakeHistory(medLogReqMobile);
+            IntakeResponseMobile saveHistory = new IntakeResponseMobile();
+            saveHistory.setLoggedDate(medLogReqMobile.getLoggedDate());
+            saveHistory.setTaken(medLogReqMobile.isTaken());
+            saveHistory.setPatientId(medLogReqMobile.getPatientId());
+            saveHistory.setScheduleId(medLogReqMobile.getScheduleId());
+            return new ResponseEntity<>(saveHistory,HttpStatus.OK);
         }catch (RuntimeException e){
             logger.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -121,19 +133,18 @@ public class MedicationController {
         med.setFrequency(req.getFrequency());
         medicationService.saveMedication(med);
 
-        List<UUID> newScheduleIds = new ArrayList<>();
+        List<Schedule> newSchedules = new ArrayList<>();
         //then create new schedules
         for (String timeStr : req.getTimes()) {
             LocalTime time = LocalTime.parse(timeStr);
             Schedule newSchedule = scheduleService.createSchedule(med, patient, time);
-            newScheduleIds.add(newSchedule.getId());
+            newSchedules.add(newSchedule);
         }
 
-        Map<String, List<UUID>> result = new HashMap<>();
-        result.put("deActivatedIds", deactivatedScheduleIds);
-        result.put("newIds", newScheduleIds);
-        
-        return ResponseEntity.ok(result);
+        saveEditMedResponse response = new saveEditMedResponse();
+        response.setNewSchedules(newSchedules);
+        response.setDeActivatedIds(deactivatedScheduleIds);
+        return ResponseEntity.ok(response);
      }
 
 
@@ -160,11 +171,16 @@ public class MedicationController {
             //save new medication
             Medication med = medicationService.createMedication(req);
             //save new schedule
-            for (String timeStr : req.getTimes()) {
-                LocalTime time = LocalTime.parse(timeStr);
-                scheduleService.createSchedule(med,patient,time);
-            }
-            return ResponseEntity.ok(med);
+            String timeStr = req.getTime();
+            LocalTime time = LocalTime.parse(timeStr);
+            Schedule newSchedule =  scheduleService.createSchedule(med,patient,time);
+
+            saveNewMedResponse saveResponse = new saveNewMedResponse();
+            saveResponse.setScheduleId(newSchedule.getId());
+            saveResponse.setTime(timeStr);
+            saveResponse.setMedicationName(med.getMedicationName());
+            saveResponse.setMedId(med.getId());
+            return ResponseEntity.ok(saveResponse);
         }catch (RuntimeException e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

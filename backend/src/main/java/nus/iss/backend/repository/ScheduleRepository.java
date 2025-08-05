@@ -16,7 +16,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
 
     @Query("SELECT s FROM Schedule s " +
             "WHERE s.scheduledTime = :scheduledTime " +
-            "AND s.patient.id = :patientId")
+            "AND s.patient.id = :patientId " +
+            "AND s.isActive = true")
     List<Schedule> findSchedulesByPatientIdandScheduledTime(LocalTime scheduledTime, UUID patientId);
 
     List<Schedule> findByMedicationAndIsActiveTrue(Medication medication);
