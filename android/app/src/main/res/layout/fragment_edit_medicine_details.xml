@@ -52,18 +52,27 @@
         android:text="Time(h):"
         android:textSize="18sp"/>
 
-    <LinearLayout
-        android:id="@+id/timeInputContainer"
+    <ScrollView
+        android:id="@+id/timeInputScrollView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:layout_marginBottom="32dp"/>
+        android:layout_height="400dp"
+        android:fillViewport="false"
+        android:scrollbars="vertical">
+
+        <LinearLayout
+            android:id="@+id/timeInputContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginBottom="32dp"/>
+    </ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp">
 
         <Button
             android:id="@+id/btnBack"
