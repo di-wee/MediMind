@@ -19,7 +19,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.medimind.adapters.GroupedScheduleAdapter
+import com.example.medimind.adapters.ScheduleListItem
 import com.example.medimind.network.ApiClient
+import com.example.medimind.network.ScheduleItem
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 import java.io.File
@@ -102,11 +107,7 @@ class HomeFragment : Fragment() {
                     greetingTextView.text = "Hello, ${profile.firstName}"
                 } catch (e: Exception) {
                     greetingTextView.text = "Hello"
-                    Toast.makeText(
-                        requireContext(),
-                        "Failed to load profile: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(requireContext(), "Failed to load profile: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         } else {
@@ -116,30 +117,25 @@ class HomeFragment : Fragment() {
         // Logout button: clear session and navigate to login
         val logoutButton = view.findViewById<Button>(R.id.logoutButton)
         logoutButton.setOnClickListener {
-            // 1. Clear SharedPreferences
             val editor = sharedPref.edit()
             editor.clear()
             editor.apply()
 
             Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
 
-            // 2. Navigate back to login screen and clear the back stack
             val navController = requireActivity().findNavController(R.id.nav_host_fragment)
             val navOptions = androidx.navigation.NavOptions.Builder()
-                .setPopUpTo(R.id.mainFragment, true) // Clear everything up to mainFragment
+                .setPopUpTo(R.id.mainFragment, true)
                 .build()
             navController.navigate(R.id.loginFragment, null, navOptions)
         }
 
-        // Today label
         val todayLabel = view.findViewById<TextView>(R.id.todayLabel)
         todayLabel.text = "Today, ${fullDateFormat.format(Date())}"
 
-        // Populate horizontal calendar
         val calendarStrip = view.findViewById<LinearLayout>(R.id.calendarStrip)
         populateCalendarStrip(calendarStrip)
 
-        // Buttons
         addMedButton = view.findViewById(R.id.addMedButton)
         cameraButton = view.findViewById(R.id.cameraButton)
         galleryButton = view.findViewById(R.id.galleryButton)
@@ -161,12 +157,38 @@ class HomeFragment : Fragment() {
         }
 
         manualButton.setOnClickListener {
-            // Navigate to manual medication entry fragment
             findNavController().navigate(R.id.action_homeFragment_to_newMedManualFragment)
         }
 
-        // Camera image box
         cameraBox = view.findViewById(R.id.cameraBox)
+
+        // RecyclerView setup for grouped medication schedule
+        val scheduleRecyclerView = view.findViewById<RecyclerView>(R.id.scheduleRecyclerView)
+        scheduleRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        if (patientId != null) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val rawSchedule = ApiClient.retrofitService.getDailySchedule(patientId)
+                    val groupedList = groupScheduleItems(rawSchedule)
+                    scheduleRecyclerView.adapter = GroupedScheduleAdapter(groupedList)
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Failed to load schedule: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    private fun groupScheduleItems(scheduleList: List<ScheduleItem>): List<ScheduleListItem> {
+        val grouped = mutableListOf<ScheduleListItem>()
+        scheduleList
+            .groupBy { it.scheduledTime }
+            .toSortedMap()
+            .forEach { (time, meds) ->
+                grouped.add(ScheduleListItem.TimeHeader(time))
+                grouped.addAll(meds.map { ScheduleListItem.MedicationEntry(it) })
+            }
+        return grouped
     }
 
     private fun createUri(): Uri {
@@ -250,7 +272,7 @@ class HomeFragment : Fragment() {
 
                 dateText.background = ContextCompat.getDrawable(requireContext(), R.drawable.circle_blue_bg)
                 dateText.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
-                dayText.setTextColor(Color.parseColor("#1E88E5")) // blue text for selected day
+                dayText.setTextColor(Color.parseColor("#1E88E5"))
 
                 selectedDateView = container
                 selectedCalendar = dayCopy
