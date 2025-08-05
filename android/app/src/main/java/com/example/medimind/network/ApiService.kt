@@ -1,12 +1,9 @@
 package com.example.medimind.network
 
-import retrofit2.http.Query
 import com.example.medimind.data.EditMedRequest
-import com.example.medimind.data.EditMedResponse
-import com.example.medimind.data.MedicationResponse
-import com.example.medimind.data.IntakeHistoryResponse
-import com.example.medimind.data.Medication
-import com.example.medimind.data.Schedule
+import com.example.medimind.service.EditMedResponse
+import com.example.medimind.service.MedicationResponse
+import com.example.medimind.service.IntakeHistoryResponse
 import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -14,7 +11,6 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import java.time.LocalTime
-import java.util.UUID
 
 // Request body for registration
 data class RegisterRequest(

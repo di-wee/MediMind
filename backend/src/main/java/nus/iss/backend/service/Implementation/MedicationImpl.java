@@ -132,6 +132,7 @@ public class MedicationImpl implements MedicationService {
     }
 
 
+    //LST: all the steps will work like "all or nothing"
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ResponseEntity<?> processEditMedication(EditMedicationRequest req) {
@@ -159,6 +160,7 @@ public class MedicationImpl implements MedicationService {
         this.saveMedication(med);
 
         //then create new schedules
+        //the formatters are for HHMM and HH:MM
         for (String timeStr : req.getTimes()) {
             LocalTime time;
             try {

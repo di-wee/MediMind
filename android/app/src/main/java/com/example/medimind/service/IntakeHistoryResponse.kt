@@ -1,4 +1,4 @@
-package com.example.medimind.data
+package com.example.medimind.service
 
 data class IntakeHistoryResponse(
     val medicationName: String,
