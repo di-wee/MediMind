@@ -3,6 +3,7 @@ package nus.iss.backend.controller;
 import nus.iss.backend.dao.IntakeLogResponseWeb;
 import nus.iss.backend.dao.IntakeReqMobile;
 import nus.iss.backend.dao.MedicationIdList;
+import nus.iss.backend.dao.ImageOutput;
 import nus.iss.backend.dto.EditMedicationRequest;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.IntakeHistory;
@@ -16,7 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -43,34 +46,36 @@ public class MedicationController {
 
     @GetMapping("/medList")
     public ResponseEntity<List<Medication>> getMedications(@RequestBody MedicationIdList MedIds) {
-        try{
-            List<Medication> medications =  medicationService.findAllMedications(MedIds.getMedicationIdList());
+        try {
+            List<Medication> medications = medicationService.findAllMedications(MedIds.getMedicationIdList());
             if (MedIds.getMedicationIdList().isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity<>(medications,HttpStatus.OK);
-        }catch (RuntimeException e) {
+            return new ResponseEntity<>(medications, HttpStatus.OK);
+        } catch (RuntimeException e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
+
     @PostMapping("/createmedLog")
-    public ResponseEntity<List<IntakeHistory>> createMedicationLog(@RequestBody List<IntakeReqMobile> medLogReqMobiles) {
-        try{
+    public ResponseEntity<List<IntakeHistory>> createMedicationLog(
+            @RequestBody List<IntakeReqMobile> medLogReqMobiles) {
+        try {
             List<IntakeHistory> intakeHistories = new ArrayList<>();
             medLogReqMobiles.forEach(medLogReqMobile -> {
                 IntakeHistory saveHistory = intakeHistoryService.createIntakeHistory(medLogReqMobile);
                 intakeHistories.add(saveHistory);
             });
-            return new ResponseEntity<>(intakeHistories,HttpStatus.OK);
-        }catch (RuntimeException e){
+            return new ResponseEntity<>(intakeHistories, HttpStatus.OK);
+        } catch (RuntimeException e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    //for my edit  med detail page to show frequency and timer
+    // for my edit med detail page to show frequency and timer
     @GetMapping("{medicationId}/edit")
     public ResponseEntity<?> getMedicationEditDetails(@PathVariable UUID medicationId) {
         Medication med = medicationService.findMedicineById(medicationId);
@@ -81,7 +86,7 @@ public class MedicationController {
         List<Schedule> activeSchedules = scheduleService.findActiveSchedulesByMedication(med);
         List<String> times = activeSchedules.stream()
                 .map(s -> s.getScheduledTime().toString())
-                .map(t -> t.length() > 5 ? t.substring(0,5) : t)
+                .map(t -> t.length() > 5 ? t.substring(0, 5) : t)
                 .toList();
 
         Map<String, Object> result = new HashMap<>();
@@ -107,9 +112,7 @@ public class MedicationController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Failed to save medication details");
         }
-     }
-
-
+    }
 
     @GetMapping("/{medicationId}/logs")
     public ResponseEntity<List<IntakeLogResponseWeb>> getMedicationLog(@PathVariable UUID medicationId) {
@@ -117,14 +120,14 @@ public class MedicationController {
             List<IntakeLogResponseWeb> response = intakeHistoryService.getIntakeLogsForMedication(medicationId);
             return new ResponseEntity<>(response, HttpStatus.OK);
 
-        }catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             logger.error("Error in retrieving logs for medication(" + medicationId + ").");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
     }
 
-    //LST: to deactivate the medication and all related schedules
+    // LST: to deactivate the medication and all related schedules
     @PutMapping("/{medicationId}/deactivate")
     public ResponseEntity<String> deactivateMedication(@PathVariable UUID medicationId) {
         Medication med = medicationService.findMedicineById(medicationId);
@@ -142,6 +145,11 @@ public class MedicationController {
         return ResponseEntity.ok("Medication and related schedules deactivated successfully");
     }
 
-
+    // Pris: prediction from the ML model
+    @PostMapping("/predict")
+    public ResponseEntity<ImageOutput> predict(@RequestParam("file") MultipartFile file) throws IOException {
+        ImageOutput result = medicationService.sendToFastAPI(file);
+        return ResponseEntity.ok(result);
+    }
 
 }
