@@ -1,32 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/intakeHistoryLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
+    android:background="@color/white"
     tools:context=".IntakeHistoryFragment">
 
+    <!-- Reusable top navigation bar (includes greeting + logout) -->
     <include
         layout="@layout/top_nav_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <!-- Title of the screen -->
     <TextView
         android:id="@+id/historyTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Intake History"
-        android:textSize="24sp"
+        android:textSize="22sp"
         android:textStyle="bold"
-        android:paddingBottom="8dp" />
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:textColor="@color/black" />
 
+    <!-- RecyclerView that lists grouped medication intake logs -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/intakeHistoryRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:paddingBottom="8dp" />
+        android:paddingBottom="8dp"
+        android:scrollbars="vertical"
+        tools:listitem="@layout/item_intake_group" />
 
 </LinearLayout>

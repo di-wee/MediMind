@@ -1,21 +1,26 @@
 package com.example.medimind
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.medimind.adapters.MedicineAdapter
+import com.example.medimind.service.MedicationResponse
+import com.example.medimind.network.ApiClient
+import kotlinx.coroutines.launch
 
 class ActiveMedicineListFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: MedicineAdapter
-
-    // Dummy list of medicines
-    private val dummyMedicineList = listOf("Panadol", "Aspirin", "Metformin")
+    private var medicineList = mutableListOf<MedicationResponse>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,12 +36,41 @@ class ActiveMedicineListFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         // Set up adapter with click listener to navigate and pass medicineName
-        adapter = MedicineAdapter(dummyMedicineList) { medicineName ->
+        adapter = MedicineAdapter(medicineList) { medicine ->
             val bundle = Bundle().apply {
-                putString("medicineName", medicineName)
+                putString("medicineName", medicine.medicationName)
+                putString("medicineId", medicine.id)
             }
             findNavController().navigate(R.id.action_activeMedicineListFragment_to_viewMedicineDetailsFragment, bundle)
         }
         recyclerView.adapter = adapter
+
+        val sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val patientId = sharedPreferences.getString("patientId", null)
+
+        if (patientId != null) {
+            fetchActiveMedications(patientId)
+        } else {
+            Toast.makeText(context, "No patientId found", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun fetchActiveMedications(patientId: String){
+        lifecycleScope.launch {
+            try {
+                val response = ApiClient.retrofitService.getPatientMedications(patientId)
+                val activeNames = response
+                    .filter { it.active }
+                    .sortedBy { it.medicationName.lowercase() }
+
+                medicineList.clear()
+                medicineList.addAll(activeNames)
+                adapter.notifyDataSetChanged()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }
+

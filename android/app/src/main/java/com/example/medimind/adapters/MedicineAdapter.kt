@@ -1,18 +1,21 @@
-package com.example.medimind
+package com.example.medimind.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.medimind.R
+import com.example.medimind.service.MedicationResponse
 
 class MedicineAdapter(
-    private val medicines: List<String>,
-    private val onItemClick:(String) -> Unit
+    private val medicines: List<MedicationResponse>,
+    private val onItemClick:(MedicationResponse) -> Unit
 ) : RecyclerView.Adapter<MedicineAdapter.MedicineViewHolder>() {
 
-    class MedicineViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val nameTextView: TextView = itemView.findViewById(R.id.medicineName)
+    inner class MedicineViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val medicineNameTextView: TextView = itemView.findViewById(R.id.medicineName)
+        val quantityTextView: TextView = itemView.findViewById(R.id.intakeQuantity)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MedicineViewHolder {
@@ -22,7 +25,8 @@ class MedicineAdapter(
 
     override fun onBindViewHolder(holder: MedicineViewHolder, position: Int) {
         val medicine = medicines[position]
-        holder.nameTextView.text = medicine
+        holder.medicineNameTextView.text = medicine.medicationName
+        holder.quantityTextView.text = "(Take ${medicine.intakeQuantity} each time.)"
         holder.itemView.setOnClickListener{
             onItemClick(medicine)
         }

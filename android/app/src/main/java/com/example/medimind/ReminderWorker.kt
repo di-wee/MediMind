@@ -4,6 +4,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.work.Worker
@@ -15,13 +17,14 @@ class ReminderWorker(context: Context, params: WorkerParameters) : Worker(contex
     override fun doWork(): Result {
         val context = applicationContext
         val medId = inputData.getInt("med_id", -1)
-        if (medId == -1) return Result.failure()
+        val patientId = inputData.getString("patient_id")
+        if (medId == -1|| patientId==null) return Result.failure()
 
-        // 可选：发送广播再次触发 ReminderReceiver
         val intent = Intent(context, ReminderReceiver::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
             putExtra("from_worker", true)
             putExtra("med_id", medId)
+            putExtra("patientId",patientId)
         }
         context.sendBroadcast(intent)
 
@@ -31,18 +34,23 @@ class ReminderWorker(context: Context, params: WorkerParameters) : Worker(contex
     }
 
     private fun showNotification(context: Context) {
+        val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 "med_channel",
                 "Medication Reminder",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Channel for medication reminders"
+                enableVibration(true)
+                setSound(soundUri, AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build())
             }
             manager.createNotificationChannel(channel)
-        }
+
 
         val builder = NotificationCompat.Builder(context, "med_channel")
             .setSmallIcon(R.drawable.ic_med)

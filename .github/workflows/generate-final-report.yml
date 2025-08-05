@@ -1,0 +1,99 @@
+name: "Generate Final Report"
+
+on:
+  workflow_run:
+    workflows: ["SAST - Static Code Analysis & Build"]
+    types:
+      - completed
+
+jobs:
+  final-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Create a folder for the final report
+      - name: Prepare Final Report Folder
+        run: mkdir -p artifacts/final
+
+      # Aggregate Lint Reports
+      - name: Aggregate Lint Results
+        run: |
+          echo "======================" > artifacts/final/final-report.txt
+          echo "MediMind CI/CD Final Report - $(date)" >> artifacts/final/final-report.txt
+          echo "======================" >> artifacts/final/final-report.txt
+          echo "" >> artifacts/final/final-report.txt
+
+          echo "=== Linting Summary ===" >> artifacts/final/final-report.txt
+          if [ -f frontend/eslint-report.txt ]; then
+            echo "- ESLint (Frontend):" >> artifacts/final/final-report.txt
+            cat frontend/eslint-report.txt >> artifacts/final/final-report.txt
+            echo "" >> artifacts/final/final-report.txt
+          fi
+
+          if [ -f ml/pylint-report.txt ]; then
+            echo "- Pylint (ML):" >> artifacts/final/final-report.txt
+            cat ml/pylint-report.txt >> artifacts/final/final-report.txt
+            echo "" >> artifacts/final/final-report.txt
+          fi
+
+          if [ -f ml/nbqa-notebook-report.txt ]; then
+            echo "- nbqa (Jupyter Notebooks):" >> artifacts/final/final-report.txt
+            cat ml/nbqa-notebook-report.txt >> artifacts/final/final-report.txt
+            echo "" >> artifacts/final/final-report.txt
+          fi
+
+          if ls android/app/build/reports/lint-results-*.html 1> /dev/null 2>&1; then
+            echo "- Android Lint: Generated (see HTML report in artifacts)" >> artifacts/final/final-report.txt
+          fi
+
+      # Aggregate SCA Results
+      - name: Aggregate SCA Results
+        run: |
+          echo "=== SCA (Dependency Scan) Summary ===" >> artifacts/final/final-report.txt
+
+          if [ -f artifacts/sca/snyk-node-report.json ]; then
+            echo "- Frontend Snyk Vulnerabilities:" >> artifacts/final/final-report.txt
+            jq '.vulnerabilities | length' artifacts/sca/snyk-node-report.json >> artifacts/final/final-report.txt
+          fi
+
+          if [ -f artifacts/sca/snyk-java-report.json ]; then
+            echo "- Backend Snyk Vulnerabilities:" >> artifacts/final/final-report.txt
+            jq '.vulnerabilities | length' artifacts/sca/snyk-java-report.json >> artifacts/final/final-report.txt
+          fi
+
+          if [ -f artifacts/sca/pip-audit-report.json ]; then
+            echo "- ML pip-audit Vulnerabilities:" >> artifacts/final/final-report.txt
+            jq '.dependencies | length' artifacts/sca/pip-audit-report.json >> artifacts/final/final-report.txt
+          fi
+          echo "" >> artifacts/final/final-report.txt
+
+      # Aggregate SAST Results (CodeQL summary)
+      - name: Aggregate SAST Results
+        run: |
+          echo "=== SAST (CodeQL) Summary ===" >> artifacts/final/final-report.txt
+          echo "Check GitHub Security Tab for detailed CodeQL results." >> artifacts/final/final-report.txt
+          echo "" >> artifacts/final/final-report.txt
+
+      # Aggregate Unit Test Results (if using Maven Surefire)
+      - name: Aggregate Unit Test Results
+        run: |
+          echo "=== Unit Test Summary ===" >> artifacts/final/final-report.txt
+          if ls backend/target/surefire-reports/*.xml 1> /dev/null 2>&1; then
+            total=$(grep "<testsuite" backend/target/surefire-reports/*.xml | wc -l)
+            echo "Total test suites executed: $total" >> artifacts/final/final-report.txt
+            failures=$(grep "<failure" backend/target/surefire-reports/*.xml | wc -l)
+            echo "Total test failures: $failures" >> artifacts/final/final-report.txt
+          else
+            echo "No unit test results found." >> artifacts/final/final-report.txt
+          fi
+          echo "" >> artifacts/final/final-report.txt
+
+      # Upload the final report as an artifact
+      - name: Upload Final Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-report
+          path: artifacts/final/final-report.txt
