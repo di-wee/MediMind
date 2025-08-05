@@ -9,10 +9,7 @@ import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
 import nus.iss.backend.model.Schedule;
-import nus.iss.backend.service.IntakeHistoryService;
-import nus.iss.backend.service.MedicationService;
-import nus.iss.backend.service.PatientService;
-import nus.iss.backend.service.ScheduleService;
+import nus.iss.backend.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -42,6 +40,8 @@ public class MedicationController {
     private ScheduleService scheduleService;
     @Autowired
     private IntakeHistoryService intakeHistoryService;
+    @Autowired
+    private MedicationEditService medicationEditService;
 
     @GetMapping("/medList")
     public ResponseEntity<List<Medication>> getMedications(@RequestBody MedicationIdList MedIds) {
@@ -95,40 +95,20 @@ public class MedicationController {
 
     @PostMapping("/edit/save")
     public ResponseEntity<?> saveEditMedication(@RequestBody EditMedicationRequest req) {
-        Medication med = medicationService.findMedicineById(req.getMedicationId());
-        if (med == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Medication not found");
-        }
-
-        Optional<Patient> patientOpt = patientService.findPatientById(req.getPatientId());
-        if (patientOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patient not found");
-        }
-        Patient patient = patientOpt.get();
-
-        //every time will clean all inactive schedules(created more than 90 days) and related intakeHistory
-        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(90);
-        scheduleService.deleteOldInactiveSchedules(med, cutoffDate);
-
-        //then deactivate the active schedules before create new ones
-        List<Schedule> activeSchedules = scheduleService.findActiveSchedulesByMedication(med);
-        scheduleService.deactivateSchedules(activeSchedules);
-
-        //then update new frequency
-        med.setFrequency(req.getFrequency());
-        medicationService.saveMedication(med);
-
-        //then create new schedules
+        // time format validation
         for (String timeStr : req.getTimes()) {
-            LocalTime time = LocalTime.parse(timeStr);
-            scheduleService.createSchedule(med, patient, time);
+            if (!timeStr.matches("^\\d{4}$") && !timeStr.matches("^\\d{2}:\\d{2}$")) {
+                return ResponseEntity.badRequest().body("Invalid time format: " + timeStr);
+            }
         }
 
-        //last step: reset the alarm and notification things,
-        // leave to shiying to implement, probably will implement in android part, not sure
-
-        return ResponseEntity.ok("Medication details updated successfully");
-
+        try {
+            return medicationEditService.processEditMedication(req);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to save medication details");
+        }
      }
 
 
@@ -144,6 +124,24 @@ public class MedicationController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
+    }
+
+    //LST: to deactivate the medication and all related schedules
+    @PutMapping("/{medicationId}/deactivate")
+    public ResponseEntity<String> deactivateMedication(@PathVariable UUID medicationId) {
+        Medication med = medicationService.findMedicineById(medicationId);
+        if (med == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Medication not found");
+        }
+
+        med.setActive(false);
+        medicationService.saveMedication(med);
+
+        List<Schedule> schedules = scheduleService.findActiveSchedulesByMedication(med);
+
+        scheduleService.deactivateSchedules(schedules);
+
+        return ResponseEntity.ok("Medication and related schedules deactivated successfully");
     }
 
 
