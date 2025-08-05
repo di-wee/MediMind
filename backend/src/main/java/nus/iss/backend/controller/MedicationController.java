@@ -136,6 +136,7 @@ public class MedicationController {
 
         }
     }
+
     @PostMapping("/save")
     public ResponseEntity<?> saveMedication(@RequestBody newMedicationReq req) {
         try{
@@ -161,30 +162,29 @@ public class MedicationController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-// LST: to deactivate the medication and all related schedules
-@PutMapping("/{medicationId}/deactivate")
-public ResponseEntity<String> deactivateMedication(@PathVariable UUID medicationId) {
-    Medication med = medicationService.findMedicineById(medicationId);
-    if (med == null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Medication not found");
+
+    // LST: to deactivate the medication and all related schedules
+    @PutMapping("/{medicationId}/deactivate")
+    public ResponseEntity<String> deactivateMedication(@PathVariable UUID medicationId) {
+        Medication med = medicationService.findMedicineById(medicationId);
+        if (med == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Medication not found");
+        }
+
+        med.setActive(false);
+        medicationService.saveMedication(med);
+
+        List<Schedule> schedules = scheduleService.findActiveSchedulesByMedication(med);
+
+        scheduleService.deactivateSchedules(schedules);
+
+        return ResponseEntity.ok("Medication and related schedules deactivated successfully");
     }
 
-    med.setActive(false);
-    medicationService.saveMedication(med);
-
-    List<Schedule> schedules = scheduleService.findActiveSchedulesByMedication(med);
-
-    scheduleService.deactivateSchedules(schedules);
-
-    return ResponseEntity.ok("Medication and related schedules deactivated successfully");
-}
-
-// Pris: prediction from the ML model
-@PostMapping("/predict")
-public ResponseEntity<ImageOutput> predict(@RequestParam("file") MultipartFile file) throws IOException {
-    ImageOutput result = medicationService.sendToFastAPI(file);
-    return ResponseEntity.ok(result);
-}
-
-
+    // Pris: prediction from the ML model
+    @PostMapping("/predict")
+    public ResponseEntity<ImageOutput> predict(@RequestParam("file") MultipartFile file) throws IOException {
+        ImageOutput result = medicationService.sendToFastAPI(file);
+        return ResponseEntity.ok(result);
+    }
 }
