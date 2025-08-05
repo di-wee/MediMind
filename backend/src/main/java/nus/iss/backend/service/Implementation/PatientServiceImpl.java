@@ -7,6 +7,8 @@ import nus.iss.backend.model.Patient;
 import nus.iss.backend.repository.PatientRepository;
 import nus.iss.backend.service.PatientService;
 import nus.iss.backend.service.ScheduleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,8 @@ import java.util.UUID;
 @Service
 @Transactional
 public class PatientServiceImpl implements PatientService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PatientServiceImpl.class);
 
     @Autowired
     private PatientRepository patientRepo;
@@ -39,17 +43,14 @@ public class PatientServiceImpl implements PatientService {
      */
     @Override
     public List<MissedDoseResponse> getPatientMedicationsWithMissedDose(UUID patientId) {
-        // Fetch patient, throw exception if not found
         Optional<Patient> pt = patientRepo.findById(patientId);
         if (pt.isEmpty()) {
             throw new ItemNotFound("Patient not found!");
         }
         Patient patient = pt.get();
 
-        // Retrieve medications from the patient entity
         List<Medication> medicationList = patient.getMedications();
 
-        // Convert medications to MissedDoseResponse DTOs
         return medicationList.stream()
                 .map(medication -> {
                     MissedDoseResponse dto = new MissedDoseResponse();
@@ -62,7 +63,6 @@ public class PatientServiceImpl implements PatientService {
                     dto.setNotes(medication.getNotes());
                     dto.setTiming(medication.getTiming());
 
-                    // Check whether any schedule linked to this medication has a missed dose
                     boolean hasMissed = medication.getSchedules().stream()
                             .anyMatch(sch -> scheduleService.hasMissedDose(sch.getId()));
 
@@ -86,5 +86,34 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public Optional<Patient> findPatientByEmailAndPassword(String email, String password) {
         return patientRepo.findByEmailAndPassword(email, password);
+    }
+
+    /**
+     * Find all patients assigned to a doctor based on the doctor's MCR number.
+     */
+    @Override
+    public List<Patient> findPatientsByDoctorMcr(String mcr) {
+        return patientRepo.findByDoctorMcrNo(mcr);
+    }
+
+    /**
+     * Unassign a doctor from a patient.
+     */
+    @Override
+    public boolean unassignDoctor(UUID patientId) {
+        logger.info("Attempting to unassign doctor for patient {}", patientId);
+        Optional<Patient> patientOpt = patientRepo.findById(patientId);
+        
+        if (patientOpt.isPresent()) {
+            Patient patient = patientOpt.get();
+            logger.info("Found patient: {} {}", patient.getFirstName(), patient.getLastName());
+            patient.setDoctor(null);
+            patientRepo.saveAndFlush(patient); // ensure immediate DB update
+            logger.info("Successfully unassigned doctor for patient {}", patientId);
+            return true;
+        } else {
+            logger.warn("Patient {} not found", patientId);
+            return false;
+        }
     }
 }

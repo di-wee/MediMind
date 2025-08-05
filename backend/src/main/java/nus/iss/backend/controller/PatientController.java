@@ -171,4 +171,31 @@ public class PatientController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @GetMapping("/patients/by-doctor/{mcr}")
+    public ResponseEntity<List<Patient>> getPatientsByDoctor(@PathVariable String mcr) {
+        try {
+            List<Patient> patients = patientService.findPatientsByDoctorMcr(mcr);
+            return new ResponseEntity<>(patients, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            logger.error("Error retrieving patients for doctor MCR {}: {}", mcr, e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @PutMapping("/patients/{id}/unassign-doctor")
+    public ResponseEntity<Void> unassignDoctorFromPatient(@PathVariable UUID id) {
+        try {
+            boolean updated = patientService.unassignDoctor(id);
+            if (updated) {
+                logger.info("Successfully unassigned doctor for patient {}", id);
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            } else {
+                logger.warn("Patient {} not found when trying to unassign doctor", id);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (RuntimeException e) {
+            logger.error("Error unassigning doctor from patient {}: {}", id, e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
