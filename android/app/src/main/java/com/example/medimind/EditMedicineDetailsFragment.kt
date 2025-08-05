@@ -160,24 +160,7 @@ class EditMedicineDetailsFragment : Fragment() {
             try {
                 Log.d("EditMedRequest", "Before sending request at: ${System.currentTimeMillis()}")
 
-                val response = ApiClient.retrofitService.saveEditedMedication(request)
-
-                val deActivatedIds = response.deActivatedIds
-                val newSchedules = response.newSchedules
-                for (schedule in newSchedules) {
-                    val timeStr = schedule.scheduledTime ?: continue
-                    val scheduleId = schedule.id ?: continue
-
-                    val parts = timeStr.split(":")
-                    val hour = parts[0].toInt()
-                    val minute = parts[1].toInt()
-                    val localTime = LocalTime.of(hour, minute)
-                    val zoned = localTime.atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
-                    val timeMillis = zoned.toInstant().toEpochMilli()
-
-                    //save edited new alarm
-                    ReminderUtils.scheduleAlarm(context = requireContext(), timeMilli = timeMillis, patientId = patientId)
-                }
+                ApiClient.retrofitService.saveEditedMedication(request)
 
                 Log.d("EditMedRequest", "After sending request at: ${System.currentTimeMillis()}")
                 Log.d("EditMedRequest", "Request sent: $request")
@@ -188,6 +171,18 @@ class EditMedicineDetailsFragment : Fragment() {
                 Log.e("EditMedError", "Failed to send request: ${e.message}", e)
                 Toast.makeText(context, "Save Failed!", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        for (timeStr in times) {
+            val parts = timeStr.split(":")
+            val hour = parts[0].toInt()
+            val minute = parts[1].toInt()
+            val localTime = LocalTime.of(hour, minute)
+            val zoned = localTime.atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
+            val timeMillis = zoned.toInstant().toEpochMilli()
+
+            //save edited new alarm
+            ReminderUtils.scheduleAlarm(context = requireContext(), timeMilli = timeMillis, patientId = patientId)
         }
     }
 

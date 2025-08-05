@@ -137,11 +137,6 @@ data class ScheduleListRequest(
     val patientId:String
 )
 
-data class editMedResponse (
-    val deActivatedIds: List<String>,
-    val newSchedules:List<ScheduleResponse>
-)
-
 data class SaveMedicationResponse(
     val ScheduleId: String,
     val time: String,
@@ -162,7 +157,7 @@ interface ApiService {
 
     // LST:
     @POST("api/medication/edit/save")
-    suspend fun saveEditedMedication(@Body body: EditMedRequest): editMedResponse
+    suspend fun saveEditedMedication(@Body body: EditMedRequest): ResponseBody
 
     // Registration endpoint
     @POST("api/patient/register")

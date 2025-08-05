@@ -1,6 +1,5 @@
 package nus.iss.backend.service.Implementation;
 
-import nus.iss.backend.dao.saveEditMedResponse;
 import nus.iss.backend.dto.newMedicationReq;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -153,15 +152,12 @@ public class MedicationImpl implements MedicationService {
 
         //then deactivate the active schedules before create new ones
         List<Schedule> activeSchedules = scheduleService.findActiveSchedulesByMedication(med);
-        List<UUID> deactivatedScheduleIds = activeSchedules.stream()
-                .map(Schedule::getId).toList();
         scheduleService.deactivateSchedules(activeSchedules);
 
         //then update new frequency
         med.setFrequency(req.getFrequency());
         this.saveMedication(med);
 
-        List<Schedule> newSchedules = new ArrayList<>();
         //then create new schedules
         for (String timeStr : req.getTimes()) {
             LocalTime time;
@@ -174,15 +170,9 @@ public class MedicationImpl implements MedicationService {
             } catch (Exception e) {
                 throw new IllegalArgumentException("Invalid time format: " + timeStr);
             }
-
-            Schedule newSchedule= scheduleService.createSchedule(med, patient, time);
-            newSchedules.add(newSchedule);
+            scheduleService.createSchedule(med, patient, time);
         }
-
-        saveEditMedResponse response = new saveEditMedResponse();
-        response.setNewSchedules(newSchedules);
-        response.setDeActivatedIds(deactivatedScheduleIds);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().build();
     }
 
     @Override
