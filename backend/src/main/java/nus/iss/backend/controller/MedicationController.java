@@ -139,6 +139,7 @@ public class MedicationController {
 
     @PostMapping("/save")
     public ResponseEntity<?> saveMedication(@RequestBody newMedicationReq req) {
+        logger.info(">>> /save API hit, request received: " + req.toString());
         try{
             Patient patient =  patientService.findPatientById(req.getPatientId()).orElse(null);
             if(patient==null) {

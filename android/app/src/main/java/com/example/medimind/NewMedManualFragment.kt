@@ -32,14 +32,15 @@ class NewMedManualFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_new_med_manual, container, false)
     }
 
-    override fun onViewCreated(view:View, savedInstanceState: Bundle?){
+    override fun onViewCreated(view:View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val backBtnFromManual = view.findViewById<Button>(R.id.btnBackFromManual)
-        backBtnFromManual.setOnClickListener{
+        backBtnFromManual.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
-        val sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val sharedPreferences =
+            requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val patientId = sharedPreferences.getString("patientId", null)
 
         val medicationNameInput = view.findViewById<TextView>(R.id.medicationNameInputManual)
@@ -48,53 +49,58 @@ class NewMedManualFragment : Fragment() {
         val instructionInput = view.findViewById<TextView>(R.id.instructionInputManual)
         val noteInput = view.findViewById<TextView>(R.id.noteInputManual)
 
-        var instruction = instructionInput.text.toString()
-        var note = noteInput.text.toString()
-
-        var frequency = frequencyInput.text.toString().toIntOrNull()?:0
-        //generate default times
-        var times = generateDefaultTimes(frequency)
-        for(time in times){
-            //convert generated times to timeMillis List
-            var timeMilli = convertToScheduleList(time)
-            //set alarm in alarmManager
-            val saveBtnFromManual = view.findViewById<Button>(R.id.btnSaveFromManual)
-            saveBtnFromManual.setOnClickListener{
-                //save new medication to database and set new alarm
-                val medicationName = medicationNameInput.text.toString()
-                val dosage = dosageInput.text.toString()
-                if (patientId == null || medicationName.isBlank() || dosage.isBlank() || frequency == 0) {
-                    Toast.makeText(requireContext(), "Please fill in all fields correctly", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-                val request = newMedicationRequest(
-                    medicationName = medicationName,
-                    patientId = patientId,
-                    dosage = dosage,
-                    frequency = frequency,
-                    Timing = "",
-                    instructions = instruction ,
-                    notes = note,
-                    isActive = true,
-                    times = time
-                )
-
-                lifecycleScope.launch {
-                    try {
-                        //save to db
-                        val service = ApiClient.retrofitService
+        val saveBtnFromManual = view.findViewById<Button>(R.id.btnSaveFromManual)
+        saveBtnFromManual.setOnClickListener {
+            var instruction = instructionInput.text.toString()
+            var note = noteInput.text.toString()
+            var frequency = frequencyInput.text.toString().toIntOrNull() ?: 0
+            //generate default times
+            var times = generateDefaultTimes(frequency)
+            //save new medication to database and set new alarm
+            val medicationName = medicationNameInput.text.toString()
+            val dosage = dosageInput.text.toString()
+            if (patientId == null || medicationName.isBlank() || dosage.isBlank() || frequency == 0) {
+                Toast.makeText(
+                    requireContext(),
+                    "Please fill in all fields correctly",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+            lifecycleScope.launch {
+                try {
+                    //save to db
+                    val service = ApiClient.retrofitService
+                    for (time in times) {
+                        val request = newMedicationRequest(
+                            medicationName = medicationName,
+                            patientId = patientId,
+                            dosage = dosage,
+                            frequency = frequency,
+                            Timing = "",
+                            instructions = instruction,
+                            notes = note,
+                            isActive = true,
+                            times = time
+                        )
                         val saveMedicationResponse = service.saveMedication(request)
-                        Toast.makeText(requireContext(), "Medication saved", Toast.LENGTH_SHORT).show()
+                        //convert generated times to timeMillis List
+                        var timeMilli = convertToScheduleList(time)
+                        //set alarm in alarmManager
                         //set new alarm
                         scheduleAlarm(requireContext(), timeMilli, patientId)
-                        parentFragmentManager.popBackStack()
-                    } catch (e: Exception) {
-                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
                     }
+                    Toast.makeText(requireContext(), "Medication saved", Toast.LENGTH_SHORT)
+                        .show()
+                    parentFragmentManager.popBackStack()
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG)
+                        .show()
                 }
             }
         }
     }
+
     fun generateDefaultTimes(frequency: Int): List<String> {
         val times = mutableListOf<String>()
 
