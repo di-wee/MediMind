@@ -1,17 +1,22 @@
 package nus.iss.backend.service.Implementation;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import nus.iss.backend.dao.ImageOutput;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.Medication;
-import nus.iss.backend.model.Patient;
 import nus.iss.backend.model.Schedule;
 import nus.iss.backend.repository.MedicationRepository;
 import nus.iss.backend.service.MedicationService;
-import nus.iss.backend.service.PatientService;
 import nus.iss.backend.service.ScheduleService;
 import nus.iss.backend.util.ImageToApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
@@ -20,8 +25,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpHeaders;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -34,6 +39,10 @@ public class MedicationImpl implements MedicationService {
 
     @Autowired
     ScheduleService scheduleService;
+
+    // found in appConfig
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Override
     public Boolean hasMedicineMissedDose(UUID medicationId) {
@@ -70,5 +79,34 @@ public class MedicationImpl implements MedicationService {
     @Override
     public Medication saveMedication(Medication medication) {
         return medicationRepo.save(medication);
+    }
+
+    @Override
+    public ImageOutput sendToFastAPI(MultipartFile file) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        InputStreamResource fileResource = new ImageToApi(
+                file.getInputStream(), file.getOriginalFilename());
+        body.add("file", fileResource);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+        String fastapiUrl = "http://192.168.0.115:8000/predict_image"; // Replace with your local FastAPI IP
+
+        ResponseEntity<String> response = restTemplate.postForEntity(fastapiUrl, requestEntity, String.class);
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(response.getBody());
+        JsonNode extracted = root.get("extracted_info");
+
+        ImageOutput result = new ImageOutput();
+        result.setMedicationName(extracted.path("medication_name").asText(""));
+        result.setIntakeQuantity(extracted.path("intake_quantity").asText(""));
+        result.setFrequency(Integer.parseInt(extracted.path("frequency").asText("")));
+        result.setInstructions(extracted.path("instruction").asText(""));
+        result.setNotes(extracted.path("note").asText(""));
+
+        return result;
     }
 }

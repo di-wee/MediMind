@@ -4,7 +4,6 @@ import com.example.medimind.data.EditMedRequest
 import com.example.medimind.data.EditMedResponse
 import com.example.medimind.data.MedicationResponse
 import com.example.medimind.data.IntakeHistoryResponse
-import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -20,7 +19,7 @@ data class RegisterRequest(
     val lastName: String,
     val gender: String,
     val dob: String,
-    val clinicName: String
+    val clinicName: String // or clinicId if you choose
 )
 
 // Request body for login
@@ -72,13 +71,6 @@ data class EmbeddedClinics(
     val clinics: List<ClinicResponse>
 )
 
-data class ScheduleItem(
-    val scheduledTime: String,
-    val medicationName: String,
-    val quantity: String,
-    val isActive: Boolean
-)
-
 interface ApiService {
 
     // LST: Get medications for a patient
@@ -91,7 +83,7 @@ interface ApiService {
 
     // LST:
     @POST("api/medication/edit/save")
-    suspend fun saveEditedMedication(@Body body: EditMedRequest): ResponseBody
+    suspend fun saveEditedMedication(@Body body: EditMedRequest): Void
 
     // Registration endpoint
     @POST("api/patient/register")
@@ -120,11 +112,6 @@ interface ApiService {
     @GET("api/patients/{patientId}/intake-history")
     suspend fun getIntakeHistory(@Path("patientId") patientId: String): List<IntakeHistoryResponse>
 
-    //LST: deactivate medication
-    @PUT("api/medication/{medicationId}/deactivate")
-    suspend fun deactivateMedication(@Path("medicationId") medId: String): ResponseBody
 
-    // Get daily recurring medication schedule
-    @GET("api/schedule/daily/{patientId}")
-    suspend fun getDailySchedule(@Path("patientId") patientId: String): List<ScheduleItem>
+
 }
