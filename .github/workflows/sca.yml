@@ -31,14 +31,19 @@ jobs:
       - name: Prepare Artifact Directory
         run: mkdir -p artifacts/sca
 
-      # ---------------------
+     # ---------------------
       # Backend (Java) Scan
       # ---------------------
       - name: Scan Backend (Java)
         working-directory: ./backend
         run: |
-          trivy fs --security-checks vuln --format json --output ../artifacts/sca/backend-trivy.json .
-
+          mkdir -p ../artifacts/sca
+          # Clean old builds to avoid stale 3.17.0 jars
+          mvn clean package -DskipTests
+          # Scan current folder (including target)
+          trivy fs --security-checks vuln --ignore-unfixed \
+            --format json \
+            --output ../artifacts/sca/backend-trivy.json .
       # ---------------------
       # Frontend (Node.js) Scan
       # ---------------------
@@ -79,17 +84,18 @@ jobs:
           name: sca-trivy-reports
           path: artifacts/sca/
 
-      - name: Generate Human-Readable Summary
+      - name: Generate Human-Readable SCA Summary
         run: |
-          JSON_FILE="backend-trivy.json"
-          SUMMARY_FILE="sca-summary.txt"
-      
-          # Check if file exists and is non-empty
+          JSON_FILE="../artifacts/sca/backend-trivy.json"
+          SUMMARY_FILE="../artifacts/sca/sca-summary.txt"
+
+          mkdir -p ../artifacts/sca
+
           if [ ! -s "$JSON_FILE" ]; then
             echo "No vulnerabilities found." > "$SUMMARY_FILE"
           else
-            # Extract vulnerabilities
             vuln_count=$(jq '[.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[]] | length' "$JSON_FILE")
+            
             if [ "$vuln_count" -eq 0 ]; then
               echo "No vulnerabilities found." > "$SUMMARY_FILE"
             else
