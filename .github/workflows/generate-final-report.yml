@@ -15,8 +15,8 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install GitHub CLI
-        uses: actions/setup-gh-cli@v2
+      - name: Check GH CLI version
+        run: gh --version
 
       - name: Wait for all workflows to complete
         env:
@@ -38,7 +38,6 @@ jobs:
               if [ "$status" = "completed" ]; then
                 break
               fi
-
               echo "$workflow not finished yet. Waiting 60s..."
               sleep 60
             done
@@ -66,7 +65,6 @@ jobs:
               echo "No completed runs found for $workflow"
               continue
             fi
-
             echo "Downloading artifacts for run $run_id of $workflow..."
             gh run download "$run_id" --dir "artifacts/$workflow" || echo "No artifacts for $workflow"
           done
