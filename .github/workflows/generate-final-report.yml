@@ -3,9 +3,9 @@ name: Generate Final CI/CD Report
 on:
   workflow_run:
     workflows:
-      - "lint.yml"
-      - "sast.yml"
-      - "sca.yml"
+      - "Linting CI & Build"
+      - "SCA - Dependency Scan (Trivy)"
+      - "SAST - Static Code Analysis & Build"
     types:
       - completed
 
