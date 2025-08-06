@@ -83,26 +83,23 @@ jobs:
         run: |
           JSON_FILE="backend-trivy.json"
           SUMMARY_FILE="sca-summary.txt"
-
-          # Fallback if JSON file doesn't exist
-          if [ ! -f "$JSON_FILE" ]; then
-            echo "Trivy JSON file not found. Skipping vulnerability listing."
-            echo "No vulnerabilities found." > "$SUMMARY_FILE"
-          elif [ ! -s "$JSON_FILE" ]; then
-            echo "Trivy JSON file is empty. Skipping vulnerability listing."
+      
+          # Check if file exists and is non-empty
+          if [ ! -s "$JSON_FILE" ]; then
             echo "No vulnerabilities found." > "$SUMMARY_FILE"
           else
-            # Count vulnerabilities
-            count=$(jq '[.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[]] | length' "$JSON_FILE")
-            if [ "$count" -eq 0 ]; then
+            # Extract vulnerabilities
+            vuln_count=$(jq '[.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[]] | length' "$JSON_FILE")
+            if [ "$vuln_count" -eq 0 ]; then
               echo "No vulnerabilities found." > "$SUMMARY_FILE"
             else
+              echo "Found $vuln_count vulnerabilities:" > "$SUMMARY_FILE"
               jq -r '
                 .Results[]
                 | select(.Vulnerabilities != null)
                 | .Vulnerabilities[]
                 | "\(.VulnerabilityID) | \(.Severity) | \(.PkgName) \(.InstalledVersion) -> Fixed in \(.FixedVersion // "N/A")"
-              ' "$JSON_FILE" > "$SUMMARY_FILE"
+              ' "$JSON_FILE" >> "$SUMMARY_FILE"
             fi
           fi
       
