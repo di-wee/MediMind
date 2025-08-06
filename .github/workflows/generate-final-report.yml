@@ -20,6 +20,32 @@ jobs:
       - name: Install GitHub CLI
         uses: cli/cli-action@v2
 
+      - name: Wait for all workflows to complete
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          required_workflows=("lint.yml" "sast.yml" "sca.yml")
+          echo "Ensuring all required workflows are completed on branch ${GITHUB_REF_NAME}..."
+          
+          for workflow in "${required_workflows[@]}"; do
+            while true; do
+              status=$(gh run list \
+                --workflow "$workflow" \
+                --branch "${GITHUB_REF_NAME}" \
+                --json status \
+                --jq '.[0].status')
+              
+              if [ "$status" = "completed" ]; then
+                echo "$workflow latest run is completed."
+                break
+              fi
+
+              echo "$workflow not finished yet. Waiting 60s..."
+              sleep 60
+            done
+          done
+
       - name: Prepare artifacts folder
         run: mkdir -p artifacts
 
@@ -55,9 +81,17 @@ jobs:
           echo "======================" > "$report_file"
           echo "MediMind CI/CD Final Report - $(date)" >> "$report_file"
           echo "======================" >> "$report_file"
-          
-          # Combine all *.txt and *.log files from subfolders
-          find artifacts -type f \( -name "*.txt" -o -name "*.log" \) ! -path "*/final/*" -exec cat {} \; >> "$report_file"
+
+          # Combine all *.txt and *.log files, label them by workflow
+          for workflow in lint.yml sast.yml sca.yml; do
+            echo "" >> "$report_file"
+            echo "=== $workflow Report ===" >> "$report_file"
+            if [ -d "artifacts/$workflow" ]; then
+              find "artifacts/$workflow" -type f \( -name "*.txt" -o -name "*.log" \) -exec cat {} \; >> "$report_file"
+            else
+              echo "No artifacts found for $workflow" >> "$report_file"
+            fi
+          done
 
           echo "Final report generated at $report_file"
 
