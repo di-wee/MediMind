@@ -10,6 +10,8 @@ import nus.iss.backend.repository.IntakeRepository;
 import nus.iss.backend.repository.PatientRepository;
 import nus.iss.backend.service.PatientService;
 import nus.iss.backend.service.ScheduleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,8 @@ import java.util.UUID;
 @Service
 @Transactional
 public class PatientServiceImpl implements PatientService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PatientServiceImpl.class);
 
     @Autowired
     private PatientRepository patientRepo;
@@ -64,14 +68,28 @@ public class PatientServiceImpl implements PatientService {
             .toList();
     }
 
+    /**
+     * Save a new patient to the database (used for registration).
+     */
     @Override
     public Patient savePatient(Patient patient) {
         return patientRepo.save(patient);
     }
 
+    /**
+     * Find a patient by email and password (used for login).
+     */
     @Override
     public Optional<Patient> findPatientByEmailAndPassword(String email, String password) {
         return patientRepo.findByEmailAndPassword(email, password);
+    }
+
+    /**
+     * Find all patients assigned to a doctor based on the doctor's MCR number.
+     */
+    @Override
+    public List<Patient> findPatientsByDoctorMcr(String mcr) {
+        return patientRepo.findByDoctorMcrNo(mcr);
     }
 
     @Override
@@ -113,4 +131,26 @@ public class PatientServiceImpl implements PatientService {
             .sorted(Comparator.comparing(IntakeHistoryResponse::getScheduledTime))
             .toList();
     }
+    /**
+     * Unassign a doctor from a patient.
+     */
+    @Override
+    public boolean unassignDoctor(UUID patientId) {
+        logger.info("Attempting to unassign doctor for patient {}", patientId);
+        Optional<Patient> patientOpt = patientRepo.findById(patientId);
+
+        if (patientOpt.isPresent()) {
+            Patient patient = patientOpt.get();
+            logger.info("Found patient: {} {}", patient.getFirstName(), patient.getLastName());
+            patient.setDoctor(null);
+            patientRepo.saveAndFlush(patient); // ensure immediate DB update
+            logger.info("Successfully unassigned doctor for patient {}", patientId);
+            return true;
+        } else {
+            logger.warn("Patient {} not found", patientId);
+            return false;
+        }
+    }
 }
+
+

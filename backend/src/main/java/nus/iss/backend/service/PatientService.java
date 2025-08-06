@@ -36,6 +36,16 @@ public interface PatientService {
     Optional<Patient> findPatientByEmailAndPassword(String email, String password);
 
     /**
+     * Find all patients assigned to a doctor based on the doctor's MCR number.
+     */
+    List<Patient> findPatientsByDoctorMcr(String mcr);
+
+    /**
+     * Unassign a doctor from a specific patient.
+     */
+    boolean unassignDoctor(UUID patientId);
+
+    /**
      * Get list of medications currently assigned to a patient.
      */
     List<Medication> getPatientMedications(UUID patientId);
