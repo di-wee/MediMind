@@ -2,6 +2,7 @@ package nus.iss.backend.controller;
 
 import nus.iss.backend.dao.MissedDoseResponse;
 import nus.iss.backend.dto.RegisterPatientRequest;
+import nus.iss.backend.dto.AssignPatientRequest;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.Clinic;
 import nus.iss.backend.model.Medication;
@@ -213,4 +214,37 @@ public class PatientController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PutMapping("/patients/assign")
+    public ResponseEntity<Void> assignDoctorToPatient(@RequestBody AssignPatientRequest request) {
+        try {
+            UUID patientId = request.getPatientId();       // Already UUID now
+            String doctorMcr = request.getDoctorId();       // Still a String
+
+            patientService.assignPatientToDoctor(patientId, doctorMcr);
+            logger.info("Assigned doctor {} to patient {}", doctorMcr, patientId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Assignment failed: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            logger.error("Error assigning doctor to patient: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/patients/unassigned/{mcr}")
+    public ResponseEntity<List<Patient>> getUnassignedPatients(@PathVariable String mcr) {
+        try {
+            List<Patient> unassignedPatients = patientService.findUnassignedPatientsByDoctorClinic(mcr);
+            return new ResponseEntity<>(unassignedPatients, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid request: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException e) {
+            logger.error("Unexpected error while fetching unassigned patients: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
