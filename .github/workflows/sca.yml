@@ -1,4 +1,4 @@
-name: "SCA - Dependency Scan with Trivy"
+name: "SCA - Dependency & Image Scan (Trivy)"
 
 on:
   push:
@@ -17,50 +17,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the code
-      - name: Checkout Code
+      # Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Install Trivy
+      # Install Trivy
       - name: Install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
-          sudo mv trivy /usr/local/bin/
+          sudo mv ./bin/trivy /usr/local/bin/trivy
+          trivy --version
 
-      # 3️⃣ Create artifact folder
-      - name: Prepare Artifacts Folder
-        run: mkdir -p artifacts/sca
+      # Create artifact directory
+      - name: Prepare Artifact Directory
+        run: mkdir -p artifacts/trivy
 
-      # 4️⃣ Scan React Frontend (Node.js)
-      - name: Scan React Frontend
-        working-directory: ./frontend
+      # Scan project dependencies for vulnerabilities (FS scan)
+      - name: Trivy File System Scan
         run: |
-          npm install || true
-          trivy fs --security-checks vuln --ignore-unfixed --exit-code 0 --format json -o ../../artifacts/sca/trivy-node-report.json .
+          trivy fs --security-checks vuln --severity HIGH,CRITICAL --format table --output artifacts/trivy/fs-vuln-report.txt .
+          trivy fs --security-checks vuln --severity HIGH,CRITICAL --format json --output artifacts/trivy/fs-vuln-report.json .
 
-      # 5️⃣ Scan Python ML Dependencies
-      - name: Scan Python ML
-        working-directory: ./ml
-        run: |
-          pip install -r requirements.txt || true
-          trivy fs --security-checks vuln --ignore-unfixed --exit-code 0 --format json -o ../../artifacts/sca/trivy-python-report.json .
+      # Optional: Scan Docker images if you have images built in previous jobs
+      # Example for backend image:
+      # - name: Docker Login
+      #   uses: docker/login-action@v2
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 6️⃣ Scan Java Backend Dependencies
-      - name: Scan Java Backend
-        working-directory: ./backend
-        run: |
-          mvn dependency:copy-dependencies || true
-          trivy fs --security-checks vuln --ignore-unfixed --exit-code 0 --format json -o ../../artifacts/sca/trivy-java-report.json .
+      # - name: Scan Backend Docker Image
+      #   run: |
+      #     docker pull ${{ secrets.DOCKERHUB_USERNAME }}/medimind-backend:latest
+      #     trivy image --severity HIGH,CRITICAL --format table --output artifacts/trivy/backend-image-report.txt ${{ secrets.DOCKERHUB_USERNAME }}/medimind-backend:latest
 
-      # 7️⃣ Optional: Scan Docker Image for Backend
-      - name: Scan Backend Docker Image
-        run: |
-          docker build -t medimind-backend:latest ./backend
-          trivy image --security-checks vuln --ignore-unfixed --exit-code 0 --format json -o artifacts/sca/trivy-backend-docker.json medimind-backend:latest
-
-      # 8️⃣ Upload reports as artifacts
+      # Upload all reports as artifact
       - name: Upload Trivy Reports
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-reports
-          path: artifacts/sca/*.json
+          name: trivy-scan-report
+          path: artifacts/trivy
