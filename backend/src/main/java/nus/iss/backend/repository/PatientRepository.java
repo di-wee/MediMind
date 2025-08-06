@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
+
 
 @Repository
 public interface PatientRepository extends JpaRepository<Patient, UUID> {
@@ -23,4 +25,6 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
      * SELECT * FROM patient WHERE email = ? AND password = ?
      */
     Optional<Patient> findByEmailAndPassword(String email, String password);
+    List<Patient> findByDoctorMcrNo(String mcr);
+
 }
