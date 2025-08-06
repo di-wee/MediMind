@@ -21,6 +21,15 @@ jobs:
         uses: actions/checkout@v4
 
       # ---------------------
+      # Set up Java 21 for backend build
+      # ---------------------
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # ---------------------
       # Install Trivy
       # ---------------------
       - name: Install Trivy
@@ -28,22 +37,24 @@ jobs:
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
           sudo mv ./bin/trivy /usr/local/bin/
 
+      # Prepare artifact directory
       - name: Prepare Artifact Directory
         run: mkdir -p artifacts/sca
 
-     # ---------------------
+      # ---------------------
       # Backend (Java) Scan
       # ---------------------
       - name: Scan Backend (Java)
         working-directory: ./backend
         run: |
           mkdir -p ../artifacts/sca
-          # Clean old builds to avoid stale 3.17.0 jars
+          # Clean old builds to avoid stale jars
           mvn clean package -DskipTests
           # Scan current folder (including target)
           trivy fs --security-checks vuln --ignore-unfixed \
             --format json \
             --output ../artifacts/sca/backend-trivy.json .
+
       # ---------------------
       # Frontend (Node.js) Scan
       # ---------------------
@@ -62,7 +73,7 @@ jobs:
           pip install -r requirements.txt || true
           trivy fs --security-checks vuln --format json --output ../artifacts/sca/ml-trivy.json .
 
-     # ---------------------
+      # ---------------------
       # Android Scan (APK)
       # ---------------------
       - name: Build Android APK
@@ -73,23 +84,16 @@ jobs:
         run: |
           APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -n 1)
           echo "Scanning APK: $APK_PATH"
-          mkdir -p artifacts/sca
           trivy fs --scanners vuln --format json --output artifacts/sca/android-trivy.json "$APK_PATH"
-      # ---------------------
-      # Upload SCA Reports
-      # ---------------------
-      - name: Upload SCA Reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: sca-trivy-reports
-          path: artifacts/sca/
 
+      # ---------------------
+      # Generate Human-Readable SCA Summary
+      # ---------------------
       - name: Generate Human-Readable SCA Summary
         run: |
-          JSON_FILE="../artifacts/sca/backend-trivy.json"
-          SUMMARY_FILE="../artifacts/sca/sca-summary.txt"
-
-          mkdir -p ../artifacts/sca
+          JSON_FILE="artifacts/sca/backend-trivy.json"
+          SUMMARY_FILE="artifacts/sca/sca-summary.txt"
+          mkdir -p artifacts/sca
 
           if [ ! -s "$JSON_FILE" ]; then
             echo "No vulnerabilities found." > "$SUMMARY_FILE"
@@ -108,9 +112,18 @@ jobs:
               ' "$JSON_FILE" >> "$SUMMARY_FILE"
             fi
           fi
-      
+
+      # ---------------------
+      # Upload SCA Reports & Summary
+      # ---------------------
+      - name: Upload SCA Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: sca-trivy-reports
+          path: artifacts/sca/
+
       - name: Upload SCA summary
         uses: actions/upload-artifact@v4
         with:
           name: sca-summary
-          path: sca-summary.txt
+          path: artifacts/sca/sca-summary.txt
