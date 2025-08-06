@@ -1,4 +1,4 @@
-name: "SCA - Dependency & Image Scan (Trivy)"
+name: "SCA - Dependency Scan (Trivy)"
 
 on:
   push:
@@ -13,47 +13,69 @@ on:
       - main
 
 jobs:
-  trivy-scan:
+  sca-trivy:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # ---------------------
       # Install Trivy
+      # ---------------------
       - name: Install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
-          sudo mv ./bin/trivy /usr/local/bin/trivy
-          trivy --version
+          sudo mv ./bin/trivy /usr/local/bin/
 
-      # Create artifact directory
       - name: Prepare Artifact Directory
-        run: mkdir -p artifacts/trivy
+        run: mkdir -p artifacts/sca
 
-      # Scan project dependencies for vulnerabilities (FS scan)
-      - name: Trivy File System Scan
+      # ---------------------
+      # Backend (Java) Scan
+      # ---------------------
+      - name: Scan Backend (Java)
+        working-directory: ./backend
         run: |
-          trivy fs --security-checks vuln --severity HIGH,CRITICAL --format table --output artifacts/trivy/fs-vuln-report.txt .
-          trivy fs --security-checks vuln --severity HIGH,CRITICAL --format json --output artifacts/trivy/fs-vuln-report.json .
+          trivy fs --security-checks vuln --format json --output ../artifacts/sca/backend-trivy.json .
 
-      # Optional: Scan Docker images if you have images built in previous jobs
-      # Example for backend image:
-      # - name: Docker Login
-      #   uses: docker/login-action@v2
-      #   with:
-      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # ---------------------
+      # Frontend (Node.js) Scan
+      # ---------------------
+      - name: Scan Frontend (Node.js)
+        working-directory: ./frontend
+        run: |
+          npm install
+          trivy fs --security-checks vuln --format json --output ../artifacts/sca/frontend-trivy.json .
 
-      # - name: Scan Backend Docker Image
-      #   run: |
-      #     docker pull ${{ secrets.DOCKERHUB_USERNAME }}/medimind-backend:latest
-      #     trivy image --severity HIGH,CRITICAL --format table --output artifacts/trivy/backend-image-report.txt ${{ secrets.DOCKERHUB_USERNAME }}/medimind-backend:latest
+      # ---------------------
+      # ML (Python) Scan
+      # ---------------------
+      - name: Scan Python ML
+        working-directory: ./ml
+        run: |
+          pip install -r requirements.txt || true
+          trivy fs --security-checks vuln --format json --output ../artifacts/sca/ml-trivy.json .
 
-      # Upload all reports as artifact
-      - name: Upload Trivy Reports
+      # ---------------------
+      # Android Scan (APK)
+      # ---------------------
+      - name: Build Android APK
+        working-directory: ./android
+        run: ./gradlew assembleDebug
+
+      - name: Scan Android APK with Trivy
+        working-directory: ./android
+        run: |
+          APK_PATH=$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+          echo "Scanning APK: $APK_PATH"
+          trivy fs --security-checks vuln --format json --output ../../artifacts/sca/android-trivy.json "$APK_PATH"
+
+      # ---------------------
+      # Upload SCA Reports
+      # ---------------------
+      - name: Upload SCA Reports
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-scan-report
-          path: artifacts/trivy
+          name: sca-trivy-reports
+          path: artifacts/sca/
