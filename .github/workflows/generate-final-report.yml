@@ -1,63 +1,87 @@
-name: "Generate Final Report"
+name: "Generate Demo Final Report"
 
 on:
-  workflow_dispatch:
-    inputs:
-      lint_run_id:
-        description: 'Workflow run ID for Lint'
-        required: true
-      sca_run_id:
-        description: 'Workflow run ID for SCA'
-        required: true
-      sast_run_id:
-        description: 'Workflow run ID for SAST'
-        required: true
+  workflow_dispatch:  # Manual trigger
 
 jobs:
   final-report:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download Lint artifacts
+      # ---------------------
+      # Download all artifacts from previous runs
+      # ---------------------
+      - name: Download Lint Artifacts
         uses: actions/download-artifact@v4
         with:
           name: eslint-report
           path: frontend/eslint-report
-          run-id: ${{ github.event.inputs.lint_run_id }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: pylint-report
+          path: artifacts/pylint-report
+      - uses: actions/download-artifact@v4
+        with:
+          name: nbqa-notebook-report
+          path: artifacts/nbqa-notebook-report
 
-      - name: Download SCA artifacts
+      # Optional: Download SCA reports if they exist
+      - name: Download SCA Artifacts
         uses: actions/download-artifact@v4
         with:
           name: snyk-node-report
-          path: artifacts/sca
-          run-id: ${{ github.event.inputs.sca_run_id }}
-
-      - name: Download SAST artifacts
-        uses: actions/download-artifact@v4
+          path: artifacts/snyk-node-report
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
         with:
-          name: codeql-results
-          path: artifacts/sast
-          run-id: ${{ github.event.inputs.sast_run_id }}
+          name: snyk-java-report
+          path: artifacts/snyk-java-report
+        continue-on-error: true
 
+      # ---------------------
+      # Aggregate Final Report
+      # ---------------------
       - name: Generate Final Report
         run: |
           mkdir -p artifacts/final
           report_file="artifacts/final/final-report.txt"
-          echo "MediMind CI/CD Final Report - $(date)" > $report_file
+          
+          echo "======================" > $report_file
+          echo "MediMind CI/CD Final Report - $(date)" >> $report_file
+          echo "======================" >> $report_file
           echo "" >> $report_file
-          echo "=== Lint ===" >> $report_file
-          ls artifacts/eslint-report || echo "No Lint artifact found" >> $report_file
-          echo "" >> $report_file
-          echo "=== SCA ===" >> $report_file
-          ls artifacts/sca || echo "No SCA artifact found" >> $report_file
-          echo "" >> $report_file
-          echo "=== SAST ===" >> $report_file
-          ls artifacts/sast || echo "No SAST artifact found" >> $report_file
 
+          echo "=== Linting Summary ===" >> $report_file
+          cat artifacts/eslint-report/eslint-report.txt >> $report_file
+          echo "" >> $report_file
+          cat artifacts/pylint-report/pylint-report.txt >> $report_file
+          echo "" >> $report_file
+          cat artifacts/nbqa-notebook-report/nbqa-notebook-report.txt >> $report_file
+          echo "" >> $report_file
+
+          echo "=== SCA (Dependency Scan) Summary ===" >> $report_file
+          if [ -f artifacts/snyk-node-report/snyk-node-report.json ]; then
+            echo "- Node vulnerabilities:" >> $report_file
+            jq '.vulnerabilities | length' artifacts/snyk-node-report/snyk-node-report.json >> $report_file
+          fi
+          if [ -f artifacts/snyk-java-report/snyk-java-report.json ]; then
+            echo "- Java vulnerabilities:" >> $report_file
+            jq '.vulnerabilities | length' artifacts/snyk-java-report/snyk-java-report.json >> $report_file
+          fi
+          echo "" >> $report_file
+
+          echo "=== SAST (CodeQL) Summary ===" >> $report_file
+          echo "See Security tab for detailed CodeQL alerts." >> $report_file
+          echo "" >> $report_file
+
+      # ---------------------
+      # Upload Final Report
+      # ---------------------
       - name: Upload Final Report
         uses: actions/upload-artifact@v4
         with:
-          name: final-report
+          name: final-demo-report
           path: artifacts/final/final-report.txt
