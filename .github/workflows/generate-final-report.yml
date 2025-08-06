@@ -36,38 +36,62 @@ jobs:
           echo "======================" >> $report_file
           echo "" >> $report_file
 
+          # ---------------------
+          # 1. Linting Summary
+          # ---------------------
           echo "=== Linting Summary ===" >> $report_file
           if [ -f artifacts/eslint-report/eslint-report.txt ]; then
-            echo "- Frontend Lint Issues:" >> $report_file
-            grep -c "error" artifacts/eslint-report/eslint-report.txt || echo "0 errors" >> $report_file
+            errors=$(grep -c "error" artifacts/eslint-report/eslint-report.txt || echo 0)
+            echo "- Frontend ESLint Errors: $errors" >> $report_file
+            echo "  Last 10 Lines:" >> $report_file
+            tail -n 10 artifacts/eslint-report/eslint-report.txt >> $report_file
+            echo "" >> $report_file
           fi
-
           if [ -f artifacts/pylint-report/pylint-report.txt ]; then
-            echo "- Python Lint Issues:" >> $report_file
-            grep -c "error" artifacts/pylint-report/pylint-report.txt || echo "0 errors" >> $report_file
+            errors=$(grep -c "error" artifacts/pylint-report/pylint-report.txt || echo 0)
+            echo "- Python Pylint Errors: $errors" >> $report_file
+            echo "  Last 10 Lines:" >> $report_file
+            tail -n 10 artifacts/pylint-report/pylint-report.txt >> $report_file
+            echo "" >> $report_file
           fi
 
-          echo "" >> $report_file
+          # ---------------------
+          # 2. Dependency Scan (SCA)
+          # ---------------------
           echo "=== SCA (Dependency Scan) Summary ===" >> $report_file
-          if [ -f artifacts/snyk-java-report/snyk-java-report.json ]; then
-            vulns=$(jq '.vulnerabilities | length' artifacts/snyk-java-report/snyk-java-report.json)
-            echo "- Backend Vulnerabilities: $vulns" >> $report_file
-          fi
           if [ -f artifacts/snyk-node-report/snyk-node-report.json ]; then
-            vulns=$(jq '.vulnerabilities | length' artifacts/snyk-node-report/snyk-node-report.json)
-            echo "- Frontend Vulnerabilities: $vulns" >> $report_file
+            total=$(jq '.vulnerabilities | length' artifacts/snyk-node-report/snyk-node-report.json)
+            high=$(jq '[.vulnerabilities[] | select(.severity=="high")] | length' artifacts/snyk-node-report/snyk-node-report.json)
+            med=$(jq '[.vulnerabilities[] | select(.severity=="medium")] | length' artifacts/snyk-node-report/snyk-node-report.json)
+            low=$(jq '[.vulnerabilities[] | select(.severity=="low")] | length' artifacts/snyk-node-report/snyk-node-report.json)
+            echo "- Frontend Vulnerabilities: $total (High:$high / Medium:$med / Low:$low)" >> $report_file
           fi
-
+          if [ -f artifacts/snyk-java-report/snyk-java-report.json ]; then
+            total=$(jq '.vulnerabilities | length' artifacts/snyk-java-report/snyk-java-report.json)
+            high=$(jq '[.vulnerabilities[] | select(.severity=="high")] | length' artifacts/snyk-java-report/snyk-java-report.json)
+            med=$(jq '[.vulnerabilities[] | select(.severity=="medium")] | length' artifacts/snyk-java-report/snyk-java-report.json)
+            low=$(jq '[.vulnerabilities[] | select(.severity=="low")] | length' artifacts/snyk-java-report/snyk-java-report.json)
+            echo "- Backend Vulnerabilities: $total (High:$high / Medium:$med / Low:$low)" >> $report_file
+          fi
           echo "" >> $report_file
+
+          # ---------------------
+          # 3. SAST Summary
+          # ---------------------
           echo "=== SAST (CodeQL) Summary ===" >> $report_file
-          echo "See Security tab for full CodeQL results." >> $report_file
-
+          echo "See Security tab for detailed CodeQL results." >> $report_file
           echo "" >> $report_file
+
+          # ---------------------
+          # 4. Unit Test Summary
+          # ---------------------
           echo "=== Unit Test Summary ===" >> $report_file
           if ls backend/target/surefire-reports/*.xml 1> /dev/null 2>&1; then
             total=$(grep "<testsuite" backend/target/surefire-reports/*.xml | wc -l)
             failures=$(grep "<failure" backend/target/surefire-reports/*.xml | wc -l)
             echo "Total test suites: $total, Failures: $failures" >> $report_file
+            echo "Failing Tests (first 10):" >> $report_file
+            grep "<failure" backend/target/surefire-reports/*.xml | head -10 >> $report_file
           else
             echo "No unit test results found." >> $report_file
           fi
