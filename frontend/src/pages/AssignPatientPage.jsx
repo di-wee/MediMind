@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import MediMindContext from '../context/MediMindContext';
 
@@ -7,80 +8,120 @@ const AssignPatientPage = () => {
     const [patients, setPatients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
+    // Fallback for MCR from localStorage if not in context
+    let mcr = doctorDetails?.mcr;
+    if (!mcr) {
+        const stored = localStorage.getItem('doctorDetails');
+        if (stored) {
+            try {
+                mcr = JSON.parse(stored).mcr;
+            } catch {
+                mcr = null;
+            }
+        }
+    }
+
+    // Fetch unassigned patients for the doctor
     useEffect(() => {
         const fetchUnassignedPatients = async () => {
-            if (!doctorDetails?.mcr) {
-                console.warn('doctorDetails.mcr is not ready yet');
+            if (!mcr) {
+                setError('Doctor MCR not available');
+                setLoading(false);
                 return;
             }
-
-            console.log('Fetching unassigned patients for MCR:', doctorDetails.mcr);
             try {
-                const response = await axios.get(`/api/patients/unassigned/${doctorDetails.mcr}`);
-                console.log('Unassigned patients from backend:', response.data);
+                const response = await axios.get(`/api/patients/unassigned/${mcr}`);
                 setPatients(Array.isArray(response.data) ? response.data : []);
-            } catch (err) {
-                console.error('Error fetching unassigned patients:', err);
-                setError('Failed to fetch patients');
+            } catch {
+                setError('Failed to fetch unassigned patients');
             } finally {
                 setLoading(false);
             }
         };
-
         fetchUnassignedPatients();
-    }, [doctorDetails?.mcr]);
+    }, [mcr]);
 
-    const assignPatient = async (patientId) => {
+    // Handle assigning patient to doctor
+    const handleAssign = async (patientId) => {
         try {
-            await axios.put(`/api/patients/assign`, {
-                patientId: patientId,
-                doctorId: doctorDetails.mcr,
+            await axios.put('/api/patients/assign', {
+                patientId,
+                doctorId: mcr,
             });
+            // Remove assigned patient from list instantly
             setPatients((prev) => prev.filter((p) => p.id !== patientId));
-        } catch (err) {
-            console.error(err);
-            alert('Failed to assign patient');
+        } catch {
+            alert('Assignment failed!');
         }
     };
 
-    if (!doctorDetails?.mcr || loading) {
-        return <p className="p-6">Loading patients...</p>;
-    }
-    if (error) {
-        return <p className="p-6 text-red-500">{error}</p>;
-    }
+    if (loading) return <div>Loading unassigned patients...</div>;
+    if (error) return <div style={{ color: 'red' }}>{error}</div>;
 
     return (
-        <div className="p-6">
-            <h2 className="text-xl font-bold mb-4">Unassigned Patients in Your Clinic</h2>
-
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+            <button
+                onClick={() => navigate(-1)}
+                style={{
+                    margin: '16px 0',
+                    padding: '8px 16px',
+                    background: '#334155',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer'
+                }}
+            >
+                &larr; Back
+            </button>
+            <h2>Unassigned Patients</h2>
             {patients.length === 0 ? (
-                <p>No unassigned patients available.</p>
+                <div>No unassigned patients found.</div>
             ) : (
-                <table className="min-w-full table-auto border">
-                    <thead className="bg-gray-100">
+                <table style={{ borderCollapse: 'collapse', width: '100%', marginTop: '16px' }}>
+                    <thead>
                     <tr>
-                        <th className="border px-4 py-2">Patient Name</th>
-                        <th className="border px-4 py-2">NRIC</th>
-                        <th className="border px-4 py-2">Email</th>
-                        <th className="border px-4 py-2">Action</th>
+                        <th style={{ borderBottom: '1px solid #ddd', padding: '8px' }}>Name</th>
+                        <th style={{ borderBottom: '1px solid #ddd', padding: '8px' }}>Email</th>
+                        <th style={{ borderBottom: '1px solid #ddd', padding: '8px' }}>NRIC</th>
+                        <th style={{ borderBottom: '1px solid #ddd', padding: '8px' }}>Clinic</th>
+                        <th style={{ borderBottom: '1px solid #ddd', padding: '8px' }}>DOB</th>
+                        <th style={{ borderBottom: '1px solid #ddd', padding: '8px' }}>Assign</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {patients.map((p) => (
-                        <tr key={p.id}>
-                            <td className="border px-4 py-2">
-                                {p.firstName} {p.lastName}
+                    {patients.map((patient) => (
+                        <tr key={patient.id}>
+                            <td style={{ borderBottom: '1px solid #eee', padding: '8px' }}>
+                                <strong>{patient.firstName} {patient.lastName}</strong>
                             </td>
-                            <td className="border px-4 py-2">{p.nric}</td>
-                            <td className="border px-4 py-2">{p.email}</td>
-                            <td className="border px-4 py-2 text-center">
+                            <td style={{ borderBottom: '1px solid #eee', padding: '8px' }}>
+                                {patient.email}
+                            </td>
+                            <td style={{ borderBottom: '1px solid #eee', padding: '8px' }}>
+                                {patient.nric}
+                            </td>
+                            <td style={{ borderBottom: '1px solid #eee', padding: '8px' }}>
+                                {patient.clinic?.clinicName}
+                            </td>
+                            <td style={{ borderBottom: '1px solid #eee', padding: '8px' }}>
+                                {patient.dob}
+                            </td>
+                            <td style={{ borderBottom: '1px solid #eee', padding: '8px' }}>
                                 <button
-                                    onClick={() => assignPatient(p.id)}
-                                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                                    onClick={() => handleAssign(patient.id)}
+                                    style={{
+                                        padding: '6px 12px',
+                                        background: '#059669',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
                                 >
-                                    Assign to Me
+                                    Assign
                                 </button>
                             </td>
                         </tr>
