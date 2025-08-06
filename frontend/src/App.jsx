@@ -4,69 +4,82 @@ import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import PatientProfile from './pages/PatientProfile';
 import MedicationLog from './components/MedicationLog';
+import AssignPatientPage from './pages/AssignPatientPage';
 import LandingPage from './pages/LandingPage';
 import AddPatientPage from './pages/AddPatientPage';
 import Register from './pages/Register';
 import DoctorProfile from './pages/DoctorProfile';
+import MediMindContext from './context/MediMindContext';
+import { useState } from 'react';
 
 function App() {
+	const [doctorDetails, setDoctorDetails] = useState({});
 	return (
 		<>
 			<main>
-				<Routes>
-					{/* Landing page: View & Remove Assigned Patients */}
-					<Route
-						path='/'
-						element={
-							<ProtectedRoute>
-								<LandingPage />
-							</ProtectedRoute>
-						}
-					/>
-					<Route
-						path='/addpatient'
-						element={
-							<ProtectedRoute>
-								<AddPatientPage />
-							</ProtectedRoute>
-						}
-					/>
+				<MediMindContext.Provider value={{ doctorDetails, setDoctorDetails }}>
+					<Routes>
+						<Route
+							path='/'
+							element={
+								<ProtectedRoute>
+									<LandingPage />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path='/addpatient'
+							element={
+								<ProtectedRoute>
+									<AddPatientPage />
+								</ProtectedRoute>
+							}
+						/>
 
-					{/* Add new patient page */}
-					<Route
-						path='/login'
-						element={<Login />}
-					/>
+						{/* Add new patient page */}
+						<Route
+							path='/login'
+							element={<Login />}
+						/>
 
-					<Route
-						path='/profile/:mcrNo'
-						element={<DoctorProfile />}
-					/>
-					<Route
-						path='/register'
-						element={<Register />}
-					/>
+						<Route
+							path='/profile/:mcrNo'
+							element={
+								<ProtectedRoute>
+									<DoctorProfile />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path='/register'
+							element={<Register />}
+						/>
 
-					{/* Login and Register */}
-					<Route
-						path='/login'
-						element={<Login />}
-					/>
-					<Route
-						path='/register'
-						element={<Register />}
-					/>
+						<Route
+							path='/login'
+							element={<Login />}
+						/>
 
-					{/* Patient profile and medication logs */}
-					<Route
-						path='/patient/:patientId'
-						element={
-							<ProtectedRoute>
-								<PatientProfile />
-							</ProtectedRoute>
-						}
-					/>
-				</Routes>
+						<Route
+							path='/patient/:patientId'
+							element={
+								<ProtectedRoute>
+									<PatientProfile />
+								</ProtectedRoute>
+							}
+						/>
+
+						<Route
+							path='/assign'
+							element={
+								<ProtectedRoute>
+									<AssignPatientPage />
+								</ProtectedRoute>
+							}
+						/>
+
+					</Routes>
+				</MediMindContext.Provider>
 			</main>
 		</>
 	);

@@ -1,31 +1,44 @@
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import PatientList from '../components/PatientList';
+import { useNavigate } from 'react-router-dom'; //
 
 export default function LandingPage() {
-   return (
-   	<div className="min-h-screen grid grid-cols-[256px_1fr] bg-gray-50">
-   		{/* Sidebar - Grid item spanning both rows */}
-   		<div className="row-span-2 h-screen">
-   			<Sidebar
-   				mcrNo='M12345A'
-   				firstName='Jenny'
-   				clinicName='Raffles Medical Centre'
-   			/>
-   		</div>
-   		
-   		{/* Header - Second column, first row */}
-   		<div className="col-start-2 sticky top-0 z-10">
-   			<Header
-   				title='Assigned Patients'
-   				subtitle='Manage your current patient assignments'
-   			/>
-   		</div>
-   		
-   		{/* Main Content - Second column, second row */}
-   		<main className="col-start-2 overflow-y-auto">
-   			<PatientList />
-   		</main>
-   	</div>
-   );
+	const navigate = useNavigate(); //
+
+	return (
+		<div className='h-screen overflow-hidden bg-gray-50 grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[256px_1fr]'>
+			{/* Sidebar - Grid item spanning both rows */}
+			<div className='row-span-2 h-screen'>
+				<Sidebar
+					mcrNo='M12345A'
+					firstName='Jenny'
+					clinicName='Raffles Medical Centre'
+				/>
+			</div>
+
+			{/* Header - Second column, first row */}
+			<div className='flex flex-col overflow-hidden'>
+				<Header
+					title='Assigned Patients'
+					subtitle='Manage your current patient assignments'
+				/>
+				{/* Add button below header */}
+				<div className='px-6 py-2 border border-gray-300 bg-white'>
+					<button
+						onClick={() => navigate('/assign')}
+						className='bg-white text-black hover:bg-gray-100 font-semibold py-2 px-4 rounded shadow-md border border-gray-300'
+					>
+						View Unassigned Patients
+					</button>
+				</div>
+			</div>
+
+			{/* Main Content - Second column, second row */}
+			<main className='flex-1 overflow-y-auto max-w-full p-4 sm:p-6 md:p-2'>
+				<PatientList />
+			</main>
+		</div>
+	);
 }
+

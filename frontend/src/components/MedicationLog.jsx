@@ -6,7 +6,6 @@ import {
 } from '@heroicons/react/20/solid';
 import React, { useEffect, useRef, useState } from 'react';
 import { getDynamicFilterOptions, applyFilter } from '../utils/filterUtil';
-import medicationLog from '../mockdata/medicationlog.json';
 import FilterContainer from './FilterContainer';
 
 function MedicationLog({ medication, patientId }) {
@@ -42,39 +41,65 @@ function MedicationLog({ medication, patientId }) {
 	);
 
 	const parseDateTime = (date, time) => {
-		const [day, month, year] = date.split('-'); // day:21 month: 07, year: 2025
+		if (!date || !time) return new Date(0);
 
-		const rawTime = time.replace(' HRs', '').trim();
-		let formatTime = rawTime;
-		if (rawTime.length === 4) {
-			formatTime = `${rawTime.slice(0, 2)}:${rawTime.slice(2)}`; //8:00
-		}
+		//transforming it into 0800HRs eg
+		const rawTime = time.replace(' HRs', '');
+		const hours = rawTime.slice(0, 2);
+		const minutes = rawTime.slice(2);
 
-		const formatDateTime = `${year}-${month}-${day}T${formatTime}`;
-
-		return new Date(formatDateTime);
+		return new Date(`${date}T${hours}:${minutes}`);
 	};
 
 	const handleEditClick = (log) => {
 		//storing the edited row id and note content into state
 		setEditingRowId(log.id);
-		setEditedNote(log.notes);
+		setEditedNote(log.doctorNotes);
 	};
 
-	const handleSaveClick = () => {
+	const handleSaveClick = async () => {
 		//this is to keep the state most up to date when being edited
 		//
 		//logic: using the prev state of the medication log, and mapping (rebasing it into a new
 		// array) if the log.id matches the id of the row being edited, we will replace
 		// the note key value with editedNote, else we will just show the existing log
-		setLogList((prev) =>
-			prev.map((log) =>
-				log.id === editingRowId ? { ...log, notes: editedNote } : log
-			)
-		);
-		//re-initialising state
-		setEditingRowId(null);
-		setEditedNote('');
+
+		try {
+			const response = await fetch(
+				import.meta.env.VITE_SERVER + `api/logs/save/doctor-notes`,
+				{
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						intakeHistoryId: editingRowId,
+						editedNote,
+					}),
+				}
+			);
+
+			if (response.ok) {
+				const data = await response.json();
+				setLogList((prev) =>
+					prev.map((log) =>
+						log.id === editingRowId ? { ...log, doctorNotes: editedNote } : log
+					)
+				);
+				setDisplayList((prev) =>
+					prev.map((log) =>
+						log.id === editingRowId ? { ...log, doctorNotes: editedNote } : log
+					)
+				);
+				//re-initialising state
+				setEditingRowId(null);
+				setEditedNote('');
+			}
+		} catch (err) {
+			console.error('Error in saving doctor notes: ', err);
+		}
+
+		alert('Doctor note have been saved!');
 	};
 
 	const handleFunnelClick = (col) => {
@@ -113,18 +138,19 @@ function MedicationLog({ medication, patientId }) {
 		filtered = [...filtered].sort((a, b) => {
 			let aVal, bVal;
 			if (sortConfig.column === 'date') {
-				aVal = parseDateTime(a.date, a.time);
-				bVal = parseDateTime(b.date, b.time);
+				aVal = parseDateTime(a.loggedDate, a.scheduledTime);
+				bVal = parseDateTime(b.loggedDate, b.scheduledTime);
 			} else if (sortConfig.column === 'time') {
 				const parseTime = (time) => {
+					if (!time) return 0; // prevent undefined error
 					const rawTime = time.replace(' HRs', ''); // 0800
 					const hours = parseInt(rawTime.slice(0, 2), 10); //8
 					const minutes = parseInt(rawTime.slice(2), 10); //0
 					const totalMinutes = hours * 60 + minutes;
 					return totalMinutes;
 				};
-				aVal = parseTime(a.time);
-				bVal = parseTime(b.time);
+				aVal = parseTime(a.scheduledTime);
+				bVal = parseTime(b.scheduledTime);
 			}
 			return sortConfig.order === 'asc' ? aVal - bVal : bVal - aVal;
 		});
@@ -147,21 +173,52 @@ function MedicationLog({ medication, patientId }) {
 	//medicationlog into logList
 
 	useEffect(() => {
-		const sortedLog = [...medicationLog].sort((a, b) => {
-			//converting to proper date-time format YYYY-MM-DD HHMM to be compared
-			const dateA = parseDateTime(a.date, a.time);
+		const fetchMedicationLog = async () => {
+			try {
+				const response = await fetch(
+					import.meta.env.VITE_SERVER + `api/medication/${medication.id}/logs`,
+					{
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					}
+				);
 
-			const dateB = parseDateTime(b.date, b.time);
+				if (response.ok) {
+					const medicationLog = await response.json();
 
-			return dateB - dateA;
-		});
+					const transformedLog = medicationLog.map((log, idx) => {
+						//"scheduledTime": "20:00:00"
+						const formattedTime =
+							log.scheduledTime.slice(0, 2) +
+							log.scheduledTime.slice(3, 5) +
+							' HRs';
+						return {
+							id: log.intakeHistoryId,
+							loggedDate: log.loggedDate,
+							scheduledTime: formattedTime,
+							doctorNotes: log.doctorNotes || '',
+							taken: log.taken,
+							scheduleId: log.scheduleId,
+						};
+					});
 
-		// console.log('sorted', sortedLog);
-		// console.log('non-sorted', medicationLog);
+					const sortedLog = [...transformedLog].sort(
+						(a, b) =>
+							parseDateTime(b.loggedDate, b.scheduledTime) -
+							parseDateTime(a.loggedDate, a.scheduledTime)
+					);
 
-		setLogList(sortedLog);
-		setDisplayList(sortedLog);
-	}, []);
+					setLogList(sortedLog);
+					setDisplayList(sortedLog);
+				}
+			} catch (err) {
+				console.error('Error in fetching medication log: ', err);
+			}
+		};
+		fetchMedicationLog();
+	}, [medication]);
 
 	useEffect(() => {
 		const handleClickOutside = (event) => {
@@ -176,12 +233,16 @@ function MedicationLog({ medication, patientId }) {
 		};
 	}, [filterRef]);
 
+	useEffect(() => {
+		console.log(logList);
+	}, [displayList]);
+
 	return (
 		<>
 			<h3 className='font-bold text-lg px-15 '>Medication Intake Log</h3>
 			<h6 className='text-sm px-15 mb-5'>
-				[<b>{medication.medicationName}</b> - {medication.dosage},{' '}
-				{medication.frequency}]
+				[<b>{medication.medicationName}</b> - {medication.intakeQuantity},{' '}
+				{medication.frequency} times a day]
 			</h6>
 			<div className='max-h-96 w-full overflow-y-auto px-15 mx-auto overflow-x-auto mb-10'>
 				<table>
@@ -232,8 +293,8 @@ function MedicationLog({ medication, patientId }) {
 					<tbody>
 						{displayList.map((log) => (
 							<tr>
-								<td>{log.date}</td>
-								<td>{log.time}</td>
+								<td>{log.loggedDate}</td>
+								<td>{log.scheduledTime}</td>
 								<td>
 									{log.taken ? (
 										<CheckIcon className='log-check' />
@@ -249,7 +310,7 @@ function MedicationLog({ medication, patientId }) {
 											className='input w-full border-1 border-sky-500 p-1.5 rounded-xs'
 										/>
 									) : (
-										log.notes
+										log.doctorNotes
 									)}
 								</td>
 								<td>
