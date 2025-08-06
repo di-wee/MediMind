@@ -57,7 +57,7 @@ jobs:
           pip install -r requirements.txt || true
           trivy fs --security-checks vuln --format json --output ../artifacts/sca/ml-trivy.json .
 
-      # ---------------------
+     # ---------------------
       # Android Scan (APK)
       # ---------------------
       - name: Build Android APK
@@ -65,12 +65,11 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Scan Android APK with Trivy
-        working-directory: ./android
         run: |
-          APK_PATH=$(find app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+          APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -n 1)
           echo "Scanning APK: $APK_PATH"
-          trivy fs --security-checks vuln --format json --output ../../artifacts/sca/android-trivy.json "$APK_PATH"
-
+          mkdir -p artifacts/sca
+          trivy fs --scanners vuln --format json --output artifacts/sca/android-trivy.json "$APK_PATH"
       # ---------------------
       # Upload SCA Reports
       # ---------------------
