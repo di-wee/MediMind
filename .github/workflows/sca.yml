@@ -80,16 +80,16 @@ jobs:
       # # ---------------------
       # # Android Scan (APK)
       # # ---------------------
-      # - name: Build Android APK
-      #   working-directory: ./android
-      #   run: ./gradlew assembleDebug
+      - name: Build Android APK
+        working-directory: ./android
+        run: ./gradlew assembleDebug
 
-      # - name: Scan Android APK with Trivy
-      #   run: |
-      #     APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -n 1)
-      #     echo "Scanning APK: $APK_PATH"
-      #     trivy fs --scanners vuln --format json \
-      #       --output artifacts/sca/android-trivy.json "$APK_PATH"
+      - name: Scan Android APK with Trivy
+        run: |
+          APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+          echo "Scanning APK: $APK_PATH"
+          trivy fs --scanners vuln --format json \
+            --output artifacts/sca/android-trivy.json "$APK_PATH"
 
       # ---------------------
       # Generate Human-Readable SCA Summary
