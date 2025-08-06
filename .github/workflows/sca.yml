@@ -79,14 +79,32 @@ jobs:
           name: sca-trivy-reports
           path: artifacts/sca/
 
-      - name: Convert Trivy JSON to summary
+      - name: Generate Human-Readable Summary
         run: |
-          jq -r '
-            .Results[]
-            | select(.Vulnerabilities != null)
-            | .Vulnerabilities[]
-            | "\(.VulnerabilityID) | \(.Severity) | \(.PkgName) \(.InstalledVersion) -> Fixed in \(.FixedVersion // "N/A")"
-          ' backend-trivy.json > sca-summary.txt
+          JSON_FILE="backend-trivy.json"
+          SUMMARY_FILE="sca-summary.txt"
+
+          # Fallback if JSON file doesn't exist
+          if [ ! -f "$JSON_FILE" ]; then
+            echo "Trivy JSON file not found. Skipping vulnerability listing."
+            echo "No vulnerabilities found." > "$SUMMARY_FILE"
+          elif [ ! -s "$JSON_FILE" ]; then
+            echo "Trivy JSON file is empty. Skipping vulnerability listing."
+            echo "No vulnerabilities found." > "$SUMMARY_FILE"
+          else
+            # Count vulnerabilities
+            count=$(jq '[.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[]] | length' "$JSON_FILE")
+            if [ "$count" -eq 0 ]; then
+              echo "No vulnerabilities found." > "$SUMMARY_FILE"
+            else
+              jq -r '
+                .Results[]
+                | select(.Vulnerabilities != null)
+                | .Vulnerabilities[]
+                | "\(.VulnerabilityID) | \(.Severity) | \(.PkgName) \(.InstalledVersion) -> Fixed in \(.FixedVersion // "N/A")"
+              ' "$JSON_FILE" > "$SUMMARY_FILE"
+            fi
+          fi
       
       - name: Upload SCA summary
         uses: actions/upload-artifact@v4
