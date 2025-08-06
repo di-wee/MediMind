@@ -6,6 +6,8 @@ import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
+import nus.iss.backend.repository.DoctorRepository;
+import nus.iss.backend.model.Doctor;
 import nus.iss.backend.repository.IntakeRepository;
 import nus.iss.backend.repository.PatientRepository;
 import nus.iss.backend.service.PatientService;
@@ -36,6 +38,9 @@ public class PatientServiceImpl implements PatientService {
 
     @Autowired
     private IntakeRepository intakeRepository;
+
+    @Autowired
+    private DoctorRepository doctorRepo;
 
     @Override
     public Optional<Patient> findPatientById(UUID id) {
@@ -151,6 +156,41 @@ public class PatientServiceImpl implements PatientService {
             return false;
         }
     }
+
+    @Override
+    public void assignPatientToDoctor(UUID patientId, String doctorMcr) {
+        Optional<Patient> optionalPatient = patientRepo.findById(patientId);
+        Optional<Doctor> optionalDoctor = Optional.ofNullable(doctorRepo.findDoctorByMcrNo(doctorMcr));
+
+        if (optionalPatient.isPresent() && optionalDoctor.isPresent()) {
+            Patient patient = optionalPatient.get();
+            Doctor doctor = optionalDoctor.get();
+
+            if (patient.getClinic().getId().equals(doctor.getClinic().getId())) {
+                patient.setDoctor(doctor);
+                patientRepo.save(patient);
+                logger.info("Assigned doctor {} to patient {}", doctorMcr, patientId);
+            } else {
+                throw new IllegalArgumentException("Doctor and patient are not from the same clinic.");
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid doctor or patient ID.");
+        }
+    }
+
+    @Override
+    public List<Patient> findUnassignedPatientsByDoctorClinic(String mcr) {
+        Doctor doctor = doctorRepo.findDoctorByMcrNo(mcr);
+        if (doctor == null) {
+            throw new IllegalArgumentException("Doctor not found");
+        }
+
+        UUID clinicUuid = doctor.getClinic().getId();
+        return patientRepo.findByClinic_IdAndDoctorIsNull(clinicUuid);
+    }
+
+
+
 }
 
 

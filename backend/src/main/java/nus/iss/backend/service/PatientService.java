@@ -55,4 +55,14 @@ public interface PatientService {
      * Returns medication name, scheduled time, taken time, and status.
      */
     List<IntakeHistoryResponse> getIntakeHistoryByPatientId(UUID patientId);
+
+    /**
+     * Assign a doctor to the patient (only if same clinic).
+     */
+    void assignPatientToDoctor(UUID patientId, String doctorMcr);
+
+    List<Patient> findUnassignedPatientsByDoctorClinic(String mcr);
+
+
+
 }
