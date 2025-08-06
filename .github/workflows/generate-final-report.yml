@@ -3,9 +3,7 @@ name: Generate Final CI/CD Report
 on:
   workflow_run:
     workflows:
-      - "Linting CI & Build"
-      - "SCA - Dependency Scan (Trivy)"
-      - "SAST - Static Code Analysis & Build"
+      - "SCA - Dependency Scan (Trivy)" # Trigger only after SCA completes
     types:
       - completed
 
@@ -18,14 +16,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install GitHub CLI
-        uses: cli/cli-action@v2
+        uses: actions/setup-gh-cli@v2
 
       - name: Wait for all workflows to complete
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
-          required_workflows=("lint.yml" "sast.yml" "sca.yml")
+          required_workflows=("Linting CI & Build" "SAST - Static Code Analysis & Build" "SCA - Dependency Scan (Trivy)")
           echo "Ensuring all required workflows are completed on branch ${GITHUB_REF_NAME}..."
           
           for workflow in "${required_workflows[@]}"; do
@@ -36,8 +34,8 @@ jobs:
                 --json status \
                 --jq '.[0].status')
               
+              echo "Latest status for $workflow: $status"
               if [ "$status" = "completed" ]; then
-                echo "$workflow latest run is completed."
                 break
               fi
 
@@ -54,7 +52,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
-          workflows=("lint.yml" "sast.yml" "sca.yml")
+          workflows=("Linting CI & Build" "SAST - Static Code Analysis & Build" "SCA - Dependency Scan (Trivy)")
           
           for workflow in "${workflows[@]}"; do
             echo "Fetching latest run for $workflow..."
@@ -82,8 +80,7 @@ jobs:
           echo "MediMind CI/CD Final Report - $(date)" >> "$report_file"
           echo "======================" >> "$report_file"
 
-          # Combine all *.txt and *.log files, label them by workflow
-          for workflow in lint.yml sast.yml sca.yml; do
+          for workflow in "Linting CI & Build" "SAST - Static Code Analysis & Build" "SCA - Dependency Scan (Trivy)"; do
             echo "" >> "$report_file"
             echo "=== $workflow Report ===" >> "$report_file"
             if [ -d "artifacts/$workflow" ]; then
