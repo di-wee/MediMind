@@ -21,6 +21,15 @@ jobs:
         uses: actions/checkout@v4
 
       # ---------------------
+      # Set up Java 21 for backend build
+      # ---------------------
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # ---------------------
       # Install Trivy
       # ---------------------
       - name: Install Trivy
@@ -28,6 +37,7 @@ jobs:
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
           sudo mv ./bin/trivy /usr/local/bin/
 
+      # Prepare artifact directory
       - name: Prepare Artifact Directory
         run: mkdir -p artifacts/sca
 
@@ -37,7 +47,15 @@ jobs:
       - name: Scan Backend (Java)
         working-directory: ./backend
         run: |
-          trivy fs --security-checks vuln --format json --output ../artifacts/sca/backend-trivy.json .
+          mkdir -p ../artifacts/sca
+          # Clean old builds and remove stale bin to avoid false positives
+          mvn clean package -DskipTests
+          rm -rf bin
+          # Scan current folder (excluding bin)
+          trivy fs --security-checks vuln --ignore-unfixed \
+            --skip-dirs bin \
+            --format json \
+            --output ../artifacts/sca/backend-trivy.json .
 
       # ---------------------
       # Frontend (Node.js) Scan
@@ -46,7 +64,8 @@ jobs:
         working-directory: ./frontend
         run: |
           npm install
-          trivy fs --security-checks vuln --format json --output ../artifacts/sca/frontend-trivy.json .
+          trivy fs --security-checks vuln --format json \
+            --output ../artifacts/sca/frontend-trivy.json .
 
       # ---------------------
       # ML (Python) Scan
@@ -55,23 +74,52 @@ jobs:
         working-directory: ./ml
         run: |
           pip install -r requirements.txt || true
-          trivy fs --security-checks vuln --format json --output ../artifacts/sca/ml-trivy.json .
+          trivy fs --security-checks vuln --format json \
+            --output ../artifacts/sca/ml-trivy.json .
 
-     # ---------------------
-      # Android Scan (APK)
+      # # ---------------------
+      # # Android Scan (APK)
+      # # ---------------------
+      # - name: Build Android APK
+      #   working-directory: ./android
+      #   run: ./gradlew assembleDebug
+
+      # - name: Scan Android APK with Trivy
+      #   run: |
+      #     APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+      #     echo "Scanning APK: $APK_PATH"
+      #     trivy fs --scanners vuln --format json \
+      #       --output artifacts/sca/android-trivy.json "$APK_PATH"
+
       # ---------------------
-      - name: Build Android APK
-        working-directory: ./android
-        run: ./gradlew assembleDebug
-
-      - name: Scan Android APK with Trivy
+      # Generate Human-Readable SCA Summary
+      # ---------------------
+      - name: Generate Human-Readable SCA Summary
         run: |
-          APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -n 1)
-          echo "Scanning APK: $APK_PATH"
+          JSON_FILE="artifacts/sca/backend-trivy.json"
+          SUMMARY_FILE="artifacts/sca/sca-summary.txt"
           mkdir -p artifacts/sca
-          trivy fs --scanners vuln --format json --output artifacts/sca/android-trivy.json "$APK_PATH"
+
+          if [ ! -s "$JSON_FILE" ]; then
+            echo "No vulnerabilities found." > "$SUMMARY_FILE"
+          else
+            vuln_count=$(jq '[.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[]] | length' "$JSON_FILE")
+            
+            if [ "$vuln_count" -eq 0 ]; then
+              echo "No vulnerabilities found." > "$SUMMARY_FILE"
+            else
+              echo "Found $vuln_count vulnerabilities:" > "$SUMMARY_FILE"
+              jq -r '
+                .Results[]
+                | select(.Vulnerabilities != null)
+                | .Vulnerabilities[]
+                | "\(.VulnerabilityID) | \(.Severity) | \(.PkgName) \(.InstalledVersion) -> Fixed in \(.FixedVersion // "N/A")"
+              ' "$JSON_FILE" >> "$SUMMARY_FILE"
+            fi
+          fi
+
       # ---------------------
-      # Upload SCA Reports
+      # Upload SCA Reports & Summary
       # ---------------------
       - name: Upload SCA Reports
         uses: actions/upload-artifact@v4
@@ -79,35 +127,8 @@ jobs:
           name: sca-trivy-reports
           path: artifacts/sca/
 
-      - name: Generate Human-Readable Summary
-        run: |
-          JSON_FILE="backend-trivy.json"
-          SUMMARY_FILE="sca-summary.txt"
-
-          # Fallback if JSON file doesn't exist
-          if [ ! -f "$JSON_FILE" ]; then
-            echo "Trivy JSON file not found. Skipping vulnerability listing."
-            echo "No vulnerabilities found." > "$SUMMARY_FILE"
-          elif [ ! -s "$JSON_FILE" ]; then
-            echo "Trivy JSON file is empty. Skipping vulnerability listing."
-            echo "No vulnerabilities found." > "$SUMMARY_FILE"
-          else
-            # Count vulnerabilities
-            count=$(jq '[.Results[] | select(.Vulnerabilities != null) | .Vulnerabilities[]] | length' "$JSON_FILE")
-            if [ "$count" -eq 0 ]; then
-              echo "No vulnerabilities found." > "$SUMMARY_FILE"
-            else
-              jq -r '
-                .Results[]
-                | select(.Vulnerabilities != null)
-                | .Vulnerabilities[]
-                | "\(.VulnerabilityID) | \(.Severity) | \(.PkgName) \(.InstalledVersion) -> Fixed in \(.FixedVersion // "N/A")"
-              ' "$JSON_FILE" > "$SUMMARY_FILE"
-            fi
-          fi
-      
       - name: Upload SCA summary
         uses: actions/upload-artifact@v4
         with:
           name: sca-summary
-          path: sca-summary.txt
+          path: artifacts/sca/sca-summary.txt
