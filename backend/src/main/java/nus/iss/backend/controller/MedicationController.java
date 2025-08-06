@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -188,7 +189,7 @@ public class MedicationController {
     }
 
     // Pris: prediction from the ML model
-    @PostMapping("/predict")
+    @PostMapping(value = "/predict_image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImageOutput> predict(@RequestParam("file") MultipartFile file) throws IOException {
         ImageOutput result = medicationService.sendToFastAPI(file);
         return ResponseEntity.ok(result);

@@ -1,15 +1,20 @@
 package com.example.medimind.network
 
 import com.example.medimind.data.EditMedRequest
+import com.example.medimind.data.ImageOutput
 import com.example.medimind.service.EditMedResponse
 import com.example.medimind.service.MedicationResponse
 import com.example.medimind.service.IntakeHistoryResponse
+import okhttp3.Call
+import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import java.time.LocalTime
 
@@ -205,4 +210,10 @@ interface ApiService {
     // Get daily recurring medication schedule
     @GET("api/schedule/daily/{patientId}")
     suspend fun getDailySchedule(@Path("patientId") patientId: String): List<ScheduleItem>
+
+    @Multipart
+    @POST("/api/medication/predict_image")
+    suspend fun uploadImage(
+        @Part file: MultipartBody.Part
+    ): ImageOutput
 }
