@@ -1,13 +1,18 @@
 @import 'tailwindcss';
 
+html,
+body,
+#root {
+	height: 100%;
+	width: 100%;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
 :root {
 	font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 	line-height: 1.5;
 	font-weight: 400;
-
-	color-scheme: light dark;
-	color: rgba(255, 255, 255, 0.87);
-	background-color: #242424;
 
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
@@ -17,19 +22,19 @@
 
 a {
 	font-weight: 500;
-	color: #646cff;
 	text-decoration: inherit;
+	color: inherit;
 }
 a:hover {
-	color: #535bf2;
+	color: inherit;
 }
 
 body {
 	margin: 0;
-	display: flex;
-	place-items: center;
+	padding: 0;
 	min-width: 320px;
 	min-height: 100vh;
+	width: 100%;
 }
 
 h1 {
@@ -37,23 +42,133 @@ h1 {
 	line-height: 1.1;
 }
 
-button {
-	border-radius: 8px;
-	border: 1px solid transparent;
-	padding: 0.6em 1.2em;
-	font-size: 1em;
-	font-weight: 500;
-	font-family: inherit;
-	background-color: #1a1a1a;
+.btn-submit {
+	@apply bg-gray-800 text-white rounded-lg text-sm px-5 py-2.5 font-medium w-full text-center
+			hover:bg-gray-600 transition-colors duration-300 ease-in-out focus:ring-4 focus:ring-gray-300 focus:outline-none;
+
 	cursor: pointer;
-	transition: border-color 0.25s;
 }
-button:hover {
-	border-color: #646cff;
+
+.btn-edit {
+	@apply bg-gray-800 text-white rounded-lg text-sm px-1 py-2.5 font-bold w-full text-center
+	hover:bg-gray-600 transition-colors duration-300 ease-in-out focus:ring-4 focus:ring-gray-300 focus:outline-none;
+
+	cursor: pointer;
 }
-button:focus,
-button:focus-visible {
-	outline: 4px auto -webkit-focus-ring-color;
+
+.btn-save {
+	@apply bg-green-600 text-white rounded-lg text-sm px-1 py-2.5 font-bold w-full text-center
+	hover:bg-green-800 transition-colors duration-300 ease-in-out focus:ring-4  focus:outline-none;
+
+	cursor: pointer;
+}
+
+.link {
+	@apply text-sm font-medium text-blue-600 hover:underline transition duration-200 ease-in-out;
+}
+
+.form-label {
+	@apply block mb-2 text-sm font-medium text-gray-900;
+}
+
+.form-input {
+	@apply bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5;
+}
+
+.form-readonly {
+	@apply bg-gray-200 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5;
+}
+
+.form-editable {
+	@apply border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5;
+}
+
+.nav-button {
+	@apply flex justify-center items-center hover:bg-gray-100 px-4 py-2 rounded transition-colors text-gray-600 duration-200;
+}
+
+table {
+	@apply w-full min-w-full border border-gray-300 text-sm font-bold text-left shadow-xl;
+}
+
+thead {
+	@apply bg-gray-700 text-white text-center;
+}
+
+th {
+	@apply h-15 px-4 py-2 border-b;
+	font-size: 16px;
+}
+
+tbody {
+	@apply divide-y divide-blue-200;
+}
+
+.tr-list {
+	@apply hover:bg-gray-200 transition-colors duration-200;
+	cursor: pointer;
+}
+
+td {
+	@apply px-4 py-4 text-center align-middle;
+}
+
+.check {
+	@apply inline-block size-7 text-red-500 text-center;
+}
+
+.log-check {
+	@apply inline-block size-7 text-green-500 text-center;
+}
+
+.log-x {
+	@apply inline-block size-7 text-red-500 text-center;
+}
+
+.patient-details {
+	@apply px-20 flex w-full mx-auto justify-between mt-5 gap-x-30;
+}
+
+.profile-details {
+	@apply px-20 flex w-full mx-auto justify-between mt-5 gap-x-15;
+}
+
+.password-details {
+	@apply px-20 flex w-full mx-auto mt-5  gap-x-15;
+}
+
+.filter-btn {
+	@apply inline-block size-2.5;
+	cursor: pointer;
+}
+
+.filter-grid {
+	cursor: pointer;
+	@apply absolute min-h-10 overflow-x-auto w-40 bg-gray-50 border-gray-600 rounded shadow-lg z-50 p-2 text-gray-700;
+}
+
+.input-checkbox {
+	@apply w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600;
+}
+
+.pos-status {
+	@apply inline-flex justify-center items-center rounded-md bg-green-50 px-6 py-1.5 font-medium text-green-700 ring-1 ring-green-600/20 ring-inset;
+}
+
+.neg-status {
+	@apply inline-flex justify-center items-center rounded-md bg-red-50 px-5 py-1.5 font-medium text-red-700 ring-1 ring-red-600/10 ring-inset;
+}
+
+.login-container {
+	@apply flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0;
+}
+
+.login-validation {
+	@apply bg-red-200 text-sm px-3 py-4 border-1 border-red-600 rounded-sm text-red-900;
+}
+
+.inline-val-msg {
+	@apply text-sm text-red-500;
 }
 
 @media (prefers-color-scheme: light) {

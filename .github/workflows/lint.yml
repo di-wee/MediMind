@@ -1,8 +1,16 @@
-name: "Linting CI"
+name: "Linting CI & Build"
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - frontend-(react)
+      - backend-(java-springboot)
+      - android
+      - machine-learning
+  pull_request:
+    branches:
+      - main
 
 jobs:
   lint:
@@ -12,56 +20,48 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create artifact folder
-        run: |
-          mkdir -p artifacts/lint
-
-      # React Lint
+      # ---------------------
+      # Linting Steps
+      # ---------------------
       - name: Lint React frontend
         working-directory: ./frontend
         run: |
           npm install
-          npm run lint > ../../artifacts/lint/eslint-report.txt || true
-
-      - name: Upload ESLint Report
-        uses: actions/upload-artifact@v4
+          if npm run | grep -q "lint"; then
+            npm run lint > eslint-report.txt 2>&1 || true
+          else
+            echo "No lint script defined" > eslint-report.txt
+          fi
+      - uses: actions/upload-artifact@v4
         with:
           name: eslint-report
-          path: artifacts/lint/eslint-report.txt
+          path: frontend/eslint-report.txt
 
-      # Python Lint
       - name: Lint Python ML
         working-directory: ./ml
         run: |
-          pip install pylint
-          pylint *.py > ../artifacts/lint/pylint-report.txt || true
-
-      - name: Upload Pylint Report
-        uses: actions/upload-artifact@v4
+          pip install pylint nbqa
+          pylint *.py > pylint-report.txt 2>&1 || true
+          if ls *.ipynb 1> /dev/null 2>&1; then
+            nbqa pylint *.ipynb > nbqa-notebook-report.txt 2>&1 || true
+          else
+            echo "No Jupyter notebooks found" > nbqa-notebook-report.txt
+          fi
+      - uses: actions/upload-artifact@v4
         with:
           name: pylint-report
-          path: artifacts/lint/pylint-report.txt
-
-      # Jupyter Notebook Linting (nbqa)
-      - name: Lint Jupyter notebooks
-        working-directory: ./ml
-        run: |
-          pip install nbqa pylint
-          nbqa pylint *.ipynb > ../../artifacts/lint/nbqa-notebook-report.txt || true
-
-      - name: Upload Jupyter Lint Report
-        uses: actions/upload-artifact@v4
+          path: ml/pylint-report.txt
+      - uses: actions/upload-artifact@v4
         with:
           name: nbqa-notebook-report
-          path: artifacts/lint/nbqa-notebook-report.txt
+          path: ml/nbqa-notebook-report.txt
 
-      # Android Lint
       - name: Android Lint
         working-directory: ./android
         run: ./gradlew lint
-
-      - name: Upload Android Lint Report
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: android-lint-report
-          path: android/app/build/reports/lint-results.html
+          path: android/app/build/reports/lint-results-*.html
+
+      
