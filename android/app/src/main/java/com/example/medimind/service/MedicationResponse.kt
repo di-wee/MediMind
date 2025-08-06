@@ -1,6 +1,4 @@
-package com.example.medimind.data
-
-import com.google.gson.annotations.SerializedName
+package com.example.medimind.service
 
 data class MedicationResponse(
     val id: String,
@@ -10,8 +8,6 @@ data class MedicationResponse(
     val timing: String?,
     val instructions: String?,
     val notes:String?,
-    @SerializedName("active")
-    val isActive: Boolean,
-    @SerializedName("missedDose")
-    val missedDose:Boolean
+    val active: Boolean,
+    val scheduleIds: List<String>
 )

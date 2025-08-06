@@ -1,5 +1,6 @@
 package nus.iss.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,10 +33,12 @@ public class IntakeHistory {
     @Column(name = "Doctor_Note")
     private String doctorNote;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "Patient_Id",nullable = false)
     private Patient patient;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="Schedule_Id",nullable = false)
     private Schedule schedule;

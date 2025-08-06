@@ -1,11 +1,16 @@
 package com.example.medimind.network
 
-import com.example.medimind.data.MedicationResponse
+import com.example.medimind.data.EditMedRequest
+import com.example.medimind.service.EditMedResponse
+import com.example.medimind.service.MedicationResponse
+import com.example.medimind.service.IntakeHistoryResponse
+import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import java.time.LocalTime
 
 // Request body for registration
 data class RegisterRequest(
@@ -68,11 +73,87 @@ data class EmbeddedClinics(
     val clinics: List<ClinicResponse>
 )
 
-interface ApiService {
+data class ScheduleItem(
+    val scheduledTime: String,
+    val medicationName: String,
+    val quantity: String,
+    val isActive: Boolean
+)
 
-    // Get medications for a patient
-    @GET("api/patient/{id}/medications")
+data class newMedicationRequest(
+    val medicationName:String,
+    val patientId: String,
+    val dosage: String,
+    val frequency: Int,
+    val Timing:String,
+    val instructions:String,
+    val notes:String,
+    val isActive:Boolean,
+    val times:String
+    )
+
+data class MedicationIdListRequest(
+    val medicationIds: List<String>
+)
+data class MedResponse(
+    val id: String,
+    val medicationName: String,
+    val intakeQuantity: String,
+    val frequency: Int,
+    val timing: String,
+    val instructions: String,
+    val note: String,
+    val isActive: Boolean
+)
+data class ScheduleResponse(
+    val id:String,
+    val scheduledTime: String,
+    val isActive:Boolean,
+    val medicationId: String,
+)
+
+data class IntakeMedRequest(
+    val loggedDate: LocalTime,
+    val isTaken:Boolean,
+    val patientId:String,
+    val scheduleId: String
+)
+
+data class IntakeResponse(
+    val id: String,
+    val loggedDate: String,
+    val isTaken: Boolean,
+    val doctorNote: String,
+    val patientId:String,
+    val scheduleId:String
+)
+
+data class ScheduleListRequest(
+    val time:String,
+    val patientId:String
+)
+
+data class SaveMedicationResponse(
+    val ScheduleId: String,
+    val time: String,
+    val MedicationId: String,
+    val MedicationName:String
+)
+
+interface ApiService {
+    //Sorry guys,please do not use the response types in "data" and check the response body structure in the backend
+
+    // LST: Get medications for a patient
+    @GET("api/patient/{id}/medList")
     suspend fun getPatientMedications(@Path("id") patientId: String): List<MedicationResponse>
+
+    // LST:
+    @GET("api/medication/{medicationId}/edit")
+    suspend fun getMedicationEditDetails(@Path("medicationId") medId: String): EditMedResponse
+
+    // LST:
+    @POST("api/medication/edit/save")
+    suspend fun saveEditedMedication(@Body body: EditMedRequest): ResponseBody
 
     // Registration endpoint
     @POST("api/patient/register")
@@ -96,4 +177,31 @@ interface ApiService {
     // Fetch list of clinics (for registration spinner)
     @GET("clinics")
     suspend fun getClinics(): ClinicListResponse
+
+    // Get intake history for a patient
+    @GET("api/patients/{patientId}/intake-history")
+    suspend fun getIntakeHistory(@Path("patientId") patientId: String): List<IntakeHistoryResponse>
+
+    //LST: deactivate medication
+    @PUT("api/medication/{medicationId}/deactivate")
+    suspend fun deactivateMedication(@Path("medicationId") medId: String): ResponseBody
+
+    //get medication from medId list
+    @GET("api/medication/medList")
+    suspend fun getMedications(@Body request: MedicationIdListRequest): List<MedResponse>
+
+    // save new medication
+    @PUT("api/medication/save")
+    suspend fun saveMedication(@Body request: newMedicationRequest): SaveMedicationResponse
+
+    //get active schedule list by timeMillis & patientId
+    @GET("api/schedule/find")
+    suspend fun getSchedulesByTime(@Body request:ScheduleListRequest): List<ScheduleResponse>
+    //create intakeHistory after alarm
+    @POST("api/medication/createMedLog")
+    suspend fun createMedicationLog(@Body request: IntakeMedRequest): IntakeResponse
+
+    // Get daily recurring medication schedule
+    @GET("api/schedule/daily/{patientId}")
+    suspend fun getDailySchedule(@Path("patientId") patientId: String): List<ScheduleItem>
 }

@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.medimind.adapters.MedicineAdapter
+import com.example.medimind.service.MedicationResponse
 import com.example.medimind.network.ApiClient
 import kotlinx.coroutines.launch
 
@@ -19,10 +20,7 @@ class ActiveMedicineListFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: MedicineAdapter
-    private var medicineList = mutableListOf<String>()
-
-    // Dummy list of medicines
-//    private val dummyMedicineList = listOf("Panadol", "Aspirin", "Metformin")
+    private var medicineList = mutableListOf<MedicationResponse>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,9 +36,10 @@ class ActiveMedicineListFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         // Set up adapter with click listener to navigate and pass medicineName
-        adapter = MedicineAdapter(medicineList) { medicineName ->
+        adapter = MedicineAdapter(medicineList) { medicine ->
             val bundle = Bundle().apply {
-                putString("medicineName", medicineName)
+                putString("medicineName", medicine.medicationName)
+                putString("medicineId", medicine.id)
             }
             findNavController().navigate(R.id.action_activeMedicineListFragment_to_viewMedicineDetailsFragment, bundle)
         }
@@ -49,27 +48,20 @@ class ActiveMedicineListFragment : Fragment() {
         val sharedPreferences = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val patientId = sharedPreferences.getString("patientId", null)
 
-        //for test, I hard code a patientId to make it work, will change after we have sharedpreference
-        // Lewis: changed patient ID to 0048c909-b76e-4db3-9c71-fa23df0b4f2e for testing.
-        fetchActiveMedications(patientId)
-
-//        if (patientId != null) {
-//            fetchActiveMedications(patientId)
-//        } else {
-//            Toast.makeText(context, "No patientId found", Toast.LENGTH_SHORT).show()
-//        }
+        if (patientId != null) {
+            fetchActiveMedications(patientId)
+        } else {
+            Toast.makeText(context, "No patientId found", Toast.LENGTH_SHORT).show()
+        }
     }
 
-    private fun fetchActiveMedications(patientId: String? = null){
+    private fun fetchActiveMedications(patientId: String){
         lifecycleScope.launch {
             try {
-                //for test, I hard code a patientId to make it work, will change after we have sharedpreference
-                val realPatientId = patientId ?: "0595556f-43c6-4469-aa68-a86753b0a558"
-                val response = ApiClient.retrofitService.getPatientMedications(realPatientId)
+                val response = ApiClient.retrofitService.getPatientMedications(patientId)
                 val activeNames = response
-                    .filter { it.isActive }
+                    .filter { it.active }
                     .sortedBy { it.medicationName.lowercase() }
-                    .map { it.medicationName }
 
                 medicineList.clear()
                 medicineList.addAll(activeNames)

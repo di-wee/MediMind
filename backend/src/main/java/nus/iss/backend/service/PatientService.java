@@ -1,12 +1,18 @@
 package nus.iss.backend.service;
 
 import nus.iss.backend.dao.MissedDoseResponse;
+import nus.iss.backend.dto.IntakeHistoryResponse;
+import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Service
+@Transactional
 public interface PatientService {
 
     /**
@@ -38,4 +44,15 @@ public interface PatientService {
      * Unassign a doctor from a specific patient.
      */
     boolean unassignDoctor(UUID patientId);
+
+    /**
+     * Get list of medications currently assigned to a patient.
+     */
+    List<Medication> getPatientMedications(UUID patientId);
+
+    /**
+     * NEW: Get intake history for a patient.
+     * Returns medication name, scheduled time, taken time, and status.
+     */
+    List<IntakeHistoryResponse> getIntakeHistoryByPatientId(UUID patientId);
 }

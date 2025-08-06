@@ -13,5 +13,5 @@ public class IntakeReqMobile {
     private LocalDate loggedDate;
     private boolean isTaken;
     private UUID patientId;
-    private Schedule schedule;
+    private UUID scheduleId;
 }
