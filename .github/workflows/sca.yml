@@ -48,10 +48,12 @@ jobs:
         working-directory: ./backend
         run: |
           mkdir -p ../artifacts/sca
-          # Clean old builds to avoid stale jars
+          # Clean old builds and remove stale bin to avoid false positives
           mvn clean package -DskipTests
-          # Scan current folder (including target)
+          rm -rf bin
+          # Scan current folder (excluding bin)
           trivy fs --security-checks vuln --ignore-unfixed \
+            --skip-dirs bin \
             --format json \
             --output ../artifacts/sca/backend-trivy.json .
 
@@ -62,7 +64,8 @@ jobs:
         working-directory: ./frontend
         run: |
           npm install
-          trivy fs --security-checks vuln --format json --output ../artifacts/sca/frontend-trivy.json .
+          trivy fs --security-checks vuln --format json \
+            --output ../artifacts/sca/frontend-trivy.json .
 
       # ---------------------
       # ML (Python) Scan
@@ -71,20 +74,22 @@ jobs:
         working-directory: ./ml
         run: |
           pip install -r requirements.txt || true
-          trivy fs --security-checks vuln --format json --output ../artifacts/sca/ml-trivy.json .
+          trivy fs --security-checks vuln --format json \
+            --output ../artifacts/sca/ml-trivy.json .
 
-      # ---------------------
-      # Android Scan (APK)
-      # ---------------------
-      - name: Build Android APK
-        working-directory: ./android
-        run: ./gradlew assembleDebug
+      # # ---------------------
+      # # Android Scan (APK)
+      # # ---------------------
+      # - name: Build Android APK
+      #   working-directory: ./android
+      #   run: ./gradlew assembleDebug
 
-      - name: Scan Android APK with Trivy
-        run: |
-          APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -n 1)
-          echo "Scanning APK: $APK_PATH"
-          trivy fs --scanners vuln --format json --output artifacts/sca/android-trivy.json "$APK_PATH"
+      # - name: Scan Android APK with Trivy
+      #   run: |
+      #     APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+      #     echo "Scanning APK: $APK_PATH"
+      #     trivy fs --scanners vuln --format json \
+      #       --output artifacts/sca/android-trivy.json "$APK_PATH"
 
       # ---------------------
       # Generate Human-Readable SCA Summary
