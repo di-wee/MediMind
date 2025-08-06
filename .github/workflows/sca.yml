@@ -78,3 +78,18 @@ jobs:
         with:
           name: sca-trivy-reports
           path: artifacts/sca/
+
+      - name: Convert Trivy JSON to summary
+        run: |
+          jq -r '
+            .Results[]
+            | select(.Vulnerabilities != null)
+            | .Vulnerabilities[]
+            | "\(.VulnerabilityID) | \(.Severity) | \(.PkgName) \(.InstalledVersion) -> Fixed in \(.FixedVersion // "N/A")"
+          ' backend-trivy.json > sca-summary.txt
+      
+      - name: Upload SCA summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: sca-summary
+          path: sca-summary.txt
