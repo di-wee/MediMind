@@ -13,9 +13,8 @@ public class newMedicationReq {
     private UUID patientId;
     private String dosage;
     private int frequency;
-    private String Timing;
     private String instructions;
     private String notes;
     private Boolean isActive;
-    private String time;
+    private List<String> times;
 }

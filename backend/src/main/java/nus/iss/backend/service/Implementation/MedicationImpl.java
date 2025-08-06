@@ -178,24 +178,29 @@ public class MedicationImpl implements MedicationService {
     }
 
     @Override
-    public Medication createMedication(newMedicationReq req){
+    public Medication createMedication(newMedicationReq req) {
         Patient patient = patientRepo.findPatientById(req.getPatientId());
-        if(patient==null) {
+        if (patient == null) {
             logger.warn("Patient not found!");
+            return null;
         }
-        //save new medication
-        List<Patient> patients = new ArrayList<>();
-        patients.add(patient);
+
         Medication med = new Medication();
         med.setMedicationName(req.getMedicationName());
         med.setActive(true);
         med.setIntakeQuantity(req.getDosage());
         med.setFrequency(req.getFrequency());
         med.setNotes(req.getNotes());
-        med.setTiming(req.getTiming());
         med.setInstructions(req.getInstructions());
-        med.setPatients(patients);
+
         medicationRepo.save(med);
+
+        if (patient.getMedications() == null) {
+            patient.setMedications(new ArrayList<>());
+        }
+        patient.getMedications().add(med);
+        patientRepo.save(patient);
+
         return med;
     }
 }

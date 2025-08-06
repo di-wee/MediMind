@@ -178,6 +178,17 @@ class EditMedicineDetailsFragment : Fragment() {
                 Log.d("EditMedRequest", "After sending request at: ${System.currentTimeMillis()}")
                 Log.d("EditMedRequest", "Request sent: $request")
                 Toast.makeText(context,"Successfully save!", Toast.LENGTH_SHORT).show()
+                for (timeStr in times) {
+                    val parts = timeStr.split(":")
+                    val hour = parts[0].toInt()
+                    val minute = parts[1].toInt()
+                    val localTime = LocalTime.of(hour, minute)
+                    val zoned = localTime.atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
+                    val timeMillis = zoned.toInstant().toEpochMilli()
+
+                    //save edited new alarm
+                    ReminderUtils.scheduleAlarm(context = requireContext(), timeMilli = timeMillis, patientId = patientId)
+                }
                 parentFragmentManager.popBackStack()
             } catch (e: Exception) {
                 Log.d("EditMedError", "Failed to send request", e)
@@ -186,17 +197,7 @@ class EditMedicineDetailsFragment : Fragment() {
             }
         }
 
-        for (timeStr in times) {
-            val parts = timeStr.split(":")
-            val hour = parts[0].toInt()
-            val minute = parts[1].toInt()
-            val localTime = LocalTime.of(hour, minute)
-            val zoned = localTime.atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
-            val timeMillis = zoned.toInstant().toEpochMilli()
 
-            //save edited new alarm
-            ReminderUtils.scheduleAlarm(context = requireContext(), timeMilli = timeMillis, patientId = patientId)
-        }
     }
 
 }
