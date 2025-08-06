@@ -24,7 +24,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: eslint-report
-          path: artifacts/eslint-report
+          path: frontend/eslint-report
           run-id: ${{ github.event.inputs.lint_run_id }}
 
       - name: Download SCA artifacts
