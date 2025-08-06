@@ -218,8 +218,8 @@ public class PatientController {
     @PutMapping("/patients/assign")
     public ResponseEntity<Void> assignDoctorToPatient(@RequestBody AssignPatientRequest request) {
         try {
-            UUID patientId = UUID.fromString(request.getPatientId());
-            String doctorMcr = request.getDoctorId();  // Use as String
+            UUID patientId = request.getPatientId();       // Already UUID now
+            String doctorMcr = request.getDoctorId();       // Still a String
 
             patientService.assignPatientToDoctor(patientId, doctorMcr);
             logger.info("Assigned doctor {} to patient {}", doctorMcr, patientId);
