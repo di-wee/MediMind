@@ -1,4 +1,4 @@
-name: "SCA - Dependency Scan with Trivy"
+name: "SCA - Dependency Scan (Trivy)"
 
 on:
   push:
@@ -13,54 +13,68 @@ on:
       - main
 
 jobs:
-  trivy-scan:
+  sca-trivy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the code
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Install Trivy
+      # ---------------------
+      # Install Trivy
+      # ---------------------
       - name: Install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
-          sudo mv trivy /usr/local/bin/
+          sudo mv ./bin/trivy /usr/local/bin/
 
-      # 3️⃣ Create artifact folder
-      - name: Prepare Artifacts Folder
+      - name: Prepare Artifact Directory
         run: mkdir -p artifacts/sca
 
-      # 4️⃣ Scan React Frontend (Node.js)
-      - name: Scan React Frontend
+      # ---------------------
+      # Backend (Java) Scan
+      # ---------------------
+      - name: Scan Backend (Java)
+        working-directory: ./backend
+        run: |
+          trivy fs --security-checks vuln --format json --output ../artifacts/sca/backend-trivy.json .
+
+      # ---------------------
+      # Frontend (Node.js) Scan
+      # ---------------------
+      - name: Scan Frontend (Node.js)
         working-directory: ./frontend
         run: |
-          npm install || true
-          trivy fs --security-checks vuln --ignore-unfixed --exit-code 0 --format json -o ../../artifacts/sca/trivy-node-report.json .
+          npm install
+          trivy fs --security-checks vuln --format json --output ../artifacts/sca/frontend-trivy.json .
 
-      # 5️⃣ Scan Python ML Dependencies
+      # ---------------------
+      # ML (Python) Scan
+      # ---------------------
       - name: Scan Python ML
         working-directory: ./ml
         run: |
           pip install -r requirements.txt || true
-          trivy fs --security-checks vuln --ignore-unfixed --exit-code 0 --format json -o ../../artifacts/sca/trivy-python-report.json .
+          trivy fs --security-checks vuln --format json --output ../artifacts/sca/ml-trivy.json .
 
-      # 6️⃣ Scan Java Backend Dependencies
-      - name: Scan Java Backend
-        working-directory: ./backend
+     # ---------------------
+      # Android Scan (APK)
+      # ---------------------
+      - name: Build Android APK
+        working-directory: ./android
+        run: ./gradlew assembleDebug
+
+      - name: Scan Android APK with Trivy
         run: |
-          mvn dependency:copy-dependencies || true
-          trivy fs --security-checks vuln --ignore-unfixed --exit-code 0 --format json -o ../../artifacts/sca/trivy-java-report.json .
-
-      # 7️⃣ Optional: Scan Docker Image for Backend
-      - name: Scan Backend Docker Image
-        run: |
-          docker build -t medimind-backend:latest ./backend
-          trivy image --security-checks vuln --ignore-unfixed --exit-code 0 --format json -o artifacts/sca/trivy-backend-docker.json medimind-backend:latest
-
-      # 8️⃣ Upload reports as artifacts
-      - name: Upload Trivy Reports
+          APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" | head -n 1)
+          echo "Scanning APK: $APK_PATH"
+          mkdir -p artifacts/sca
+          trivy fs --scanners vuln --format json --output artifacts/sca/android-trivy.json "$APK_PATH"
+      # ---------------------
+      # Upload SCA Reports
+      # ---------------------
+      - name: Upload SCA Reports
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-reports
-          path: artifacts/sca/*.json
+          name: sca-trivy-reports
+          path: artifacts/sca/
