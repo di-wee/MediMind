@@ -1,4 +1,4 @@
-name: "SCA - Dependency Vulnerability Scan & Build"
+name: "SCA - Dependency Scan with Trivy"
 
 on:
   push:
@@ -13,52 +13,54 @@ on:
       - main
 
 jobs:
-  sca:
+  trivy-scan:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # 1️⃣ Checkout the code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install Snyk CLI
-        run: npm install -g snyk
+      # 2️⃣ Install Trivy
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+          sudo mv trivy /usr/local/bin/
 
-      - name: Authenticate Snyk
-        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+      # 3️⃣ Create artifact folder
+      - name: Prepare Artifacts Folder
+        run: mkdir -p artifacts/sca
 
-      # --- React (Node.js) ---
-      - name: Install Node.js dependencies
+      # 4️⃣ Scan React Frontend (Node.js)
+      - name: Scan React Frontend
         working-directory: ./frontend
-        run: npm install
-      - name: Snyk Scan (React)
-        working-directory: ./frontend
-        run: snyk test --file=package.json --json > snyk-node-report.json || echo '{}' > snyk-node-report.json
-      - uses: actions/upload-artifact@v4
-        with:
-          name: snyk-node-report
-          path: frontend/snyk-node-report.json
+        run: |
+          npm install || true
+          trivy fs --security-checks vuln --ignore-unfixed --exit-code 0 --format json -o ../../artifacts/sca/trivy-node-report.json .
 
-      # --- Java (Spring Boot) ---
-      - name: Snyk Scan (Java Maven)
-        working-directory: ./backend
-        run: snyk test --file=pom.xml --json-file-output=snyk-java-report.json || true
-      - uses: actions/upload-artifact@v4
-        with:
-          name: snyk-java-report
-          path: backend/snyk-java-report.json
-
-      # --- Python (ML) ---
-      - name: Install Python dependencies
+      # 5️⃣ Scan Python ML Dependencies
+      - name: Scan Python ML
         working-directory: ./ml
         run: |
-          pip install -r requirements.txt
-          pip install torch torchvision torchaudio pip-audit || true
-      - name: Python Dependency Audit (pip-audit)
-        working-directory: ./ml
-        run: pip-audit -r requirements.txt -f json -o pip-audit-report.json || true
-      - uses: actions/upload-artifact@v4
-        with:
-          name: pip-audit-report
-          path: ml/pip-audit-report.json
+          pip install -r requirements.txt || true
+          trivy fs --security-checks vuln --ignore-unfixed --exit-code 0 --format json -o ../../artifacts/sca/trivy-python-report.json .
 
-    
+      # 6️⃣ Scan Java Backend Dependencies
+      - name: Scan Java Backend
+        working-directory: ./backend
+        run: |
+          mvn dependency:copy-dependencies || true
+          trivy fs --security-checks vuln --ignore-unfixed --exit-code 0 --format json -o ../../artifacts/sca/trivy-java-report.json .
+
+      # 7️⃣ Optional: Scan Docker Image for Backend
+      - name: Scan Backend Docker Image
+        run: |
+          docker build -t medimind-backend:latest ./backend
+          trivy image --security-checks vuln --ignore-unfixed --exit-code 0 --format json -o artifacts/sca/trivy-backend-docker.json medimind-backend:latest
+
+      # 8️⃣ Upload reports as artifacts
+      - name: Upload Trivy Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-reports
+          path: artifacts/sca/*.json
