@@ -1,5 +1,7 @@
 package com.example.medimind.network
 
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -20,9 +22,21 @@ object ApiClient {
         return if (isEmulator()) EMULATOR_URL else DEVICE_URL
     }
 
+    // Logging interceptor for debugging API requests
+    private val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    // OkHttpClient with logging
+    private val client = OkHttpClient.Builder()
+        .addInterceptor(logging)
+        .build()
+
+    // Single retrofitService definition
     val retrofitService: ApiService by lazy {
         Retrofit.Builder()
             .baseUrl(getBaseUrl())
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(ApiService::class.java)
