@@ -1,6 +1,7 @@
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import MediMindContext from '../context/MediMindContext';
 
 function Register() {
 	const navigate = useNavigate();
@@ -11,6 +12,9 @@ function Register() {
 	const [clinicList, setClinicList] = useState([]);
 	const [passVisibility, setPassVisibility] = useState(false);
 	const [confirmPassVisibility, setConfirmPassVisibility] = useState(false);
+
+	const mediMindCtx = useContext(MediMindContext);
+	const { setCompletedSignUp } = mediMindCtx;
 
 	const mcrRef = useRef();
 	const firstNameRef = useRef();
@@ -77,6 +81,7 @@ function Register() {
 			);
 
 			if (response.ok) {
+				setCompletedSignUp(true);
 				navigate('/login', { replace: true });
 			}
 		} catch (err) {

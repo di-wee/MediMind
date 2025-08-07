@@ -4,7 +4,7 @@ import MedicationLog from './MedicationLog';
 import FilterContainer from './FilterContainer';
 import { getDynamicFilterOptions, applyFilter } from '../utils/filterUtil';
 
-function MedicationList({ patientId, medicationList, setMedicationList }) {
+function MedicationList({ patientId, medicationList }) {
 	const [displayedList, setDisplayedList] = useState([]);
 	const [selectedMedicine, setSelectedMedicine] = useState({});
 	const [visible, setVisible] = useState(false);

@@ -13,10 +13,17 @@ import { useState } from 'react';
 
 function App() {
 	const [doctorDetails, setDoctorDetails] = useState({});
+	const [completedSignUp, setCompletedSignUp] = useState(false);
 	return (
 		<>
 			<main>
-				<MediMindContext.Provider value={{ doctorDetails, setDoctorDetails }}>
+				<MediMindContext.Provider
+					value={{
+						doctorDetails,
+						setDoctorDetails,
+						completedSignUp,
+						setCompletedSignUp,
+					}}>
 					<Routes>
 						<Route
 							path='/'
