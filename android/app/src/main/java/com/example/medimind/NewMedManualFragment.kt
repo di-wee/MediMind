@@ -63,6 +63,14 @@ class NewMedManualFragment : Fragment() {
             //save new medication to database and set new alarm
             val medicationName = medicationNameInput.text.toString()
             val dosage = dosageInput.text.toString()
+            val dosageNum = dosage.toDoubleOrNull() ?:0.0
+            //this make sure when insert to DB is like xx tablets
+            val dosageDisplay = when {
+                dosageNum == 1.0 -> "1 tablet"
+                dosageNum == 0.5 -> "0.5 tablet"
+                dosageNum % 1 == 0.0 -> "${dosageNum.toInt()} tablets"
+                else -> "$dosage tablets"
+            }
             if (patientId == null || medicationName.isBlank() || dosage.isBlank() || frequency == 0) {
                 Toast.makeText(
                     requireContext(),
@@ -79,7 +87,7 @@ class NewMedManualFragment : Fragment() {
                         val request = newMedicationRequest(
                             medicationName = medicationName,
                             patientId = patientId,
-                            dosage = dosage,
+                            dosage = dosageDisplay,
                             frequency = frequency,
                             instructions = instruction,
                             notes = note,
