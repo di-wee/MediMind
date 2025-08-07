@@ -180,7 +180,7 @@ export default function PatientListView({
 														{patient.firstName} {patient.lastName}
 													</p>
 													<p className='text-xs text-gray-500'>
-														Dr. {patient.assignedDoctor}
+														Dr. {patient.doctor?.firstName} {patient.doctor?.lastName}
 													</p>
 												</div>
 											</div>
@@ -213,7 +213,7 @@ export default function PatientListView({
 										{/* Clinic */}
 										<div className='col-span-3'>
 											<p className='text-sm text-gray-900 truncate'>
-												{patient.clinicName}
+												{patient.clinic?.clinicName}
 											</p>
 											<p className='text-xs text-gray-500'>
 												DOB: {patient.dob}
@@ -224,7 +224,10 @@ export default function PatientListView({
 										<div className='col-span-2'>
 											<div className='flex items-center ml-10 space-x-2'>
 												<button
-													onClick={() => onRemove(patient.id)}
+													onClick={(e) => {
+														e.stopPropagation();
+														onRemove(patient.id);
+													}}
 													className='p-1.5  text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors duration-200'
 													title='Remove patient'>
 													<TrashIcon className='w-4 h-4 cursor-pointer ' />
