@@ -67,7 +67,7 @@ public class MedicationController {
                 res.setTiming(med.getTiming());
                 res.setInstructions(med.getInstructions());
                 res.setNote(med.getNotes());
-                res.setActive(med.isActive());
+                res.setIsActive(med.isActive());
                 logger.debug("Prepared response for medication: {} - {}", med.getId(), med.getMedicationName());
                 responseList.add(res);}
             return new ResponseEntity<>(responseList,HttpStatus.OK);
