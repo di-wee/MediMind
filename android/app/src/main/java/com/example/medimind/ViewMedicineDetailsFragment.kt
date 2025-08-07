@@ -78,8 +78,7 @@ class ViewMedicineDetailsFragment : Fragment() {
                 .setNegativeButton("No", null)
                 .show()
 
-            //TODO: deactivate the medication will also deactivate all the related schedules,
-            //here also need to reset the alarm and notification
+            // alarm will deactive in future
         }
 
         view.findViewById<Button>(R.id.btnBack).setOnClickListener {
