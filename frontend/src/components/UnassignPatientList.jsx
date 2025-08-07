@@ -9,7 +9,6 @@ function UnassignPatientList({
 	searchTerm,
 	displayList,
 	handleAssign,
-	unassignedPatients,
 }) {
 	const [currentPage, setCurrentPage] = useState(1);
 	const patientsPerPage = 5;

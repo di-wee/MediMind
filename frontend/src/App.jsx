@@ -16,67 +16,59 @@ function App() {
 	const [completedSignUp, setCompletedSignUp] = useState(false);
 	return (
 		<>
-			<main>
-				<MediMindContext.Provider
-					value={{
-						doctorDetails,
-						setDoctorDetails,
-						completedSignUp,
-						setCompletedSignUp,
-					}}>
-					<Routes>
-						<Route
-							path='/'
-							element={
-								<ProtectedRoute>
-									<LandingPage />
-								</ProtectedRoute>
-							}
-						/>
-						<Route
-							path='/addpatient'
-							element={
-								<ProtectedRoute>
-									<AddPatientPage />
-								</ProtectedRoute>
-							}
-						/>
+			<MediMindContext.Provider
+				value={{
+					doctorDetails,
+					setDoctorDetails,
+					completedSignUp,
+					setCompletedSignUp,
+				}}>
+				<Routes>
+					<Route
+						path='/'
+						element={
+							<ProtectedRoute>
+								<LandingPage />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path='/addpatient'
+						element={
+							<ProtectedRoute>
+								<AddPatientPage />
+							</ProtectedRoute>
+						}
+					/>
 
-						{/* Add new patient page */}
-						<Route
-							path='/login'
-							element={<Login />}
-						/>
+					<Route
+						path='/profile/:mcrNo'
+						element={
+							<ProtectedRoute>
+								<DoctorProfile />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path='/register'
+						element={<Register />}
+					/>
 
-						<Route
-							path='/profile/:mcrNo'
-							element={
-								<ProtectedRoute>
-									<DoctorProfile />
-								</ProtectedRoute>
-							}
-						/>
-						<Route
-							path='/register'
-							element={<Register />}
-						/>
+					<Route
+						path='/login'
+						element={<Login />}
+					/>
 
-						<Route
-							path='/login'
-							element={<Login />}
-						/>
-
-						<Route
-							path='/patient/:patientId'
-							element={
-								<ProtectedRoute>
-									<PatientProfile />
-								</ProtectedRoute>
-							}
-						/>
-					</Routes>
-				</MediMindContext.Provider>
-			</main>
+					<Route
+						path='/patient/:patientId'
+						element={
+							<ProtectedRoute>
+								<PatientProfile />
+							</ProtectedRoute>
+						}
+					/>
+				</Routes>
+			</MediMindContext.Provider>
 		</>
 	);
 }
