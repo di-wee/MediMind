@@ -100,7 +100,15 @@ class EditMedicineDetailsFragment : Fragment() {
             var timeBox = inflater.inflate(R.layout.time_input_box, timeInputContainer, false) as EditText
             timeBox.hint = "HHMM"
             timeBox.inputType = InputType.TYPE_CLASS_NUMBER
-            timeBox.setText(sortedTimes.getOrNull(i - 1) ?: "")
+            val preset = sortedTimes.getOrNull(i - 1) ?: ""
+            timeBox.setText(preset)
+
+            timeBox.setOnFocusChangeListener { v, hasFocus ->
+                if (hasFocus && (v as EditText).text.toString() == preset) {
+                    v.setText("")
+                }
+            }
+
             timeInputContainer.addView(timeBox)
         }
     }
