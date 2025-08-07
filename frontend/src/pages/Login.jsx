@@ -1,11 +1,14 @@
 import { XCircleIcon } from '@heroicons/react/16/solid';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
-import React, { useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import MediMindContext from '../context/MediMindContext';
 
 function Login() {
 	const [validation, setValidation] = useState(false);
 	const [passVisibility, setPassVisibility] = useState(false);
+	const mediMindCtx = useContext(MediMindContext);
+	const { completedSignUp, setCompletedSignUp } = mediMindCtx;
 
 	const navigate = useNavigate();
 
@@ -71,6 +74,15 @@ function Login() {
 									/>
 								</div>
 							)}
+							{completedSignUp && (
+								<div className='completed-registration relative'>
+									<p>Account created! Please log in.</p>
+									<XCircleIcon
+										className='size-4.5 absolute right-5 top-5 cursor-pointer'
+										onClick={() => setCompletedSignUp(false)}
+									/>
+								</div>
+							)}
 
 							<form
 								className='space-y-4 md:space-y-6'
@@ -86,7 +98,7 @@ function Login() {
 										name='mcrNo'
 										id='mcrNo'
 										className='form-input '
-										placeholder='M1234567A'
+										placeholder='M12345A'
 										ref={mcrNoRef}
 										required
 									/>

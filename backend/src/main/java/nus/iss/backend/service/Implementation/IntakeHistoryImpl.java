@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;                       // ← for combining date + time
 import java.util.Collections;
 import java.util.Comparator;                         // ← for sorting DTOs
@@ -40,19 +41,18 @@ public class IntakeHistoryImpl implements IntakeHistoryService {
     private ScheduleRepository scheduleRepo;
 
     @Override
-    public IntakeHistory createIntakeHistory(IntakeReqMobile intakeReqMobile) {
+    public void createIntakeHistory(IntakeReqMobile intakeReqMobile) {
         Schedule schedule = scheduleRepo.findById(intakeReqMobile.getScheduleId())
                 .orElseThrow(() -> new RuntimeException("Schedule not found"));
         Patient patient = patientRepo.findById(intakeReqMobile.getPatientId())
             .orElseThrow(() -> new ItemNotFound("Patient not found!"));
         IntakeHistory intakeHistory = new IntakeHistory();
         intakeHistory.setPatient(patient);
-        intakeHistory.setLoggedDate(intakeReqMobile.getLoggedDate());
+        intakeHistory.setLoggedDate(LocalDate.parse(intakeReqMobile.getLoggedDate()));
         intakeHistory.setDoctorNote("");
-        intakeHistory.setTaken(intakeReqMobile.isTaken());
+        intakeHistory.setTaken(intakeReqMobile.getIsTaken());
         intakeHistory.setSchedule(schedule);
         intakeRepo.saveAndFlush(intakeHistory);
-        return intakeHistory;
     }
 
     @Override
