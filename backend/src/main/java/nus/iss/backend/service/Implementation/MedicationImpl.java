@@ -100,7 +100,7 @@ public class MedicationImpl implements MedicationService {
     public Medication saveMedication(Medication medication) {
         return medicationRepo.save(medication);
     }
-    
+
 
     @Override
     public ImageOutput sendToFastAPI(MultipartFile file) throws IOException {
@@ -113,20 +113,19 @@ public class MedicationImpl implements MedicationService {
         body.add("file", fileResource);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-        String fastapiUrl = "http://localhost:8000/api/medication/predict_image"; // Replace with your local FastAPI IP
+        String fastapiUrl = "http://localhost:8000/api/medication/predict_image"; // Replace if needed
 
         ResponseEntity<String> response = restTemplate.postForEntity(fastapiUrl, requestEntity, String.class);
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response.getBody());
-        JsonNode extracted = root.get("extracted_info");
 
         ImageOutput result = new ImageOutput();
-        result.setMedicationName(extracted.path("medication_name").asText(""));
-        result.setIntakeQuantity(extracted.path("intake_quantity").asText(""));
-        result.setFrequency(Integer.parseInt(extracted.path("frequency").asText("")));
-        result.setInstructions(extracted.path("instruction").asText(""));
-        result.setNotes(extracted.path("note").asText(""));
+        result.setMedicationName(root.path("medicationName").asText(""));  // camelCase for consistency
+        result.setIntakeQuantity(root.path("intakeQuantity").asText(""));
+        result.setFrequency(root.path("frequency").asInt());  // assuming Android expects int
+        result.setInstructions(root.path("instructions").asText(""));
+        result.setNotes(root.path("notes").asText(""));
 
         return result;
     }

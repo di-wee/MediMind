@@ -20,6 +20,7 @@ import com.example.medimind.ReminderUtils.scheduleAlarm
 import androidx.navigation.fragment.findNavController
 import com.example.medimind.data.ImageOutput
 import com.example.medimind.network.ApiClient
+import com.example.medimind.network.MLApiClient
 import com.example.medimind.network.newMedicationRequest
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -81,12 +82,19 @@ class ImageDetailsFragment : Fragment() {
                     val body = MultipartBody.Part.createFormData("file", tempFile.name, reqFile)
 
                     //Lewis: Call the ML API and populate UI with the extracted fields
-                    val response = ApiClient.retrofitService.uploadImage(body)
-                    nameInput.setText(response.medicationName ?: "")
-                    intakeQuantityInput.setText(response.intakeQuantity ?: "")
-                    frequencyInput.setText(response.frequency.toString())
-                    instructionInput.setText(response.instructions ?: "")
-                    noteInput.setText(response.notes ?: "")
+                    val response = MLApiClient.mlApiService.predictImage(body)
+                    if (response.isSuccessful) {
+                        val prediction = response.body()
+                        if (prediction != null) {
+                            nameInput.setText(prediction.medicationName ?: "")
+                            intakeQuantityInput.setText(prediction.intakeQuantity ?: "")
+                            frequencyInput.setText(prediction.frequency.toString())
+                            instructionInput.setText(prediction.instructions ?: "")
+                            noteInput.setText(prediction.notes ?: "")
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "Prediction failed: ${response.code()}", Toast.LENGTH_SHORT).show()
+                    }
 
                 } catch (e: Exception) {
                     Toast.makeText(
