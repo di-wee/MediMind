@@ -16,7 +16,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
-import java.time.LocalTime
+import java.time.LocalDate
 
 // Request body for registration
 data class RegisterRequest(
@@ -118,10 +118,12 @@ data class ScheduleResponse(
 )
 
 data class IntakeMedRequest(
-    val loggedDate: LocalTime,
+    val medicationId:String,
+    val loggedDate: String,
     val isTaken:Boolean,
     val patientId:String,
-    val scheduleId: String
+    val scheduleId: String,
+    val clientRequestId: String
 )
 
 data class IntakeResponse(
@@ -204,8 +206,8 @@ interface ApiService {
     suspend fun getSchedulesByTime(@Body request: ScheduleListRequest): Response<List<ScheduleResponse>>
 
     //create intakeHistory after alarm
-    @POST("api/medication/createMedLog")
-    suspend fun createMedicationLog(@Body request: IntakeMedRequest): IntakeResponse
+    @POST("api/intakeHistory/create")
+    suspend fun createMedicationLog(@Body request: IntakeMedRequest): Response<Unit>
 
     // Get daily recurring medication schedule
     @GET("api/schedule/daily/{patientId}")

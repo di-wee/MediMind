@@ -153,7 +153,6 @@ function DoctorDetails({ mcrNo }) {
 			}
 		};
 		fetchAllClinic();
-		console.log('clinicOptions', clinicOptions);
 	}, [mcrNo]);
 
 	return (

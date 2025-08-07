@@ -8,7 +8,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { getDynamicFilterOptions, applyFilter } from '../utils/filterUtil';
 import FilterContainer from './FilterContainer';
 
-function MedicationLog({ medication, patientId }) {
+function MedicationLog({ medication }) {
 	//state management
 	const [editingRowId, setEditingRowId] = useState(null);
 	const [editedNote, setEditedNote] = useState('');
@@ -80,7 +80,6 @@ function MedicationLog({ medication, patientId }) {
 			);
 
 			if (response.ok) {
-				const data = await response.json();
 				setLogList((prev) =>
 					prev.map((log) =>
 						log.id === editingRowId ? { ...log, doctorNotes: editedNote } : log
@@ -188,7 +187,7 @@ function MedicationLog({ medication, patientId }) {
 				if (response.ok) {
 					const medicationLog = await response.json();
 
-					const transformedLog = medicationLog.map((log, idx) => {
+					const transformedLog = medicationLog.map((log) => {
 						//"scheduledTime": "20:00:00"
 						const formattedTime =
 							log.scheduledTime.slice(0, 2) +
@@ -232,10 +231,6 @@ function MedicationLog({ medication, patientId }) {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, [filterRef]);
-
-	useEffect(() => {
-		console.log(logList);
-	}, [displayList]);
 
 	return (
 		<>

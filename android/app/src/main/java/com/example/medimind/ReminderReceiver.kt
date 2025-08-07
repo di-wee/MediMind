@@ -36,7 +36,7 @@ class ReminderReceiver : BroadcastReceiver() {
         val pendingResult = goAsync()
         Log.d("ReminderReceiver", "== onReceive TRIGGERED ==")
 
-        val timeMillis = intent.getLongExtra("time_millis", -1)
+        val timeMillis = intent.getLongExtra("time_millis", -1L)
         if (timeMillis == -1L){
             Log.e("ReminderReceiver", "Invalid timeMillis")
             return
@@ -46,8 +46,6 @@ class ReminderReceiver : BroadcastReceiver() {
             Log.e("ReminderReceiver", "Missing patient_id in intent extras")
             return
         }
-        //val scheduleId = intent.getStringExtra("schedule_id") ?: return
-
         Log.d("ReminderReceiver", "== Alarm TRIGGERED for $patientId at ${Date(timeMillis)} ==")
 
         val localTime = Instant.ofEpochMilli(timeMillis)
