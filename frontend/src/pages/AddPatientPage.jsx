@@ -1,11 +1,6 @@
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { useContext, useEffect, useState } from 'react';
-import {
-	MagnifyingGlassIcon,
-	UserPlusIcon,
-	ArrowLeftIcon,
-} from '@heroicons/react/24/outline';
 import MediMindContext from '../context/MediMindContext';
 import UnassignPatientList from '../components/UnassignPatientList';
 
@@ -46,24 +41,23 @@ export default function AddPatientPage() {
 
 	useEffect(() => {
 		const fetchUnassignedPatients = async () => {
-			const response = await fetch(
-				import.meta.env.VITE_SERVER +
-					`api/patients/unassigned/${doctorDetails.mcrNo}`,
-				{
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				}
-			);
-
-			if (response.ok) {
-				const patients = await response.json();
-				setDisplayList(patients);
-				setUnassignedPatients(patients);
-			}
-
 			try {
+				const response = await fetch(
+					import.meta.env.VITE_SERVER +
+						`api/patients/unassigned/${doctorDetails.mcrNo}`,
+					{
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					}
+				);
+
+				if (response.ok) {
+					const patients = await response.json();
+					setDisplayList(patients);
+					setUnassignedPatients(patients);
+				}
 			} catch (err) {
 				console.error('Error fetching unassigned patients: ', err);
 			}
