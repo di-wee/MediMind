@@ -39,7 +39,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: eslint-report
-          path: .frontend/eslint-report.txt
+          path: frontend/eslint-report.txt
 
       - name: Lint Python ML
         working-directory: ./ml
@@ -54,7 +54,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: pylint-report
-          path: .ml/pylint-report.txt
+          path: ml/pylint-report.txt
       - uses: actions/upload-artifact@v4
         with:
           name: nbqa-notebook-report
