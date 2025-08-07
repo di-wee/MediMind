@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import PageHeader from '../components/Header';
 import DoctorDetails from '../components/DoctorDetails';
-import axios from 'axios';
 
 function DoctorProfile() {
 	//this will extract the doctor's MCRNo from the endpoint /profile/:mcrNo
