@@ -1,13 +1,46 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import PageHeader from '../components/Header';
 import DoctorDetails from '../components/DoctorDetails';
+import axios from 'axios';
 
 function DoctorProfile() {
 	//this will extract the doctor's MCRNo from the endpoint /profile/:mcrNo
 	const { mcrNo } = useParams();
+
+	// Store patients assigned to this doctor
+	const [patients, setPatients] = useState([]);
+
+	// Fetch patients from backend
+	const fetchPatients = async () => {
+		try {
+			const response = await axios.get(
+				`http://localhost:8080/api/patients/by-doctor/${mcrNo}`
+			);
+			setPatients(response.data);
+		} catch (error) {
+			console.error('Error fetching patients:', error);
+		}
+	};
+
+	// Unassign doctor from patient
+	const unassignDoctor = async (patientId) => {
+		try {
+			await axios.put(
+				`http://localhost:8080/api/patients/${patientId}/unassign-doctor`
+			);
+			fetchPatients(); // Refresh list after unassigning
+		} catch (error) {
+			console.error('Failed to unassign doctor:', error);
+		}
+	};
+
+	// Run fetch when component mounts or when mcrNo changes
+	useEffect(() => {
+		fetchPatients();
+	}, [mcrNo]);
 
 	return (
 		<>

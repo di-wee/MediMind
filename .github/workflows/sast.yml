@@ -11,6 +11,10 @@ on:
   pull_request:
     branches:
       - main
+      - frontend-(react)
+      - backend-(java-springboot)
+      - android
+      - machine-learning
 
 permissions:
   actions: read

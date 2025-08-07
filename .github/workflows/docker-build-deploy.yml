@@ -2,7 +2,7 @@ name: "Build & Dockerize MediMind"
 
 on:
   workflow_run:
-    workflows: ["SAST - Static Code Analysis & Build"]
+    workflows: ["SCA - Dependency Scan (Trivy)"]
     types:
       - completed
 
