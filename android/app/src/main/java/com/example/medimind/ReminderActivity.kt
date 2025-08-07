@@ -88,8 +88,8 @@ class ReminderActivity : AppCompatActivity() {
 
                 Log.d("ReminderActivity", "Fetched ${meds.size} medications: $meds")
                 val details = meds.map {
-                    val title = "${it.medicationName}: "
-                    val intake = "${it.intakeQuantity}Tables "
+                    val title = "${it.medicationName}:  "
+                    val intake = "${it.intakeQuantity} "
                     val instruction = "Instruction：${it.instructions.ifBlank { "" }}"
                     val note = "Notes:${it.note.ifBlank { "" }}"
 
@@ -245,7 +245,7 @@ class ReminderActivity : AppCompatActivity() {
         instruction: String,
         note: String
     ): SpannableString {
-        val fullText = "$title:$intake\n$instruction\n$note"
+        val fullText = "$title$intake\n$instruction\n$note"
         val spannable = SpannableString(fullText)
 
         val titleLineEnd = title.length + 1 + intake.length

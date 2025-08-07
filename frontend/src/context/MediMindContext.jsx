@@ -1,2 +1,3 @@
 import React from 'react';
-export default React.createContext();
+const MediMindContext = React.createContext();
+export default MediMindContext;

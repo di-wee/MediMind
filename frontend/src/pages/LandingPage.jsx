@@ -7,11 +7,7 @@ export default function LandingPage() {
 		<div className='h-screen overflow-hidden bg-gray-50 grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[256px_1fr]'>
 			{/* Sidebar - Grid item spanning both rows */}
 			<div className='row-span-2 h-screen'>
-				<Sidebar
-					mcrNo='M12345A'
-					firstName='Jenny'
-					clinicName='Raffles Medical Centre'
-				/>
+				<Sidebar />
 			</div>
 
 			{/* Header - Second column, first row */}
