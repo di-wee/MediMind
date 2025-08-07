@@ -2,38 +2,35 @@ package com.example.medimind.reminder
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.medimind.R
+import com.example.medimind.ReminderActivity
 import com.example.medimind.ReminderReceiver
 
 class ReminderWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
     override fun doWork(): Result {
+        Log.d("ReminderWorker", "🔥 doWork triggered")
         val context = applicationContext
-        val medId = inputData.getInt("med_id", -1)
+        val medIdListString = inputData.getString("med_id_list")
         val patientId = inputData.getString("patient_id")
-        if (medId == -1|| patientId==null) return Result.failure()
+        val timeMillis = inputData.getLong("time_millis", -1L)
+        if (medIdListString == null|| patientId==null|| timeMillis == -1L) return Result.failure()
 
-        val intent = Intent(context, ReminderReceiver::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            putExtra("from_worker", true)
-            putExtra("med_id", medId)
-            putExtra("patientId",patientId)
-        }
-        context.sendBroadcast(intent)
-
-        showNotification(context)
+        showNotification(context,medIdListString, timeMillis, patientId)
 
         return Result.success()
     }
 
-    private fun showNotification(context: Context) {
+    private fun showNotification(context: Context,medIdListString: String, timeMillis: Long, patientId: String) {
         val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -51,6 +48,19 @@ class ReminderWorker(context: Context, params: WorkerParameters) : Worker(contex
             }
             manager.createNotificationChannel(channel)
 
+        val intent = Intent(context, ReminderActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("time_millis", timeMillis)
+            putExtra("patient_id", patientId)
+            putExtra("med_id_list",medIdListString)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            timeMillis.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
 
         val builder = NotificationCompat.Builder(context, "med_channel")
             .setSmallIcon(R.drawable.ic_med)
@@ -58,6 +68,7 @@ class ReminderWorker(context: Context, params: WorkerParameters) : Worker(contex
             .setContentText("It's time to take your medicine (snoozed)!")
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
 
         manager.notify(System.currentTimeMillis().toInt(), builder.build())
     }
