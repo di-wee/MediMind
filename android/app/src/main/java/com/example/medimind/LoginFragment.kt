@@ -1,5 +1,12 @@
 package com.example.medimind
 
+import android.graphics.Color
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.text.TextPaint
+import androidx.core.content.ContextCompat
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -30,7 +38,33 @@ class LoginFragment : Fragment() {
         val passwordField = view.findViewById<EditText>(R.id.passwordInput)
         val loginButton = view.findViewById<Button>(R.id.loginButton)
         val bypassButton = view.findViewById<Button>(R.id.bypassButton)
-        val registerButton = view.findViewById<Button>(R.id.registerButton)
+        val registerText = view.findViewById<TextView>(R.id.registerText)
+
+
+        val fullText = "Don’t have an account yet? Sign up"
+        val spannable = SpannableString(fullText)
+
+        // Make "Sign up" clickable and blue
+        val clickableSpan = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                findNavController().navigate(R.id.action_loginFragment_to_registerUserFragment)
+            }
+
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.color = ContextCompat.getColor(requireContext(), R.color.link_blue) // Optional custom color
+                ds.isUnderlineText = false
+            }
+        }
+
+        val signUpStart = fullText.indexOf("Sign up")
+        val signUpEnd = signUpStart + "Sign up".length
+
+        spannable.setSpan(clickableSpan, signUpStart, signUpEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        registerText.text = spannable
+        registerText.movementMethod = LinkMovementMethod.getInstance()
+        registerText.highlightColor = Color.TRANSPARENT
 
         // Login button -> validate credentials with backend
         loginButton.setOnClickListener {
@@ -71,9 +105,12 @@ class LoginFragment : Fragment() {
             findNavController().navigate(R.id.action_loginFragment_to_mainFragment)
         }
 
-        // Register button -> navigate to register screen
-        registerButton.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_registerUserFragment)
+        // Register text -> navigate to register screen
+        registerText.setOnClickListener {
+            val currentId = findNavController().currentDestination?.id
+            if (currentId == R.id.loginFragment) {
+                findNavController().navigate(R.id.action_loginFragment_to_registerUserFragment)
+            }
         }
 
     }
