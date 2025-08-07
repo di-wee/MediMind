@@ -5,6 +5,7 @@ function FilterContainer({
 	filterOptions,
 	handleFilterChange,
 	selectedFilters,
+	filterRef,
 }) {
 	return (
 		<>
