@@ -17,6 +17,8 @@ import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
 import java.time.LocalDate
+import retrofit2.http.*
+
 
 // Request body for registration
 data class RegisterRequest(
@@ -218,4 +220,7 @@ interface ApiService {
     suspend fun uploadImage(
         @Part file: MultipartBody.Part
     ): ImageOutput
+
+    @GET("/api/patient/profile")
+    suspend fun getProfile(): PatientResponse
 }
