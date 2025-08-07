@@ -5,9 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
@@ -43,8 +41,12 @@ class HomeFragment : Fragment() {
     private lateinit var cameraBtnText: TextView
     private lateinit var galleryBtnText: TextView
     private lateinit var manualBtnText: TextView
+
     // Camera image box
     private lateinit var cameraBox: ImageView
+
+    // Empty state view
+    private lateinit var emptyStateContainer: LinearLayout
 
     // Animations for FAB
     private val rotateOpen by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_open_anim) }
@@ -94,7 +96,6 @@ class HomeFragment : Fragment() {
     ): View? = inflater.inflate(R.layout.fragment_home, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Top navbar greeting (updated to fetch firstName)
         val greetingTextView = view.findViewById<TextView>(R.id.topGreetingText)
 
         val sharedPref = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
@@ -114,15 +115,12 @@ class HomeFragment : Fragment() {
             greetingTextView.text = "Hello"
         }
 
-        // Logout button: clear session and navigate to login
         val logoutButton = view.findViewById<Button>(R.id.logoutButton)
         logoutButton.setOnClickListener {
             val editor = sharedPref.edit()
             editor.clear()
             editor.apply()
-
             Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
-
             val navController = requireActivity().findNavController(R.id.nav_host_fragment)
             val navOptions = androidx.navigation.NavOptions.Builder()
                 .setPopUpTo(R.id.mainFragment, true)
@@ -136,6 +134,7 @@ class HomeFragment : Fragment() {
         val calendarStrip = view.findViewById<LinearLayout>(R.id.calendarStrip)
         populateCalendarStrip(calendarStrip)
 
+        // FAB setup
         addMedButton = view.findViewById(R.id.addMedButton)
         cameraButton = view.findViewById(R.id.cameraButton)
         galleryButton = view.findViewById(R.id.galleryButton)
@@ -143,7 +142,6 @@ class HomeFragment : Fragment() {
         cameraBtnText = view.findViewById(R.id.cameraBtnText)
         galleryBtnText = view.findViewById(R.id.galleryBtnText)
         manualBtnText = view.findViewById(R.id.manualBtnText)
-
         addMedButton.setOnClickListener { onAddMedButtonClicked() }
 
         cameraButton.setOnClickListener {
@@ -161,8 +159,8 @@ class HomeFragment : Fragment() {
         }
 
         cameraBox = view.findViewById(R.id.cameraBox)
+        emptyStateContainer = view.findViewById(R.id.emptyStateContainer)
 
-        // RecyclerView setup for grouped medication schedule
         val scheduleRecyclerView = view.findViewById<RecyclerView>(R.id.scheduleRecyclerView)
         scheduleRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -171,8 +169,16 @@ class HomeFragment : Fragment() {
                 try {
                     val rawSchedule = ApiClient.retrofitService.getDailySchedule(patientId)
                     val groupedList = groupScheduleItems(rawSchedule)
+
+                    if (rawSchedule.isEmpty()) {
+                        emptyStateContainer.visibility = View.VISIBLE
+                    } else {
+                        emptyStateContainer.visibility = View.GONE
+                    }
+
                     scheduleRecyclerView.adapter = GroupedScheduleAdapter(groupedList)
                 } catch (e: Exception) {
+                    emptyStateContainer.visibility = View.VISIBLE
                     Toast.makeText(requireContext(), "Failed to load schedule: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }

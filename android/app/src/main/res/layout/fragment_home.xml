@@ -81,6 +81,49 @@
                 />
             <!-- End new block -->
 
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/emptyStateContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingTop="64dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/emptyStateImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/med_schedule_placeholder"
+                    android:contentDescription="No medications scheduled"
+                    android:layout_marginTop="8dp"
+                    android:scaleType="fitCenter"
+                    android:adjustViewBounds="true" />
+
+                <TextView
+                    android:id="@+id/emptyStateTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Monitor your medication schedule"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_light_onBackground"
+                    android:layout_marginTop="16dp" />
+
+                <TextView
+                    android:id="@+id/emptyStateSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Click on Add New Medication to begin!"
+                    android:textSize="14sp"
+                    android:textColor="@color/md_theme_light_onBackground"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:paddingHorizontal="32dp" />
+            </LinearLayout>
+
+
             <!-- Bottom FAB container -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
