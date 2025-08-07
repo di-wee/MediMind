@@ -19,6 +19,7 @@ import androidx.work.workDataOf
 import com.example.medimind.data.Schedule
 import com.example.medimind.reminder.ReminderWorker
 import java.util.Date
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 
@@ -28,8 +29,15 @@ object ReminderUtils {
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
+        val adjustedTimeMillis = if (timeMilli < System.currentTimeMillis()) {
+            Log.w("ReminderUtils", "⏰ timeMillis is in the past, adjusting to next day.")
+            timeMilli + 24 * 60 * 60 * 1000 // ++ 1 day
+        } else {
+            timeMilli
+        }
+
         Log.d("ReminderUtils", "== Alarm Schedule Called ==")
-        Log.d("ReminderUtils", "timeMillis = ${timeMilli}")
+        Log.d("ReminderUtils", "timeMillis = $adjustedTimeMillis")
         Log.d("ReminderUtils", "canScheduleExact = ${
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
                 alarmManager.canScheduleExactAlarms()
@@ -37,36 +45,24 @@ object ReminderUtils {
         }")
 
         val intent = Intent(context, ReminderReceiver::class.java).apply {
-            putExtra("time_millis", timeMilli)
-            putExtra("patient_id",patientId)
-        }
-
-        val requestCode = timeMilli.hashCode()
-
-        val existingIntent = PendingIntent.getBroadcast(
-            context,
-            requestCode,
-            intent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        if (existingIntent != null) {
-            Log.d("Alarm", "Alarm for ${Date(timeMilli)} already exists, skipping.")
-            return
+            action = "com.example.medimind.ACTION_${System.currentTimeMillis()}"
+            data = Uri.parse("medimind://${UUID.randomUUID()}")
+            putExtra("time_millis", adjustedTimeMillis)
+            putExtra("patient_id", patientId)
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            requestCode,
+            0,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
         )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (alarmManager.canScheduleExactAlarms()) {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
-                    timeMilli,
+                    adjustedTimeMillis,
                     pendingIntent
                 )
             } else {
@@ -79,11 +75,12 @@ object ReminderUtils {
         } else {
             alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
-                timeMilli,
+                adjustedTimeMillis,
                 pendingIntent
             )
         }
     }
+
 
     /**
      * Delay the reminder of a certain medication by 15 minutes (executed by ReminderWorker）
