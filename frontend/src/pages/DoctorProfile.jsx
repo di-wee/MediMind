@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import PageHeader from '../components/Header';
 import DoctorDetails from '../components/DoctorDetails';
-import axios from 'axios';
 
 function DoctorProfile() {
 	//this will extract the doctor's MCRNo from the endpoint /profile/:mcrNo
@@ -16,24 +14,20 @@ function DoctorProfile() {
 	// Fetch patients from backend
 	const fetchPatients = async () => {
 		try {
-			const response = await axios.get(
-				`http://localhost:8080/api/patients/by-doctor/${mcrNo}`
-			);
+			const response = await axios.get(`http://localhost:8080/api/patients/by-doctor/${mcrNo}`);
 			setPatients(response.data);
 		} catch (error) {
-			console.error('Error fetching patients:', error);
+			console.error("Error fetching patients:", error);
 		}
 	};
 
 	// Unassign doctor from patient
 	const unassignDoctor = async (patientId) => {
 		try {
-			await axios.put(
-				`http://localhost:8080/api/patients/${patientId}/unassign-doctor`
-			);
+			await axios.put(`http://localhost:8080/api/patients/${patientId}/unassign-doctor`);
 			fetchPatients(); // Refresh list after unassigning
 		} catch (error) {
-			console.error('Failed to unassign doctor:', error);
+			console.error("Failed to unassign doctor:", error);
 		}
 	};
 
@@ -60,6 +54,31 @@ function DoctorProfile() {
 					<div className='flex-1 overflow-y-auto max-w-full p-4 sm:p-6 md:p-2'>
 						<div className='overflow-x-auto'>
 							<DoctorDetails mcrNo={mcrNo} />
+						</div>
+
+						{/* Display assigned patients */}
+						<div className="mt-6">
+							<h2 className="text-lg font-semibold mb-2">Assigned Patients:</h2>
+							{patients.length === 0 ? (
+								<p>No patients assigned.</p>
+							) : (
+								<ul className="space-y-2">
+									{patients.map((patient) => (
+										<li
+											key={patient.id}
+											className="flex justify-between items-center bg-white p-4 rounded shadow"
+										>
+											<span>{patient.firstName} {patient.lastName}</span>
+											<button
+												onClick={() => unassignDoctor(patient.id)}
+												className="px-4 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
+											>
+												Unassign
+											</button>
+										</li>
+									))}
+								</ul>
+							)}
 						</div>
 					</div>
 				</div>

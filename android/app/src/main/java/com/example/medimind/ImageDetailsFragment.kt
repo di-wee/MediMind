@@ -28,7 +28,6 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.util.Calendar
 
-
 class ImageDetailsFragment : Fragment() {
 
     private fun getRealPathFromURI(uri: Uri): String? {
@@ -65,27 +64,36 @@ class ImageDetailsFragment : Fragment() {
         if (imageUri != null) {
             imagePreview.setImageURI(imageUri)
 
-            val imagePath = getRealPathFromURI(imageUri)
-            if (imagePath != null) {
-                val file = File(imagePath)
-                val reqFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-                val body = MultipartBody.Part.createFormData("file", file.name, reqFile)
-
-                lifecycleScope.launch {
-                    try {
-                        val response = ApiClient.retrofitService.uploadImage(body)
-                        nameInput.setText(response.medicationName ?: "")
-                        intakeQuantityInput.setText(response.intakeQuantity ?: "")
-                        frequencyInput.setText(response.frequency.toString())
-                        instructionInput.setText(response.instructions ?: "")
-                        noteInput.setText(response.notes ?: "")
-                    } catch (e: Exception) {
-                        Toast.makeText(
-                            requireContext(),
-                            "Prediction failed: ${e.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+            //Lewis: Instead of using getRealPathFromURI (which may crash on Android 10+), copy content URI to temp file
+            lifecycleScope.launch {
+                try {
+                    //Lewis: Open input stream from the content URI
+                    val inputStream = requireContext().contentResolver.openInputStream(imageUri)
+                    //Lewis: Create a temporary file in cache directory
+                    val tempFile = File.createTempFile("upload", ".jpg", requireContext().cacheDir)
+                    //Lewis: Copy the image content into the temp file
+                    tempFile.outputStream().use { outputStream ->
+                        inputStream?.copyTo(outputStream)
                     }
+
+                    //Lewis: Create the multipart request body for Retrofit
+                    val reqFile = tempFile.asRequestBody("image/*".toMediaTypeOrNull())
+                    val body = MultipartBody.Part.createFormData("file", tempFile.name, reqFile)
+
+                    //Lewis: Call the ML API and populate UI with the extracted fields
+                    val response = ApiClient.retrofitService.uploadImage(body)
+                    nameInput.setText(response.medicationName ?: "")
+                    intakeQuantityInput.setText(response.intakeQuantity ?: "")
+                    frequencyInput.setText(response.frequency.toString())
+                    instructionInput.setText(response.instructions ?: "")
+                    noteInput.setText(response.notes ?: "")
+
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Prediction failed: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 
@@ -207,5 +215,4 @@ class ImageDetailsFragment : Fragment() {
             }
         }
     }
-
 }

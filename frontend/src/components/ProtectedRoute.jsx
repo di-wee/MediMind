@@ -36,7 +36,6 @@ function ProtectedRoute({ children }) {
 			}
 		};
 		checkSession();
-		console.log(doctorDetails);
 	}, []);
 
 	useEffect(() => {

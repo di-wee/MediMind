@@ -3,7 +3,7 @@ import {
 	Squares2X2Icon,
 	UserCircleIcon,
 } from '@heroicons/react/24/outline';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import MediMindContext from '../context/MediMindContext';
 
