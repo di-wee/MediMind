@@ -77,21 +77,6 @@ public class MedicationController {
         }
     }
 
-    @PostMapping("/createMedLog")
-    public ResponseEntity<IntakeResponseMobile> createMedicationLog(@RequestBody IntakeReqMobile medLogReqMobile) {
-        try{
-            intakeHistoryService.createIntakeHistory(medLogReqMobile);
-            IntakeResponseMobile saveHistory = new IntakeResponseMobile();
-            saveHistory.setLoggedDate(medLogReqMobile.getLoggedDate());
-            saveHistory.setTaken(medLogReqMobile.isTaken());
-            saveHistory.setPatientId(medLogReqMobile.getPatientId());
-            saveHistory.setScheduleId(medLogReqMobile.getScheduleId());
-            return new ResponseEntity<>(saveHistory,HttpStatus.OK);
-        }catch (RuntimeException e){
-            logger.error(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
     //for my edit  med detail page to show frequency and timer
     @GetMapping("{medicationId}/edit")
     public ResponseEntity<?> getMedicationEditDetails(@PathVariable UUID medicationId) {

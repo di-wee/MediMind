@@ -88,11 +88,18 @@ object ReminderUtils {
     /**
      * Delay the reminder of a certain medication by 15 minutes (executed by ReminderWorker）
      */
-    fun snoozeReminder(context: Context, medId: String, patientId: String) {
+    fun snoozeReminder(context: Context, medIdList: List<String>, patientId: String,timeMillis: Long) {
+        Log.d("ReminderUtils", "✅ Enqueuing snooze work for meds=$medIdList, patientId=$patientId at ${timeMillis}")
+
+        val inputData = workDataOf(
+            "med_id_list" to medIdList.joinToString(","),
+            "patient_id" to patientId,
+            "time_millis" to timeMillis,
+        )
+
         val request = OneTimeWorkRequestBuilder<ReminderWorker>()
             .setInitialDelay(1, TimeUnit.MINUTES)
-            .setInputData(workDataOf("med_id" to medId))
-            .setInputData(workDataOf("patient_id" to patientId))
+            .setInputData(inputData)
             .build()
 
         WorkManager.getInstance(context).enqueue(request)
