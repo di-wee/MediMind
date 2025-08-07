@@ -1,13 +1,18 @@
 package com.example.medimind
 
+import android.Manifest
+import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -16,9 +21,11 @@ import com.example.medimind.reminder.ReminderWorker
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
+
 object ReminderUtils {
 
     fun scheduleAlarm(context: Context, timeMilli: Long, patientId: String) {
+
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         Log.d("ReminderUtils", "== Alarm Schedule Called ==")
@@ -81,11 +88,18 @@ object ReminderUtils {
     /**
      * Delay the reminder of a certain medication by 15 minutes (executed by ReminderWorker）
      */
-    fun snoozeReminder(context: Context, medId: String, patientId: String) {
+    fun snoozeReminder(context: Context, medIdList: List<String>, patientId: String,timeMillis: Long) {
+        Log.d("ReminderUtils", "✅ Enqueuing snooze work for meds=$medIdList, patientId=$patientId at ${timeMillis}")
+
+        val inputData = workDataOf(
+            "med_id_list" to medIdList.joinToString(","),
+            "patient_id" to patientId,
+            "time_millis" to timeMillis,
+        )
+
         val request = OneTimeWorkRequestBuilder<ReminderWorker>()
-            .setInitialDelay(15, TimeUnit.MINUTES)
-            .setInputData(workDataOf("med_id" to medId))
-            .setInputData(workDataOf("patient_id" to patientId))
+            .setInitialDelay(1, TimeUnit.MINUTES)
+            .setInputData(inputData)
             .build()
 
         WorkManager.getInstance(context).enqueue(request)

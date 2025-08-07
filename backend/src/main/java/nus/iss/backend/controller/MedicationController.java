@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,13 +46,17 @@ public class MedicationController {
     @Autowired
     private IntakeHistoryService intakeHistoryService;
 
-    @GetMapping("/medList")
+    @PostMapping("/medList")
     public ResponseEntity<List<MedicationResponse>> getMedications(@RequestBody MedicationIdList MedIds) {
+        logger.info("[POST /medList] Received medicationIdList: {}", MedIds.getMedicationIds());
         try{
-            List<Medication> medications =  medicationService.findAllMedications(MedIds.getMedicationIdList());
-            if (MedIds.getMedicationIdList().isEmpty()) {
+            if (MedIds.getMedicationIds().isEmpty()) {
+                logger.warn("Received empty medicationIdList");
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
+            List<Medication> medications =  medicationService.findAllMedications(MedIds.getMedicationIds());
+            logger.info("Found {} medications from database", medications.size());
+
             List<MedicationResponse> responseList = new ArrayList<>();
             for (Medication med : medications) {
                 MedicationResponse res = new MedicationResponse();
@@ -61,31 +66,17 @@ public class MedicationController {
                 res.setFrequency(med.getFrequency());
                 res.setTiming(med.getTiming());
                 res.setInstructions(med.getInstructions());
-                res.setNotes(med.getNotes());
+                res.setNote(med.getNotes());
                 res.setActive(med.isActive());
+                logger.debug("Prepared response for medication: {} - {}", med.getId(), med.getMedicationName());
                 responseList.add(res);}
             return new ResponseEntity<>(responseList,HttpStatus.OK);
         }catch (RuntimeException e) {
-            logger.error(e.getMessage());
+            logger.error("Exception occurred in /medList: {}", e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
 
-    }
-    @PostMapping("/createMedLog")
-    public ResponseEntity<IntakeResponseMobile> createMedicationLog(@RequestBody IntakeReqMobile medLogReqMobile) {
-        try{
-            intakeHistoryService.createIntakeHistory(medLogReqMobile);
-            IntakeResponseMobile saveHistory = new IntakeResponseMobile();
-            saveHistory.setLoggedDate(medLogReqMobile.getLoggedDate());
-            saveHistory.setTaken(medLogReqMobile.isTaken());
-            saveHistory.setPatientId(medLogReqMobile.getPatientId());
-            saveHistory.setScheduleId(medLogReqMobile.getScheduleId());
-            return new ResponseEntity<>(saveHistory,HttpStatus.OK);
-        }catch (RuntimeException e){
-            logger.error(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
     //for my edit  med detail page to show frequency and timer
     @GetMapping("{medicationId}/edit")
     public ResponseEntity<?> getMedicationEditDetails(@PathVariable UUID medicationId) {
@@ -139,26 +130,27 @@ public class MedicationController {
 
     @PostMapping("/save")
     public ResponseEntity<?> saveMedication(@RequestBody newMedicationReq req) {
+        logger.info(">>> /save API hit, request received: " + req.toString());
         try{
+            logger.info("📦 received notes: " + req.getNotes());
+
             Patient patient =  patientService.findPatientById(req.getPatientId()).orElse(null);
             if(patient==null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("patient not found");
             }
             //save new medication
             Medication med = medicationService.createMedication(req);
-            //save new schedule
-            String timeStr = req.getTime();
-            LocalTime time = LocalTime.parse(timeStr);
-            Schedule newSchedule =  scheduleService.createSchedule(med,patient,time);
-
-            saveNewMedResponse saveResponse = new saveNewMedResponse();
-            saveResponse.setScheduleId(newSchedule.getId());
-            saveResponse.setTime(timeStr);
-            saveResponse.setMedicationName(med.getMedicationName());
-            saveResponse.setMedId(med.getId());
-            return ResponseEntity.ok(saveResponse);
+            logger.info("Note from request: " + med.getNotes());
+            //save new schedules
+            List<Schedule> schedules = new ArrayList<>();
+            for (String timeStr : req.getTimes()) {
+                LocalTime time = LocalTime.parse(timeStr);
+                Schedule schedule = scheduleService.createSchedule(med, patient, time);
+                schedules.add(schedule);
+            }
+            return ResponseEntity.ok("Medication saved");
         }catch (RuntimeException e) {
-            logger.error(e.getMessage());
+            logger.error("Exception occurred:", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -182,7 +174,7 @@ public class MedicationController {
     }
 
     // Pris: prediction from the ML model
-    @PostMapping("/predict")
+    @PostMapping(value = "/predict_image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImageOutput> predict(@RequestParam("file") MultipartFile file) throws IOException {
         ImageOutput result = medicationService.sendToFastAPI(file);
         return ResponseEntity.ok(result);

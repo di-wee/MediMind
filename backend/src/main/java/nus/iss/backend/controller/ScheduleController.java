@@ -22,7 +22,7 @@ public class ScheduleController {
     @Autowired
     ScheduleService scheduleService;
 
-    @GetMapping("/find")
+    @PostMapping("/find")
     public ResponseEntity<List<ScheduleFindResponse>> getSchedulesByTime(@RequestBody ScheduleListReq req) {
         List<Schedule> schedules = scheduleService.findSchedulesByPatientIdandScheduledTime
                 (req.getTime(),req.getPatientId());
