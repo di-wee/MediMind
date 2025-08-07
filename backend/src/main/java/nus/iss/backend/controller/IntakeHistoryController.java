@@ -1,6 +1,7 @@
 package nus.iss.backend.controller;
 
 import nus.iss.backend.dao.DoctorUpdateReqWeb;
+import nus.iss.backend.dao.IntakeReqMobile;
 import nus.iss.backend.dao.UpdateDoctorNotesReq;
 import nus.iss.backend.dto.IntakeHistoryResponse;            // DTO for intake history
 import nus.iss.backend.exceptions.ItemNotFound;
@@ -66,6 +67,18 @@ public class IntakeHistoryController {
 
         } catch (Exception e) {
             logger.error("Error retrieving intake history: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/intakeHistory/create")
+    public ResponseEntity<?> createMedicationLog(@RequestBody IntakeReqMobile medLogReqMobile) {
+        logger.info("Received log: {}", medLogReqMobile);
+        try{
+            intakeHistoryService.createIntakeHistory(medLogReqMobile);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (RuntimeException e){
+            logger.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
