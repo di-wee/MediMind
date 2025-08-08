@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 //Lewis: update of ApiClient Code to run app on emulator and physical device.
 object ApiClient {
 
-    private const val EMULATOR_URL = "http://10.0.2.2:8080"
+    private const val EMULATOR_URL = "http://54.255.65.62:8080"
     private const val DEVICE_URL = "http://192.168.1.3:8080" // Local IP 172.20.10.2 (Hotspot) & 192.168.1.3 (Network)
 
     private fun isEmulator(): Boolean {
