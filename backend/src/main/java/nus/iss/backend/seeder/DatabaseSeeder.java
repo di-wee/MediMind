@@ -20,12 +20,12 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     @PersistenceContext
     private EntityManager entityManager;
-    private final Faker faker = new Faker(new Locale("en-SG"));
     private final List<String> commonMeds = Arrays.asList(
             "Panadol", "Metformin", "Lipitor", "Amoxicillin", "Losartan",
             "Omeprazole", "Amlodipine", "Ventolin", "Atorvastatin", "Insulin"
     );
-    private final Random random = new Random();
+    private final Random random = new Random(20250808); //
+    private final Faker faker = new Faker(new Locale("en-SG"), random);// fixed seed, same for all
 
     private final List<LocalTime> possibleTimes = Arrays.asList(
             LocalTime.of(8, 0),

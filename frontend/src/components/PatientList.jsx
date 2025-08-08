@@ -27,17 +27,19 @@ function PatientList() {
 	useEffect(() => {
 		const fetchPatients = async () => {
 			if (!doctorDetails.mcrNo) return;
-			
+
 			try {
 				setLoading(true);
 				const response = await fetch(
-					`${import.meta.env.VITE_SERVER}api/patients/by-doctor/${doctorDetails.mcrNo}`,
+					`${import.meta.env.VITE_SERVER}api/patients/by-doctor/${
+						doctorDetails.mcrNo
+					}`,
 					{
 						method: 'GET',
 						credentials: 'include',
 					}
 				);
-				
+
 				if (response.ok) {
 					const patientData = await response.json();
 					setPatients(patientData);
@@ -61,23 +63,22 @@ function PatientList() {
 		(patient) =>
 			patient.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			patient.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			patient.nric.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			patient.clinic?.clinicName.toLowerCase().includes(searchTerm.toLowerCase())
+			patient.nric.toLowerCase().includes(searchTerm.toLowerCase())
 	);
 
 	// Sort patients if sortBy is set
 	const sortedPatients = useMemo(() => {
 		if (!sortBy) return filteredPatients;
-		
+
 		const [field, direction] = sortBy.split('-');
-		
+
 		return [...filteredPatients].sort((a, b) => {
 			let aValue, bValue;
-			
+
 			if (field === 'clinic') {
 				aValue = a.clinic?.clinicName || '';
 				bValue = b.clinic?.clinicName || '';
-				
+
 				if (direction === 'asc') {
 					return aValue.localeCompare(bValue);
 				} else {
@@ -86,24 +87,30 @@ function PatientList() {
 			} else if (field === 'age') {
 				// Calculate age for both patients
 				const today = new Date();
-				
+
 				const aDate = new Date(a.dob);
 				let aAge = today.getFullYear() - aDate.getFullYear();
 				const aMonthDiff = today.getMonth() - aDate.getMonth();
-				if (aMonthDiff < 0 || (aMonthDiff === 0 && today.getDate() < aDate.getDate())) {
+				if (
+					aMonthDiff < 0 ||
+					(aMonthDiff === 0 && today.getDate() < aDate.getDate())
+				) {
 					aAge--;
 				}
-				
+
 				const bDate = new Date(b.dob);
 				let bAge = today.getFullYear() - bDate.getFullYear();
 				const bMonthDiff = today.getMonth() - bDate.getMonth();
-				if (bMonthDiff < 0 || (bMonthDiff === 0 && today.getDate() < bDate.getDate())) {
+				if (
+					bMonthDiff < 0 ||
+					(bMonthDiff === 0 && today.getDate() < bDate.getDate())
+				) {
 					bAge--;
 				}
-				
+
 				aValue = aAge;
 				bValue = bAge;
-				
+
 				if (direction === 'asc') {
 					return aValue - bValue;
 				} else {
@@ -113,7 +120,7 @@ function PatientList() {
 				// Sort by full name (firstName + lastName)
 				aValue = `${a.firstName} ${a.lastName}`;
 				bValue = `${b.firstName} ${b.lastName}`;
-				
+
 				if (direction === 'asc') {
 					return aValue.localeCompare(bValue);
 				} else {
@@ -201,7 +208,7 @@ function PatientList() {
 							<input
 								type='text'
 								className='block w-full min-w-xl pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-gray-400 focus:border-transparent text-sm'
-								placeholder='Search by name, NRIC, or clinic...'
+								placeholder='Search by name or NRIC...'
 								value={searchTerm}
 								onChange={handleSearchChange}
 							/>
@@ -211,7 +218,9 @@ function PatientList() {
 						<div className='flex items-center space-x-4'>
 							{/* Items Per Page Selector */}
 							<div className='flex items-center space-x-2'>
-								<label htmlFor='itemsPerPage' className='text-sm text-gray-700 font-medium'>
+								<label
+									htmlFor='itemsPerPage'
+									className='text-sm text-gray-700 font-medium'>
 									Show:
 								</label>
 								<select
