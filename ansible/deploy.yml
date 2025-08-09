@@ -150,30 +150,46 @@
       debug:
         var: current_digests.stdout_lines
 
-    - name: Force pull latest Docker images
-      shell: |
-        cd {{ app_dir }}
-        echo "=== Pulling Latest Images ==="
+    - name: Validate Docker Hub username
+      fail:
+        msg: 'DOCKERHUB_USERNAME environment variable is not set'
+      when: dockerhub_username is not defined or dockerhub_username == ""
 
-        # Remove existing images to force fresh pull (ignore errors if they don't exist)
-        docker rmi {{ dockerhub_username }}/medimind-backend:latest 2>/dev/null || echo "Backend image not found, will pull fresh"
-        docker rmi {{ dockerhub_username }}/medimind-frontend:latest 2>/dev/null || echo "Frontend image not found, will pull fresh"
-
-        # Pull latest images (docker pull will always get the latest)
-        echo "Pulling backend image..."
-        docker pull {{ dockerhub_username }}/medimind-backend:latest
-        echo "Pulling frontend image..."
-        docker pull {{ dockerhub_username }}/medimind-frontend:latest
-
-        echo "=== New Image Digests ==="
-        docker images --digests | grep {{ dockerhub_username }} || echo "No images found"
+    - name: Remove existing backend image
+      shell: docker rmi {{ dockerhub_username }}/medimind-backend:latest 2>/dev/null || echo 'Backend image not found, will pull fresh'
       become_user: '{{ app_user }}'
-      register: docker_pull_result
       ignore_errors: yes
 
-    - name: Display Docker pull results
+    - name: Remove existing frontend image
+      shell: docker rmi {{ dockerhub_username }}/medimind-frontend:latest 2>/dev/null || echo 'Frontend image not found, will pull fresh'
+      become_user: '{{ app_user }}'
+      ignore_errors: yes
+
+    - name: Pull latest backend image
+      shell: docker pull {{ dockerhub_username }}/medimind-backend:latest
+      become_user: '{{ app_user }}'
+      register: backend_pull_result
+
+    - name: Pull latest frontend image
+      shell: docker pull {{ dockerhub_username }}/medimind-frontend:latest
+      become_user: '{{ app_user }}'
+      register: frontend_pull_result
+
+    - name: Display pull results
       debug:
-        var: docker_pull_result.stdout_lines
+        msg:
+          - 'Backend pull: {{ backend_pull_result.stdout }}'
+          - 'Frontend pull: {{ frontend_pull_result.stdout }}'
+
+    - name: Check final image digests
+      shell: docker images --digests | grep {{ dockerhub_username }} || echo 'No images found'
+      become_user: '{{ app_user }}'
+      register: final_digests
+      changed_when: false
+
+    - name: Display final digests
+      debug:
+        var: final_digests.stdout_lines
 
     - name: Start Docker Compose services with latest images
       community.docker.docker_compose_v2:
