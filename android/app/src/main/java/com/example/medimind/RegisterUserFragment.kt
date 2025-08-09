@@ -7,16 +7,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.medimind.network.ApiClient
 import com.example.medimind.network.RegisterRequest
+import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.regex.Pattern
 
 class RegisterUserFragment : Fragment() {
+
+    private var selectedGender: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,30 +31,23 @@ class RegisterUserFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
+        // Clinic Spinner setup (unchanged)
         val clinicSpinner = view.findViewById<Spinner>(R.id.spinnerClinic)
-
-        // Mutable list for clinic names and a mapping for IDs
         val clinicNames = mutableListOf<String>()
         val nameToIdMap = mutableMapOf<String, String>()
-
-        // Adapter initially empty until data is fetched
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, clinicNames)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         clinicSpinner.adapter = adapter
 
-        // Fetch clinics dynamically from backend
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = ApiClient.retrofitService.getClinics()
                 clinicNames.clear()
                 nameToIdMap.clear()
-
-                // Populate lists with data from backend
                 response._embedded.clinics.forEach {
                     clinicNames.add(it.clinicName)
                     nameToIdMap[it.clinicName] = it.id
                 }
-
                 adapter.notifyDataSetChanged()
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Failed to load clinics: ${e.message}", Toast.LENGTH_LONG).show()
@@ -74,12 +71,21 @@ class RegisterUserFragment : Fragment() {
             dpd.show()
         }
 
-        // Setup gender dropdown
-        val genderSpinner = view.findViewById<Spinner>(R.id.spinnerGender)
-        val genderOptions = listOf("Male", "Female")
-        val genderAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, genderOptions)
-        genderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        genderSpinner.adapter = genderAdapter
+        // Gender buttons
+        val btnMale = view.findViewById<MaterialButton>(R.id.btnMale)
+        val btnFemale = view.findViewById<MaterialButton>(R.id.btnFemale)
+
+        btnMale.setOnClickListener {
+            btnMale.isChecked = true
+            btnFemale.isChecked = false
+            selectedGender = "Male"
+        }
+
+        btnFemale.setOnClickListener {
+            btnFemale.isChecked = true
+            btnMale.isChecked = false
+            selectedGender = "Female"
+        }
 
         // Back to login
         view.findViewById<Button>(R.id.backToLoginButton).setOnClickListener {
@@ -103,11 +109,11 @@ class RegisterUserFragment : Fragment() {
             val nric = nricField.text.toString().trim()
             val firstName = firstNameField.text.toString().trim()
             val lastName = lastNameField.text.toString().trim()
-            val gender = genderSpinner.selectedItem?.toString() ?: ""
+            val gender = selectedGender ?: ""
             val dob = dobTextView.text.toString()
             val selectedClinicName = clinicSpinner.selectedItem?.toString() ?: ""
 
-            // --------- VALIDATION START ----------
+            // Validation
             if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 emailField.error = "Enter a valid email"
                 return@setOnClickListener
@@ -148,9 +154,8 @@ class RegisterUserFragment : Fragment() {
                 Toast.makeText(requireContext(), "Please select a gender", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            // --------- VALIDATION END ----------
 
-            // Build request – sending clinicName (you can switch to clinicId if needed)
+            // Build request
             val request = RegisterRequest(
                 email, password, nric, firstName, lastName,
                 gender, dob, selectedClinicName
@@ -170,5 +175,12 @@ class RegisterUserFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun highlightButton(selected: MaterialButton, other: MaterialButton) {
+        selected.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.md_theme_light_primary))
+        selected.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+        other.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray))
+        other.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
     }
 }
