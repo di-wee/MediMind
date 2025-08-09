@@ -101,10 +101,39 @@
         group: '{{ app_user }}'
         mode: '0644'
 
+    - name: Check current container status
+      shell: docker ps -a --filter "name=medimind"
+      become_user: '{{ app_user }}'
+      register: current_containers
+      changed_when: false
+
+    - name: Display current containers
+      debug:
+        var: current_containers.stdout_lines
+
+    - name: Stop and remove existing containers
+      shell: |
+        cd {{ app_dir }}
+        docker compose down --remove-orphans || true
+        docker rm -f medimind-backend medimind-frontend || true
+        # Remove any containers with similar names
+        docker ps -a --filter "name=medimind" --format "{{.ID}}" | xargs -r docker rm -f || true
+        # Clean up dangling containers
+        docker container prune -f || true
+      become_user: '{{ app_user }}'
+      ignore_errors: yes
+
     - name: Pull latest Docker images
       community.docker.docker_compose_v2:
         project_src: '{{ app_dir }}'
         pull: always
+        state: absent
+      become_user: '{{ app_user }}'
+
+    - name: Start Docker Compose services
+      community.docker.docker_compose_v2:
+        project_src: '{{ app_dir }}'
+        state: present
       become_user: '{{ app_user }}'
 
     - name: Check Docker images availability
