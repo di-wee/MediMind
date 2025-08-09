@@ -1,4 +1,4 @@
-name: "SCA - Dependency Scan (Trivy)"
+name: 'SCA - Dependency Scan (Trivy)'
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: '21'
 
       # ---------------------
       # Install Trivy
@@ -46,15 +46,18 @@ jobs:
         run: mkdir -p artifacts/sca
 
       # ---------------------
-      # Backend (Java) Scan
+      # Backend (Java) Build, Test & Scan
       # ---------------------
-      - name: Scan Backend (Java)
+      - name: Build, Test & Generate Coverage Backend (Java)
         working-directory: ./backend
         run: |
           mkdir -p ../artifacts/sca
+          mkdir -p ../artifacts/test-coverage
           # Clean old builds and remove stale bin to avoid false positives
-          mvn clean package -DskipTests
+          mvn clean test jacoco:report
           rm -rf bin
+          # Copy JaCoCo reports to artifacts
+          cp -r target/site/jacoco/* ../artifacts/test-coverage/
           # Scan current folder (excluding bin)
           trivy fs --security-checks vuln --ignore-unfixed \
             --skip-dirs bin \
@@ -136,3 +139,12 @@ jobs:
         with:
           name: sca-summary
           path: artifacts/sca/sca-summary.txt
+
+      # ---------------------
+      # Upload Test Coverage Reports
+      # ---------------------
+      - name: Upload Test Coverage Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage-reports
+          path: artifacts/test-coverage/
