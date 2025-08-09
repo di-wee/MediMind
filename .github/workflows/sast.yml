@@ -8,7 +8,7 @@ on:
       - backend-(java-springboot)
       - android
       - machine-learning
-      - demo/frontend-ui
+      - demo/*
   pull_request:
     branches:
       - main
@@ -16,6 +16,7 @@ on:
       - backend-(java-springboot)
       - android
       - machine-learning
+      - demo/*
 
 permissions:
   actions: read
