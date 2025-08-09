@@ -103,8 +103,10 @@ runs/
 *.pt
 *.pth
 *.h5
+*.bin
 models/
 logs/
+
 
 # Jupyter Notebook outputs
 *.nbconvert.ipynb
@@ -116,3 +118,19 @@ logs/
 
 !android/gradle/wrapper/gradle-wrapper.jar
 !android/gradle/wrapper/gradle-wrapper.properties
+/ml/ner_medication_model
+/ml/ner_model2
+/ml/ner_model3
+/ml/ner_medication_model
+
+ml/ner_medication_model3/config.json
+ml/ner_medication_model3/pytorch_model.bin
+ml/ner_medication_model3/special_tokens_map.json
+ml/ner_medication_model3/tokenizer.json
+ml/ner_medication_model3/tokenizer_config.json
+ml/ner_medication_model3/training_args.bin
+ml/ner_medication_model3/vocab.txt
+
+/ml/ner_model
+/ml/ner_model1
+/ml/ner_model
