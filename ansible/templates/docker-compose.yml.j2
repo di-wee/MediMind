@@ -26,8 +26,6 @@ services:
       - "5173:5173"
     environment:
       - VITE_SERVER=http://{{ ansible_default_ipv4.address }}:8080/
-      - HOST={{ lookup('env', 'FRONTEND_HOST', default='0.0.0.0') }}
-      - PORT={{ lookup('env', 'FRONTEND_PORT', default='5173') }}
     restart: unless-stopped
     depends_on:
       - backend

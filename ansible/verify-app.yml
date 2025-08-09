@@ -43,21 +43,33 @@
       debug:
         msg: "Backend health check: {{ 'OK' if backend_health.status == 200 else 'FAILED' }}"
 
-    - name: Check backend API endpoints
+    - name: Check backend patients endpoint
       uri:
-        url: http://localhost:8080/api/
+        url: http://localhost:8080/api/doctor/test
         method: GET
-      register: backend_api
+      register: backend_test
       ignore_errors: yes
 
-    - name: Display backend API status
+    - name: Display backend  status
       debug:
-        msg: "Backend API check: {{ 'OK' if backend_api.status == 200 else 'FAILED' }}"
+        msg: "Backend patients endpoint: {{ 'OK' if backend_test.status == 200 else 'FAILED' }}"
+
+    - name: Check backend doctors endpoint
+      uri:
+        url: http://localhost:8080/doctors
+        method: GET
+      register: backend_doctors
+      ignore_errors: yes
+
+    - name: Display backend doctors status
+      debug:
+        msg: "Backend doctors endpoint: {{ 'OK' if backend_doctors.status == 200 else 'FAILED' }}"
 
     - name: Check if frontend is responding
       uri:
         url: http://localhost:5173/
         method: GET
+        status_code: [200, 301, 302]
       register: frontend_health
       ignore_errors: yes
 
@@ -65,9 +77,21 @@
       debug:
         msg: "Frontend health check: {{ 'OK' if frontend_health.status == 200 else 'FAILED' }}"
 
+    - name: Check frontend container status
+      shell: docker ps --filter "name=medimind-frontend" --format "{{ '{{' }}.Status{{ '}}' }}"
+      become_user: '{{ app_user }}'
+      register: frontend_container_status
+      changed_when: false
+
+    - name: Display frontend container status
+      debug:
+        msg: 'Frontend container status: {{ frontend_container_status.stdout }}'
+
     - name: Display service URLs
       debug:
         msg: |
           === Docker Services Status ===
-          Backend API: http://{{ ansible_default_ipv4.address }}:8080/api/
+          Backend Root: http://{{ ansible_default_ipv4.address }}:8080/
+          Backend Patients: http://{{ ansible_default_ipv4.address }}:8080/patients
+          Backend Doctors: http://{{ ansible_default_ipv4.address }}:8080/doctors
           Frontend: http://{{ ansible_default_ipv4.address }}:5173

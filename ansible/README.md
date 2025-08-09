@@ -78,7 +78,9 @@ ansible-playbook verify-app.yml -i inventory.py
 After successful deployment:
 
 - **Frontend**: http://YOUR_EC2_IP:5173
-- **Backend API**: http://YOUR_EC2_IP:8080/api/
+- **Backend Root**: http://YOUR_EC2_IP:8080/
+- **Backend Patients**: http://YOUR_EC2_IP:8080/patients
+- **Backend Doctors**: http://YOUR_EC2_IP:8080/doctors
 
 ## ✅ Features
 
