@@ -34,6 +34,7 @@
         chmod +x ~/.docker/cli-plugins/docker-compose
       args:
         creates: ~/.docker/cli-plugins/docker-compose
+      register: docker_compose_install
 
     - name: Start and enable Docker
       systemd:
@@ -41,11 +42,25 @@
         state: started
         enabled: yes
 
+    - name: Wait for Docker to be ready
+      shell: docker info
+      register: docker_ready
+      retries: 10
+      delay: 5
+      until: docker_ready.rc == 0
+      ignore_errors: yes
+
     - name: Add ubuntu user to docker group
       user:
         name: '{{ app_user }}'
         groups: docker
         append: yes
+
+    - name: Ensure ubuntu user can access Docker socket
+      file:
+        path: /var/run/docker.sock
+        mode: '0666'
+        state: file
 
     - name: Install Docker Compose plugin for ubuntu user
       shell: |
@@ -55,6 +70,13 @@
         chown -R {{ app_user }}:{{ app_user }} /home/{{ app_user }}/.docker
       args:
         creates: /home/{{ app_user }}/.docker/cli-plugins/docker-compose
+      register: docker_compose_user_install
+
+    - name: Verify Docker Compose plugin installation
+      shell: docker compose version
+      become_user: '{{ app_user }}'
+      register: docker_compose_version
+      changed_when: false
 
     - name: Create application directory
       file:
@@ -98,12 +120,6 @@
         state: started
         enabled: yes
         daemon_reload: yes
-
-    - name: Start docker-compose services
-      community.docker.docker_compose_v2:
-        project_src: '{{ app_dir }}'
-        state: present
-      become_user: '{{ app_user }}'
 
   handlers:
     - name: restart docker-compose service
