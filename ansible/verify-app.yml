@@ -34,7 +34,7 @@
 
     - name: Check if backend is responding
       uri:
-        url: http://localhost:8080/actuator/health
+        url: http://localhost:8080/
         method: GET
       register: backend_health
       ignore_errors: yes
@@ -42,6 +42,28 @@
     - name: Display backend health
       debug:
         msg: "Backend health check: {{ 'OK' if backend_health.status == 200 else 'FAILED' }}"
+
+    - name: Check backend API endpoints
+      uri:
+        url: http://localhost:8080/api/
+        method: GET
+      register: backend_api
+      ignore_errors: yes
+
+    - name: Display backend API status
+      debug:
+        msg: "Backend API check: {{ 'OK' if backend_api.status == 200 else 'FAILED' }}"
+
+    - name: Check if frontend is responding
+      uri:
+        url: http://localhost:5173/
+        method: GET
+      register: frontend_health
+      ignore_errors: yes
+
+    - name: Display frontend health
+      debug:
+        msg: "Frontend health check: {{ 'OK' if frontend_health.status == 200 else 'FAILED' }}"
 
     - name: Display service URLs
       debug:
