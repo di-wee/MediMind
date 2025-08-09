@@ -63,7 +63,7 @@
         mode: '0644'
 
     - name: Pull latest Docker images
-      docker_compose:
+      community.docker.docker_compose_v2:
         project_src: '{{ app_dir }}'
         pull: yes
       become_user: '{{ app_user }}'
@@ -83,7 +83,7 @@
         daemon_reload: yes
 
     - name: Start docker-compose services
-      docker_compose:
+      community.docker.docker_compose_v2:
         project_src: '{{ app_dir }}'
         state: present
       become_user: '{{ app_user }}'
