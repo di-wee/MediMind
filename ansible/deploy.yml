@@ -107,6 +107,35 @@
         pull: always
       become_user: '{{ app_user }}'
 
+    - name: Check Docker images availability
+      shell: docker images | grep {{ dockerhub_username }}
+      become_user: '{{ app_user }}'
+      register: docker_images_check
+      changed_when: false
+
+    - name: Display Docker images
+      debug:
+        var: docker_images_check.stdout_lines
+
+    - name: Test docker-compose configuration
+      shell: docker compose config
+      become_user: '{{ app_user }}'
+      args:
+        chdir: '{{ app_dir }}'
+      register: docker_compose_config
+      changed_when: false
+
+    - name: Display docker-compose configuration
+      debug:
+        var: docker_compose_config.stdout_lines
+
+    - name: Verify Docker images exist
+      shell: |
+        docker pull {{ dockerhub_username }}/medimind-backend:latest
+        docker pull {{ dockerhub_username }}/medimind-frontend:latest
+      become_user: '{{ app_user }}'
+      register: docker_pull_result
+
     - name: Create docker-compose systemd service
       template:
         src: docker-compose.service.j2
@@ -120,6 +149,38 @@
         state: started
         enabled: yes
         daemon_reload: yes
+
+    - name: Wait for containers to start
+      wait_for:
+        timeout: 30
+
+    - name: Check container status
+      shell: docker ps -a
+      become_user: '{{ app_user }}'
+      register: container_status
+      changed_when: false
+
+    - name: Display container status
+      debug:
+        var: container_status.stdout_lines
+
+    - name: Check container logs if failed
+      shell: |
+        if docker ps -a --format "table {{.Names}}\t{{.Status}}" | grep -q "Exited"; then
+          echo "=== Backend Container Logs ==="
+          docker logs medimind-backend || true
+          echo "=== Frontend Container Logs ==="
+          docker logs medimind-frontend || true
+        fi
+      become_user: '{{ app_user }}'
+      register: container_logs
+      changed_when: false
+      ignore_errors: yes
+
+    - name: Display container logs
+      debug:
+        var: container_logs.stdout_lines
+      when: container_logs.stdout_lines is defined
 
   handlers:
     - name: restart docker-compose service
