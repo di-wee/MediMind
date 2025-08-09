@@ -65,7 +65,7 @@
     - name: Pull latest Docker images
       community.docker.docker_compose_v2:
         project_src: '{{ app_dir }}'
-        pull: yes
+        pull: always
       become_user: '{{ app_user }}'
 
     - name: Create docker-compose systemd service
