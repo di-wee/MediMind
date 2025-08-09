@@ -24,6 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Email (Username)"
+            android:gravity="center"
             android:inputType="textEmailAddress" />
 
         <!-- Password -->
@@ -32,6 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Password"
+            android:gravity="center"
             android:inputType="textPassword"
             android:layout_marginTop="16dp" />
 
@@ -42,6 +44,7 @@
             android:layout_height="wrap_content"
             android:hint="Confirm Password"
             android:inputType="textPassword"
+            android:gravity="center"
             android:layout_marginTop="16dp" />
 
         <!-- NRIC -->
@@ -49,7 +52,8 @@
             android:id="@+id/inputNRIC"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="NRIC (e.g. S1234567A)"
+            android:hint="S1234567A"
+            android:gravity="center"
             android:layout_marginTop="16dp" />
 
         <!-- First Name -->
@@ -58,6 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="First Name"
+            android:gravity="center"
             android:layout_marginTop="16dp" />
 
         <!-- Last Name -->
@@ -66,6 +71,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Last Name"
+            android:gravity="center"
             android:layout_marginTop="16dp" />
 
         <!-- Gender dropdown -->

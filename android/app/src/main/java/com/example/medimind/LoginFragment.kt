@@ -37,7 +37,6 @@ class LoginFragment : Fragment() {
         val usernameField = view.findViewById<EditText>(R.id.usernameInput)
         val passwordField = view.findViewById<EditText>(R.id.passwordInput)
         val loginButton = view.findViewById<Button>(R.id.loginButton)
-        val bypassButton = view.findViewById<Button>(R.id.bypassButton)
         val registerText = view.findViewById<TextView>(R.id.registerText)
 
 
@@ -98,11 +97,6 @@ class LoginFragment : Fragment() {
                     Toast.makeText(requireContext(), "Login failed: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
-        }
-
-        // Bypass button -> navigate directly to mainFragment (no login)
-        bypassButton.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_mainFragment)
         }
 
         // Register text -> navigate to register screen
