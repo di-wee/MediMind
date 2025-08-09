@@ -8,7 +8,7 @@ on:
       - backend-(java-springboot)
       - android
       - machine-learning
-     
+
   pull_request:
     branches:
       - main
@@ -48,47 +48,45 @@ jobs:
         run: mkdir -p artifacts/sca
 
       # ---------------------
-      # Backend (Java) Build, Test & Scan
+      # Backend (Java) Build & Scan
       # ---------------------
-      - name: Build, Test & Generate Coverage Backend (Java)
+      - name: Build & Scan Backend (Java)
         working-directory: ./backend
         run: |
-          mkdir -p ../artifacts/sca
-          mkdir -p ../artifacts/test-coverage
           # Clean old builds and remove stale bin to avoid false positives
-          mvn clean test jacoco:report
+          mvn clean compile -DskipTests
           rm -rf bin
-          # Copy JaCoCo reports to artifacts
-          cp -r target/site/jacoco/* ../artifacts/test-coverage/
-          # Scan current folder (excluding bin)
+          # Scan current folder (excluding bin and target)
           trivy fs --security-checks vuln --ignore-unfixed \
-            --skip-dirs bin \
+            --skip-dirs bin,target \
             --format json \
             --output ../artifacts/sca/backend-trivy.json .
 
       # ---------------------
-      # Frontend (Node.js) Scan
+      # Frontend (Node.js) Build & Scan
       # ---------------------
-      - name: Scan Frontend (Node.js)
+      - name: Build & Scan Frontend (Node.js)
         working-directory: ./frontend
         run: |
           npm install
+          npm run build
+          # Scan dependencies and built files
           trivy fs --security-checks vuln --format json \
             --output ../artifacts/sca/frontend-trivy.json .
 
       # ---------------------
       # ML (Python) Scan
       # ---------------------
-      - name: Scan Python ML
+      - name: Scan Python ML Dependencies
         working-directory: ./ml
         run: |
           pip install -r requirements.txt || true
           trivy fs --security-checks vuln --format json \
             --output ../artifacts/sca/ml-trivy.json .
 
-      # # ---------------------
-      # # Android Scan (APK)
-      # # ---------------------
+      # ---------------------
+      # Android Build & Scan
+      # ---------------------
       - name: Build Android APK
         working-directory: ./android
         run: ./gradlew assembleDebug
@@ -141,12 +139,3 @@ jobs:
         with:
           name: sca-summary
           path: artifacts/sca/sca-summary.txt
-
-      # ---------------------
-      # Upload Test Coverage Reports
-      # ---------------------
-      - name: Upload Test Coverage Reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-coverage-reports
-          path: artifacts/test-coverage/

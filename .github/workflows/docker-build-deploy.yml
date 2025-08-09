@@ -1,14 +1,20 @@
 name: 'Build & Dockerize MediMind'
 
+# Only trigger on main branch pushes and SCA completion
+# This prevents unnecessary Docker builds for feature branches and PRs
+# Docker images are only needed for production deployment
 on:
   push:
     branches:
       - main
-      
-  # workflow_run:
-  #   workflows: ['SCA - Dependency Scan (Trivy)']
-  #   types:
-  #     - completed
+
+  # Allow manual triggering for testing
+  workflow_dispatch:
+
+  workflow_run:
+    workflows: ['SCA - Dependency Scan (Trivy)']
+    types:
+      - completed
 
 jobs:
   docker-build:
