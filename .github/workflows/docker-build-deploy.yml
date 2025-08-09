@@ -1,10 +1,14 @@
 name: 'Build & Dockerize MediMind'
 
 on:
-  workflow_run:
-    workflows: ['SCA - Dependency Scan (Trivy)']
-    types:
-      - completed
+  push:
+    branches:
+      - main
+      
+  # workflow_run:
+  #   workflows: ['SCA - Dependency Scan (Trivy)']
+  #   types:
+  #     - completed
 
 jobs:
   docker-build:
