@@ -1,8 +1,8 @@
-name: "Build & Dockerize MediMind"
+name: 'Build & Dockerize MediMind'
 
 on:
   workflow_run:
-    workflows: ["SCA - Dependency Scan (Trivy)"]
+    workflows: ['SCA - Dependency Scan (Trivy)']
     types:
       - completed
 
@@ -32,6 +32,8 @@ jobs:
       # ---------------------
       - name: Build Frontend
         working-directory: ./frontend
+        env:
+          VITE_SERVER: ${{ secrets.VITE_SERVER || 'http://localhost:8080/' }}
         run: |
           npm install
           CI=false npm run build
@@ -60,5 +62,5 @@ jobs:
       - name: Build & Push Frontend Image
         working-directory: ./frontend
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/medimind-frontend:latest .
+          docker build --build-arg VITE_SERVER=${{ secrets.VITE_SERVER || 'http://localhost:8080/' }} -t ${{ secrets.DOCKERHUB_USERNAME }}/medimind-frontend:latest .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/medimind-frontend:latest

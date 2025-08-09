@@ -2,6 +2,9 @@
 FROM node:20-alpine as build
 WORKDIR /app
 COPY . .
+# Set the VITE_SERVER environment variable during build
+ARG VITE_SERVER
+ENV VITE_SERVER=${VITE_SERVER}
 RUN npm install && npm run build
 
 # Stage 2: Nginx for serving static files

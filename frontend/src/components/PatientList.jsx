@@ -10,6 +10,7 @@ import PatientGrid from '../components/PatientGrid';
 import PatientListView from '../components/PatientListView';
 import { useNavigate } from 'react-router-dom';
 import MediMindContext from '../context/MediMindContext';
+import { API_BASE_URL } from '../utils/config';
 
 function PatientList() {
 	const [patients, setPatients] = useState([]);
@@ -31,9 +32,7 @@ function PatientList() {
 			try {
 				setLoading(true);
 				const response = await fetch(
-					`${import.meta.env.VITE_SERVER}api/patients/by-doctor/${
-						doctorDetails.mcrNo
-					}`,
+					`${API_BASE_URL}api/patients/by-doctor/${doctorDetails.mcrNo}`,
 					{
 						method: 'GET',
 						credentials: 'include',
@@ -141,7 +140,7 @@ function PatientList() {
 	const handleRemove = async (id) => {
 		try {
 			const response = await fetch(
-				`${import.meta.env.VITE_SERVER}api/patients/${id}/unassign-doctor`,
+				`${API_BASE_URL}api/patients/${id}/unassign-doctor`,
 				{
 					method: 'PUT',
 					credentials: 'include',
