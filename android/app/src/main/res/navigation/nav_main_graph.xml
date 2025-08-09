@@ -67,19 +67,9 @@
             app:argType="string" />
 
         <action
-            android:id="@+id/action_viewMedicineDetailsFragment_to_editMedicineDetailsFragment"
-            app:destination="@id/editMedicineDetailsFragment" />
-
-        <action
             android:id="@+id/action_viewMedicineDetailsFragment_to_webViewFragment"
             app:destination="@id/webViewFragment" />
     </fragment>
-
-    <!-- Edit Medicine Details Fragment -->
-    <fragment
-        android:id="@+id/editMedicineDetailsFragment"
-        android:name="com.example.medimind.EditMedicineDetailsFragment"
-        android:label="Edit Medicine Details" />
 
     <!-- WebView Fragment -->
     <fragment
