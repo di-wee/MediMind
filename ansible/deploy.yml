@@ -12,8 +12,8 @@
     db_host: "{{ lookup('env', 'DB_HOST') }}"
     db_port: "{{ lookup('env', 'DB_PORT') }}"
     db_name: "{{ lookup('env', 'DB_NAME') }}"
-    cors_allowed_origin: "{{ lookup('env', 'CORS_ALLOWED_ORIGIN') | default('http://13.250.34.102:5173') }}"
-    vite_server: "{{ lookup('env', 'VITE_SERVER') | default('http://13.250.34.102:8080/') }}"
+    cors_allowed_origin: "{{ lookup('env', 'CORS_ALLOWED_ORIGIN') | default('http://13.229.133.0:5173') }}"
+    vite_server: "{{ lookup('env', 'VITE_SERVER') | default('http://13.229.133.0:8080/') }}"
 
   tasks:
     - name: Update package cache
