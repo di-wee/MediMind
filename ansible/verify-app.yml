@@ -1,0 +1,49 @@
+---
+- name: Verify App Services
+  hosts: medimind_servers
+  become: yes
+  tasks:
+    - name: Check docker-compose service status
+      systemd:
+        name: medimind-docker
+      register: docker_status
+
+    - name: Display docker service status
+      debug:
+        msg: "Docker service is {{ 'running' if docker_status.status.ActiveState == 'active' else 'not running' }}"
+
+    - name: Check if backend container is running
+      shell: docker ps --filter "name=medimind-backend" --format "table {{.Names}}\t{{.Status}}"
+      register: backend_container
+      become_user: '{{ app_user }}'
+
+    - name: Display backend container status
+      debug:
+        msg: 'Backend container: {{ backend_container.stdout }}'
+
+    - name: Check if frontend container is running
+      shell: docker ps --filter "name=medimind-frontend" --format "table {{.Names}}\t{{.Status}}"
+      register: frontend_container
+      become_user: '{{ app_user }}'
+
+    - name: Display frontend container status
+      debug:
+        msg: 'Frontend container: {{ frontend_container.stdout }}'
+
+    - name: Check if backend is responding
+      uri:
+        url: http://localhost:8080/actuator/health
+        method: GET
+      register: backend_health
+      ignore_errors: yes
+
+    - name: Display backend health
+      debug:
+        msg: "Backend health check: {{ 'OK' if backend_health.status == 200 else 'FAILED' }}"
+
+    - name: Display service URLs
+      debug:
+        msg: |
+          === Docker Services Status ===
+          Backend API: http://{{ ansible_default_ipv4.address }}:8080/api/
+          Frontend: http://{{ ansible_default_ipv4.address }}:5173
