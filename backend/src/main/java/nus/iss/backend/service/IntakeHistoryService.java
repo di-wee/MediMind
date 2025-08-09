@@ -5,6 +5,7 @@ import nus.iss.backend.dao.IntakeReqMobile;
 import nus.iss.backend.dao.UpdateDoctorNotesReq;
 import nus.iss.backend.dto.IntakeHistoryResponse;    // DTO for patient intake history
 import nus.iss.backend.model.IntakeHistory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +19,7 @@ public interface IntakeHistoryService {
     /**
      * Create a new intake-history entry from a mobile request.
      */
-    IntakeHistory createIntakeHistory(IntakeReqMobile intakeReqMobile);
+    void createIntakeHistory(IntakeReqMobile intakeReqMobile);
 
     /**
      * Retrieve all intake logs for a specific medication.

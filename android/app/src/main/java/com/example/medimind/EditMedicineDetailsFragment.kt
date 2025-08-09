@@ -100,7 +100,15 @@ class EditMedicineDetailsFragment : Fragment() {
             var timeBox = inflater.inflate(R.layout.time_input_box, timeInputContainer, false) as EditText
             timeBox.hint = "HHMM"
             timeBox.inputType = InputType.TYPE_CLASS_NUMBER
-            timeBox.setText(sortedTimes.getOrNull(i - 1) ?: "")
+            val preset = sortedTimes.getOrNull(i - 1) ?: ""
+            timeBox.setText(preset)
+
+            timeBox.setOnFocusChangeListener { v, hasFocus ->
+                if (hasFocus && (v as EditText).text.toString() == preset) {
+                    v.setText("")
+                }
+            }
+
             timeInputContainer.addView(timeBox)
         }
     }
@@ -178,6 +186,17 @@ class EditMedicineDetailsFragment : Fragment() {
                 Log.d("EditMedRequest", "After sending request at: ${System.currentTimeMillis()}")
                 Log.d("EditMedRequest", "Request sent: $request")
                 Toast.makeText(context,"Successfully save!", Toast.LENGTH_SHORT).show()
+                for (timeStr in times) {
+                    val parts = timeStr.split(":")
+                    val hour = parts[0].toInt()
+                    val minute = parts[1].toInt()
+                    val localTime = LocalTime.of(hour, minute)
+                    val zoned = localTime.atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
+                    val timeMillis = zoned.toInstant().toEpochMilli()
+
+                    //save edited new alarm
+                    ReminderUtils.scheduleAlarm(context = requireContext(), timeMilli = timeMillis, patientId = patientId)
+                }
                 parentFragmentManager.popBackStack()
             } catch (e: Exception) {
                 Log.d("EditMedError", "Failed to send request", e)
@@ -186,17 +205,7 @@ class EditMedicineDetailsFragment : Fragment() {
             }
         }
 
-        for (timeStr in times) {
-            val parts = timeStr.split(":")
-            val hour = parts[0].toInt()
-            val minute = parts[1].toInt()
-            val localTime = LocalTime.of(hour, minute)
-            val zoned = localTime.atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
-            val timeMillis = zoned.toInstant().toEpochMilli()
 
-            //save edited new alarm
-            ReminderUtils.scheduleAlarm(context = requireContext(), timeMilli = timeMillis, patientId = patientId)
-        }
     }
 
 }

@@ -14,6 +14,6 @@ public class MedicationResponse {
     private int frequency;
     private String timing;
     private String instructions;
-    private String notes;
-    private boolean isActive;
+    private String note;
+    private Boolean isActive;
 }

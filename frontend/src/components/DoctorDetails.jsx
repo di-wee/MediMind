@@ -153,12 +153,11 @@ function DoctorDetails({ mcrNo }) {
 			}
 		};
 		fetchAllClinic();
-		console.log('clinicOptions', clinicOptions);
 	}, [mcrNo]);
 
 	return (
 		<>
-			<main className='w-full flex-1 bg-gray-50 min-h-screen'>
+			<main className='w-full flex-1 bg-gray-50'>
 				{/* shadow-xl bg-white py-8 m-5 rounded-xl this is giving the shadow box effect */}
 
 				<div className='border-1 border-gray-200 shadow-xl bg-white pt-8 m-5 rounded-xl'>

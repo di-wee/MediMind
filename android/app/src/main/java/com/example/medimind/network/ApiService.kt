@@ -1,16 +1,24 @@
 package com.example.medimind.network
 
 import com.example.medimind.data.EditMedRequest
+import com.example.medimind.data.ImageOutput
 import com.example.medimind.service.EditMedResponse
 import com.example.medimind.service.MedicationResponse
 import com.example.medimind.service.IntakeHistoryResponse
+import okhttp3.Call
+import okhttp3.MultipartBody
 import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
-import java.time.LocalTime
+import java.time.LocalDate
+import retrofit2.http.*
+
 
 // Request body for registration
 data class RegisterRequest(
@@ -85,11 +93,10 @@ data class newMedicationRequest(
     val patientId: String,
     val dosage: String,
     val frequency: Int,
-    val Timing:String,
     val instructions:String,
     val notes:String,
     val isActive:Boolean,
-    val times:String
+    val times:List<String>
     )
 
 data class MedicationIdListRequest(
@@ -106,17 +113,19 @@ data class MedResponse(
     val isActive: Boolean
 )
 data class ScheduleResponse(
-    val id:String,
+    val scheduleId:String,
     val scheduledTime: String,
     val isActive:Boolean,
-    val medicationId: String,
+    val medicineId: String,
 )
 
 data class IntakeMedRequest(
-    val loggedDate: LocalTime,
+    val medicationId:String,
+    val loggedDate: String,
     val isTaken:Boolean,
     val patientId:String,
-    val scheduleId: String
+    val scheduleId: String,
+    val clientRequestId: String
 )
 
 data class IntakeResponse(
@@ -187,21 +196,31 @@ interface ApiService {
     suspend fun deactivateMedication(@Path("medicationId") medId: String): ResponseBody
 
     //get medication from medId list
-    @GET("api/medication/medList")
+    @POST("api/medication/medList")
     suspend fun getMedications(@Body request: MedicationIdListRequest): List<MedResponse>
 
     // save new medication
-    @PUT("api/medication/save")
-    suspend fun saveMedication(@Body request: newMedicationRequest): SaveMedicationResponse
+    @POST("api/medication/save")
+    suspend fun saveMedication(@Body request: newMedicationRequest): ResponseBody
 
     //get active schedule list by timeMillis & patientId
-    @GET("api/schedule/find")
-    suspend fun getSchedulesByTime(@Body request:ScheduleListRequest): List<ScheduleResponse>
+    @POST("api/schedule/find")
+    suspend fun getSchedulesByTime(@Body request: ScheduleListRequest): Response<List<ScheduleResponse>>
+
     //create intakeHistory after alarm
-    @POST("api/medication/createMedLog")
-    suspend fun createMedicationLog(@Body request: IntakeMedRequest): IntakeResponse
+    @POST("api/intakeHistory/create")
+    suspend fun createMedicationLog(@Body request: IntakeMedRequest): Response<Unit>
 
     // Get daily recurring medication schedule
     @GET("api/schedule/daily/{patientId}")
     suspend fun getDailySchedule(@Path("patientId") patientId: String): List<ScheduleItem>
+
+    @Multipart
+    @POST("/api/medication/predict_image")
+    suspend fun uploadImage(
+        @Part file: MultipartBody.Part
+    ): ImageOutput
+
+    @GET("/api/patient/profile")
+    suspend fun getProfile(): PatientResponse
 }

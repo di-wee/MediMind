@@ -148,7 +148,7 @@ td {
 }
 
 .input-checkbox {
-	@apply w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600;
+	@apply w-4 h-4 text-blue-600 bg-gray-700 rounded-sm focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 border-gray-600;
 }
 
 .pos-status {
@@ -167,6 +167,10 @@ td {
 	@apply bg-red-200 text-sm px-3 py-4 border-1 border-red-600 rounded-sm text-red-900;
 }
 
+.completed-registration {
+	@apply bg-gray-200 text-sm px-3 py-4 border-1 border-gray-600 rounded-sm text-gray-900;
+}
+
 .inline-val-msg {
 	@apply text-sm text-red-500;
 }
@@ -178,8 +182,5 @@ td {
 	}
 	a:hover {
 		color: #747bff;
-	}
-	button {
-		background-color: #f9f9f9;
 	}
 }

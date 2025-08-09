@@ -1,21 +1,19 @@
 import React from 'react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useContext } from 'react';
 import {
-	PlusIcon,
 	MagnifyingGlassIcon,
 	UserPlusIcon,
 	Squares2X2Icon,
 	ListBulletIcon,
 } from '@heroicons/react/24/outline';
-import allPatients from '../mockdata/patientlist.json';
 import PatientGrid from '../components/PatientGrid';
 import PatientListView from '../components/PatientListView';
 import { useNavigate } from 'react-router-dom';
+import MediMindContext from '../context/MediMindContext';
 
 function PatientList() {
-	const [patients, setPatients] = useState(allPatients);
+	const [patients, setPatients] = useState([]);
+	const [loading, setLoading] = useState(true);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [currentPage, setCurrentPage] = useState(1);
 	const [viewMode, setViewMode] = useState('list'); // 'grid' or 'list'
@@ -23,29 +21,64 @@ function PatientList() {
 	const [sortBy, setSortBy] = useState(null); // 'clinic-asc', 'clinic-desc', etc.
 
 	const navigate = useNavigate();
+	const { doctorDetails } = useContext(MediMindContext);
 
-	// Filter patients based on search term - updated to search firstName, lastName, and NRIC
+	// Fetch patients from API when doctor details are available
+	useEffect(() => {
+		const fetchPatients = async () => {
+			if (!doctorDetails.mcrNo) return;
+
+			try {
+				setLoading(true);
+				const response = await fetch(
+					`${import.meta.env.VITE_SERVER}api/patients/by-doctor/${
+						doctorDetails.mcrNo
+					}`,
+					{
+						method: 'GET',
+						credentials: 'include',
+					}
+				);
+
+				if (response.ok) {
+					const patientData = await response.json();
+					setPatients(patientData);
+				} else {
+					console.error('Failed to fetch patients');
+					setPatients([]);
+				}
+			} catch (error) {
+				console.error('Error fetching patients:', error);
+				setPatients([]);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchPatients();
+	}, [doctorDetails.mcrNo]);
+
+	// Filter patients based on search term
 	const filteredPatients = patients.filter(
 		(patient) =>
 			patient.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			patient.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			patient.nric.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			patient.clinicName.toLowerCase().includes(searchTerm.toLowerCase())
+			patient.nric.toLowerCase().includes(searchTerm.toLowerCase())
 	);
 
 	// Sort patients if sortBy is set
 	const sortedPatients = useMemo(() => {
 		if (!sortBy) return filteredPatients;
-		
+
 		const [field, direction] = sortBy.split('-');
-		
+
 		return [...filteredPatients].sort((a, b) => {
 			let aValue, bValue;
-			
+
 			if (field === 'clinic') {
-				aValue = a.clinicName;
-				bValue = b.clinicName;
-				
+				aValue = a.clinic?.clinicName || '';
+				bValue = b.clinic?.clinicName || '';
+
 				if (direction === 'asc') {
 					return aValue.localeCompare(bValue);
 				} else {
@@ -54,24 +87,30 @@ function PatientList() {
 			} else if (field === 'age') {
 				// Calculate age for both patients
 				const today = new Date();
-				
+
 				const aDate = new Date(a.dob);
 				let aAge = today.getFullYear() - aDate.getFullYear();
 				const aMonthDiff = today.getMonth() - aDate.getMonth();
-				if (aMonthDiff < 0 || (aMonthDiff === 0 && today.getDate() < aDate.getDate())) {
+				if (
+					aMonthDiff < 0 ||
+					(aMonthDiff === 0 && today.getDate() < aDate.getDate())
+				) {
 					aAge--;
 				}
-				
+
 				const bDate = new Date(b.dob);
 				let bAge = today.getFullYear() - bDate.getFullYear();
 				const bMonthDiff = today.getMonth() - bDate.getMonth();
-				if (bMonthDiff < 0 || (bMonthDiff === 0 && today.getDate() < bDate.getDate())) {
+				if (
+					bMonthDiff < 0 ||
+					(bMonthDiff === 0 && today.getDate() < bDate.getDate())
+				) {
 					bAge--;
 				}
-				
+
 				aValue = aAge;
 				bValue = bAge;
-				
+
 				if (direction === 'asc') {
 					return aValue - bValue;
 				} else {
@@ -81,7 +120,7 @@ function PatientList() {
 				// Sort by full name (firstName + lastName)
 				aValue = `${a.firstName} ${a.lastName}`;
 				bValue = `${b.firstName} ${b.lastName}`;
-				
+
 				if (direction === 'asc') {
 					return aValue.localeCompare(bValue);
 				} else {
@@ -99,10 +138,30 @@ function PatientList() {
 	);
 	const totalPages = Math.ceil(sortedPatients.length / itemsPerPage);
 
-	const handleRemove = (id) => {
-		setPatients(patients.filter((patient) => patient.id !== id));
-		if (currentPatients.length === 1 && currentPage > 1) {
-			setCurrentPage(currentPage - 1);
+	const handleRemove = async (id) => {
+		try {
+			const response = await fetch(
+				`${import.meta.env.VITE_SERVER}api/patients/${id}/unassign-doctor`,
+				{
+					method: 'PUT',
+					credentials: 'include',
+				}
+			);
+
+			if (response.ok) {
+				// Remove patient from the list after successful unassignment
+				setPatients(patients.filter((patient) => patient.id !== id));
+				if (currentPatients.length === 1 && currentPage > 1) {
+					setCurrentPage(currentPage - 1);
+				}
+				console.log('Patient unassigned successfully');
+			} else {
+				console.error('Failed to unassign patient');
+				alert('Failed to unassign patient. Please try again.');
+			}
+		} catch (error) {
+			console.error('Error unassigning patient:', error);
+			alert('Error occurred while unassigning patient. Please try again.');
 		}
 	};
 
@@ -123,6 +182,17 @@ function PatientList() {
 		navigate('/addpatient', { replace: true });
 	};
 
+	if (loading) {
+		return (
+			<main className='flex-1 p-8 px-15 bg-gray-50 min-h-screen w-full pt-10 flex items-center justify-center'>
+				<div className='text-center'>
+					<div className='animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4'></div>
+					<p className='text-gray-600'>Loading patients...</p>
+				</div>
+			</main>
+		);
+	}
+
 	return (
 		<>
 			{/* Main Content */}
@@ -138,7 +208,7 @@ function PatientList() {
 							<input
 								type='text'
 								className='block w-full min-w-xl pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-gray-400 focus:border-transparent text-sm'
-								placeholder='Search by name, NRIC, or clinic...'
+								placeholder='Search by name or NRIC...'
 								value={searchTerm}
 								onChange={handleSearchChange}
 							/>
@@ -148,7 +218,9 @@ function PatientList() {
 						<div className='flex items-center space-x-4'>
 							{/* Items Per Page Selector */}
 							<div className='flex items-center space-x-2'>
-								<label htmlFor='itemsPerPage' className='text-sm text-gray-700 font-medium'>
+								<label
+									htmlFor='itemsPerPage'
+									className='text-sm text-gray-700 font-medium'>
 									Show:
 								</label>
 								<select
