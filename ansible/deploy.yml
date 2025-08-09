@@ -196,7 +196,6 @@
         project_src: '{{ app_dir }}'
         state: present
         pull: always
-        build: false
       become_user: '{{ app_user }}'
 
     - name: Test docker-compose configuration
