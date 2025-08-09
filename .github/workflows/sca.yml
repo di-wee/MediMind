@@ -8,7 +8,7 @@ on:
       - backend-(java-springboot)
       - android
       - machine-learning
-      - demo/*
+     
   pull_request:
     branches:
       - main
