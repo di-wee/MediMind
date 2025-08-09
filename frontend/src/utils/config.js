@@ -19,7 +19,7 @@ export const getApiBaseUrl = () => {
 
 		// Handle EC2 deployment scenario - check for EC2 IP or domain
 		if (
-			hostname === '54.179.144.79' ||
+			hostname === '3.0.180.110' ||
 			hostname.includes('ec2') ||
 			hostname.includes('amazonaws')
 		) {
