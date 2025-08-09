@@ -1,0 +1,41 @@
+name: Deploy ML to EC2
+
+on:
+  push:
+    # branches: 
+    #   - machine-learning
+    #   - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add EC2 host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.EC2ML_IP }} >> ~/.ssh/known_hosts
+
+      - name: Write SSH key
+        run: |
+          echo "${{ secrets.EC2ML_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Deploy (pull ML-Priscilla & restart)
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2ML_USER }}@${{ secrets.EC2ML_IP }} "bash -lc '
+            set -e
+            cd ~/ner-app
+            if [ ! -d .git ]; then
+              # first-time setup on server
+              git clone https://github.com/di-wee/MediMind.git /home/ubuntu/ner-app
+              cd ~/ner-app
+            fi
+            git fetch --all
+            # make sure we’re on ML-Priscilla locally
+            git checkout -B ML-Priscilla origin/ML-Priscilla
+            source venv/bin/activate || python3 -m venv venv && source venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            sudo systemctl restart ner
+            curl -sf http://localhost:8000/ping && echo OK
+          '"
