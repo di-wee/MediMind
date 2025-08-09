@@ -1,15 +1,51 @@
-name: Deploy ML to EC2
+name: Build & Deploy ML (HF-pinned Docker → EC2)
 
 on:
   push:
-    # branches: 
-    #   - machine-learning
-    #   - main
+    branches: ["ML-Priscilla"]
+    paths:
+      - "**/*.py"
+      - "Dockerfile"
+      - "requirements.txt"
+      - "model_version.txt"
+      - ".github/workflows/deploy-ml.yaml" # <- matches your filename
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Read HF model SHA
+        id: readsha
+        run: |
+          if [ ! -s model_version.txt ]; then
+            echo "ERROR: model_version.txt is missing or empty. Run tools/push_model_and_bump_git.py first."
+            exit 1
+          fi
+          echo "HF_SHA=$(head -n1 model_version.txt | tr -d '\r\n')" >> $GITHUB_OUTPUT
+          echo "Using HF SHA: $(head -n1 model_version.txt)"
+
+      - name: Docker Hub login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build image (HF-pinned)
+        run: |
+          docker build \
+            --build-arg HF_MODEL_ID=prizellia/ner-medimind \
+            --build-arg HF_REV=${{ steps.readsha.outputs.HF_SHA }} \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/nerapp:${{ steps.readsha.outputs.HF_SHA }} \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/nerapp:latest .
+
+      - name: Push image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/nerapp:${{ steps.readsha.outputs.HF_SHA }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/nerapp:latest
+
       - name: Add EC2 host key
         run: |
           mkdir -p ~/.ssh
@@ -20,22 +56,25 @@ jobs:
           echo "${{ secrets.EC2ML_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Deploy (pull ML-Priscilla & restart)
+      - name: Redeploy on EC2 (Docker)
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.EC2ML_USER }}@${{ secrets.EC2ML_IP }} "bash -lc '
             set -e
-            cd ~/ner-app
-            if [ ! -d .git ]; then
-              # first-time setup on server
-              git clone https://github.com/di-wee/MediMind.git /home/ubuntu/ner-app
-              cd ~/ner-app
+            IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/nerapp:${{ steps.readsha.outputs.HF_SHA }}
+            CONTAINER=nerapi
+
+            # Install docker if missing
+            if ! command -v docker >/dev/null 2>&1; then
+              echo \"Docker not found. Installing...\"
+              curl -fsSL https://get.docker.com | sh
             fi
-            git fetch --all
-            # make sure we’re on ML-Priscilla locally
-            git checkout -B ML-Priscilla origin/ML-Priscilla
-            source venv/bin/activate || python3 -m venv venv && source venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements.txt
-            sudo systemctl restart ner
-            curl -sf http://localhost:8000/ping && echo OK
+
+            sudo docker pull $IMAGE
+            (sudo docker rm -f $CONTAINER || true)
+            sudo docker run -d --name $CONTAINER \
+              -p 8000:8000 \
+              --restart unless-stopped \
+              $IMAGE
+
+            sudo docker image prune -f
           '"

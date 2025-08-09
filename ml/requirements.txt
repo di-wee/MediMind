@@ -1,12 +1,24 @@
-torch>=2.1.0        # or the version you're using
-torchvision         # if using image data
-numpy
-pandas
-scikit-learn
-matplotlib          # if you're plotting
-jupyter             # optional for notebooks
-seaborn
-opencv-python       # if processing images
-transformers        # for HuggingFace models
-requests
-tqdm                # for progress bars
+fastapi==0.111.0
+uvicorn==0.30.3
+
+# Core ML + HF
+transformers==4.33.3
+tokenizers==0.13.3
+huggingface_hub==0.24.6
+safetensors==0.4.3
+
+# Torch CPU build (adjust if you need CUDA)
+torch==2.3.1
+
+# Image / OCR helpers (headless keeps image small)
+pytesseract==0.3.13
+opencv-python-headless==4.10.0.84
+pillow==10.3.0
+python-multipart==0.0.9   # needed if FastAPI receives file uploads
+
+# Data + utils
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.5.1
+requests==2.32.3
+tqdm==4.66.4
