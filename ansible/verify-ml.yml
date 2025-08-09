@@ -1,0 +1,30 @@
+---
+- name: Verify ML Service
+  hosts: ml_servers
+  become: yes
+  tasks:
+    - name: Check ML service status
+      systemd:
+        name: ner
+      register: ml_status
+
+    - name: Display ML status
+      debug:
+        msg: "ML service is {{ 'running' if ml_status.status.ActiveState == 'active' else 'not running' }}"
+
+    - name: Check if ML service is responding
+      uri:
+        url: http://localhost:8000/ping
+        method: GET
+      register: ml_health
+      ignore_errors: yes
+
+    - name: Display ML health
+      debug:
+        msg: "ML health check: {{ 'OK' if ml_health.status == 200 else 'FAILED' }}"
+
+    - name: Display ML service URL
+      debug:
+        msg: |
+          === ML Service Status ===
+          ML API: http://{{ ansible_default_ipv4.address }}:8000/ping

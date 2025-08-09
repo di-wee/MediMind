@@ -1,0 +1,119 @@
+name: Deploy All Services
+
+on:
+  push:
+    branches:
+      - main
+  workflow_run:
+    workflows: ['Build & Dockerize MediMind']
+    types:
+      - completed
+
+jobs:
+  deploy-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo apt-add-repository --yes --update ppa:ansible/ansible
+          sudo apt-get install -y ansible
+
+      - name: Write SSH key for App
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2APP_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Update inventory with EC2 IP
+        run: |
+          sed -i "s/{{ EC2_PUBLIC_IP }}/${{ secrets.EC2APP_IP }}/g" ansible/inventory.ini
+          sed -i "s/your-key.pem/id_rsa/g" ansible/inventory.ini
+
+      - name: Deploy App with Ansible
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+        run: |
+          cd ansible
+          ansible-playbook deploy.yml -i inventory.ini
+
+  deploy-ml:
+    runs-on: ubuntu-latest
+    needs: deploy-app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo apt-add-repository --yes --update ppa:ansible/ansible
+          sudo apt-get install -y ansible
+
+      - name: Write ML SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2ML_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Update ML inventory with EC2 IP
+        run: |
+          sed -i "s/{{ EC2ML_PUBLIC_IP }}/${{ secrets.EC2ML_IP }}/g" ansible/inventory-ml.ini
+          sed -i "s/your-ml-key.pem/id_rsa/g" ansible/inventory-ml.ini
+
+      - name: Deploy ML with Ansible
+        run: |
+          cd ansible
+          ansible-playbook deploy-ml.yml -i inventory-ml.ini
+
+  verify-all:
+    runs-on: ubuntu-latest
+    needs: [deploy-app, deploy-ml]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo apt-add-repository --yes --update ppa:ansible/ansible
+          sudo apt-get install -y ansible
+
+      - name: Write App SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2APP_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Write ML SSH key
+        run: |
+          echo "${{ secrets.EC2ML_KEY }}" > ~/.ssh/id_rsa_ml
+          chmod 600 ~/.ssh/id_rsa_ml
+
+      - name: Update inventories
+        run: |
+          sed -i "s/{{ EC2_PUBLIC_IP }}/${{ secrets.EC2APP_IP }}/g" ansible/inventory.ini
+          sed -i "s/your-key.pem/id_rsa/g" ansible/inventory.ini
+          sed -i "s/{{ EC2ML_PUBLIC_IP }}/${{ secrets.EC2ML_IP }}/g" ansible/inventory-ml.ini
+          sed -i "s/your-ml-key.pem/id_rsa_ml/g" ansible/inventory-ml.ini
+
+      - name: Verify App Services
+        run: |
+          cd ansible
+          ansible-playbook verify-app.yml -i inventory.ini
+
+      - name: Verify ML Service
+        run: |
+          cd ansible
+          ansible-playbook verify-ml.yml -i inventory-ml.ini

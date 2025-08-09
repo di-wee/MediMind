@@ -1,0 +1,15 @@
+[Unit]
+Description=MediMind Backend
+After=network.target
+
+[Service]
+Type=simple
+User={{ app_user }}
+WorkingDirectory={{ backend_dir }}
+EnvironmentFile={{ backend_dir }}/.env
+ExecStart=/usr/bin/java -jar {{ backend_jar }}
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
