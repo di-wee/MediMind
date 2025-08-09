@@ -8,6 +8,7 @@ on:
       - backend-(java-springboot)
       - android
       - machine-learning
+      - demo/frontend-ui
   pull_request:
     branches:
       - main
@@ -15,6 +16,7 @@ on:
       - backend-(java-springboot)
       - android
       - machine-learning
+      - demo/*
 
 jobs:
   sca-trivy:

@@ -12,8 +12,8 @@
     db_host: "{{ lookup('env', 'DB_HOST') }}"
     db_port: "{{ lookup('env', 'DB_PORT') }}"
     db_name: "{{ lookup('env', 'DB_NAME') }}"
-    cors_allowed_origin: "{{ lookup('env', 'CORS_ALLOWED_ORIGIN') | default('http://13.229.133.0:5173') }}"
-    vite_server: "{{ lookup('env', 'VITE_SERVER') | default('http://13.229.133.0:8080/') }}"
+    cors_allowed_origin: "{{ lookup('env', 'CORS_ALLOWED_ORIGIN') | default('http://54.179.144.79:5173') }}"
+    vite_server: "{{ lookup('env', 'VITE_SERVER') | default('http://54.179.144.79:8080/') }}"
 
   tasks:
     - name: Update package cache
@@ -137,28 +137,66 @@
       become_user: '{{ app_user }}'
       ignore_errors: yes
 
-    - name: Pull latest Docker images
-      community.docker.docker_compose_v2:
-        project_src: '{{ app_dir }}'
-        pull: always
-        state: absent
+    - name: Check current image digests
+      shell: |
+        cd {{ app_dir }}
+        echo "=== Current Image Digests ==="
+        docker images --digests | grep {{ dockerhub_username }} || echo "No images found"
       become_user: '{{ app_user }}'
+      register: current_digests
+      changed_when: false
 
-    - name: Start Docker Compose services
+    - name: Display current digests
+      debug:
+        var: current_digests.stdout_lines
+
+    - name: Validate Docker Hub username
+      fail:
+        msg: 'DOCKERHUB_USERNAME environment variable is not set'
+      when: dockerhub_username is not defined or dockerhub_username == ""
+
+    - name: Remove existing backend image
+      shell: docker rmi {{ dockerhub_username }}/medimind-backend:latest 2>/dev/null || echo 'Backend image not found, will pull fresh'
+      become_user: '{{ app_user }}'
+      ignore_errors: yes
+
+    - name: Remove existing frontend image
+      shell: docker rmi {{ dockerhub_username }}/medimind-frontend:latest 2>/dev/null || echo 'Frontend image not found, will pull fresh'
+      become_user: '{{ app_user }}'
+      ignore_errors: yes
+
+    - name: Pull latest backend image
+      shell: docker pull {{ dockerhub_username }}/medimind-backend:latest
+      become_user: '{{ app_user }}'
+      register: backend_pull_result
+
+    - name: Pull latest frontend image
+      shell: docker pull {{ dockerhub_username }}/medimind-frontend:latest
+      become_user: '{{ app_user }}'
+      register: frontend_pull_result
+
+    - name: Display pull results
+      debug:
+        msg:
+          - 'Backend pull: {{ backend_pull_result.stdout }}'
+          - 'Frontend pull: {{ frontend_pull_result.stdout }}'
+
+    - name: Check final image digests
+      shell: docker images --digests | grep {{ dockerhub_username }} || echo 'No images found'
+      become_user: '{{ app_user }}'
+      register: final_digests
+      changed_when: false
+
+    - name: Display final digests
+      debug:
+        var: final_digests.stdout_lines
+
+    - name: Start Docker Compose services with latest images
       community.docker.docker_compose_v2:
         project_src: '{{ app_dir }}'
         state: present
+        pull: always
       become_user: '{{ app_user }}'
-
-    - name: Check Docker images availability
-      shell: docker images | grep {{ dockerhub_username }}
-      become_user: '{{ app_user }}'
-      register: docker_images_check
-      changed_when: false
-
-    - name: Display Docker images
-      debug:
-        var: docker_images_check.stdout_lines
 
     - name: Test docker-compose configuration
       shell: docker compose config
@@ -171,16 +209,6 @@
     - name: Display docker-compose configuration
       debug:
         var: docker_compose_config.stdout_lines
-
-    - name: Verify Docker images exist
-      shell: |
-        docker pull {{ dockerhub_username }}/medimind-backend:latest
-        docker pull {{ dockerhub_username }}/medimind-frontend:latest
-      become_user: '{{ app_user }}'
-      register: docker_pull_result
-
-    # Note: Frontend rebuild is disabled to prevent timeout issues
-    # The frontend will use runtime configuration via environment variables and config.json
 
     - name: Create docker-compose systemd service
       template:
