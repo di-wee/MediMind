@@ -1,9 +1,6 @@
 name: Deploy All Services
 
 on:
-  push:
-    branches:
-      - main
   workflow_run:
     workflows: ['Build & Dockerize MediMind']
     types:
@@ -22,6 +19,10 @@ jobs:
           sudo apt-get install -y software-properties-common
           sudo apt-add-repository --yes --update ppa:ansible/ansible
           sudo apt-get install -y ansible
+
+      - name: Install Ansible Collections
+        run: |
+          ansible-galaxy collection install community.docker
 
       - name: Write SSH key for App
         run: |
@@ -60,6 +61,10 @@ jobs:
           sudo apt-add-repository --yes --update ppa:ansible/ansible
           sudo apt-get install -y ansible
 
+      - name: Install Ansible Collections
+        run: |
+          ansible-galaxy collection install community.docker
+
       - name: Write ML SSH key
         run: |
           mkdir -p ~/.ssh
@@ -89,6 +94,10 @@ jobs:
           sudo apt-get install -y software-properties-common
           sudo apt-add-repository --yes --update ppa:ansible/ansible
           sudo apt-get install -y ansible
+
+      - name: Install Ansible Collections
+        run: |
+          ansible-galaxy collection install community.docker
 
       - name: Write App SSH key
         run: |
