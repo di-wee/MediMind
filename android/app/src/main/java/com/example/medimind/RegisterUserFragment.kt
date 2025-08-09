@@ -45,15 +45,23 @@ class RegisterUserFragment : Fragment() {
             }
         }
 
-        // --- Clinic spinner ---
-        val clinicSpinner = view.findViewById<Spinner>(R.id.spinnerClinic)
+        // 1) Replace Spinner reference
+        // val clinicSpinner = view.findViewById<Spinner>(R.id.spinnerClinic)
+        val clinicDropdown =
+            view.findViewById<com.google.android.material.textfield.MaterialAutoCompleteTextView>(
+                R.id.autoCompleteClinic
+            )
+
+        // 2) Keep your lists
         val clinicNames = mutableListOf<String>()
         val nameToIdMap = mutableMapOf<String, String>()
-        val adapter =
-            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, clinicNames)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        clinicSpinner.adapter = adapter
 
+        // 3) Adapter for the dropdown
+        val clinicAdapter = ArrayAdapter(requireContext(),
+            android.R.layout.simple_list_item_1, clinicNames)
+        clinicDropdown.setAdapter(clinicAdapter)
+
+        // 4) Load clinics (unchanged logic, just notify the new adapter)
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = ApiClient.retrofitService.getClinics()
@@ -63,13 +71,9 @@ class RegisterUserFragment : Fragment() {
                     clinicNames.add(it.clinicName)
                     nameToIdMap[it.clinicName] = it.id
                 }
-                adapter.notifyDataSetChanged()
+                clinicAdapter.notifyDataSetChanged()
             } catch (e: Exception) {
-                Toast.makeText(
-                    requireContext(),
-                    "Failed to load clinics: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(requireContext(), "Failed to load clinics: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -184,7 +188,7 @@ class RegisterUserFragment : Fragment() {
 
             val dob = String.format(Locale.US, "%04d-%02d-%02d", year, month, day)
 
-            val selectedClinicName = clinicSpinner.selectedItem?.toString() ?: ""
+            val selectedClinicName = clinicDropdown.text?.toString() ?: ""
             val request = RegisterRequest(
                 email = email,
                 password = password,

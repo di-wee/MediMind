@@ -10,11 +10,11 @@
     android:layout_height="match_parent">
 
 <LinearLayout
-android:orientation="vertical"
-android:padding="24dp"
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:elevation="4dp">
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:elevation="4dp">
 
 <ImageView
     android:layout_width="310dp"
