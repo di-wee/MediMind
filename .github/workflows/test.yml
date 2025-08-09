@@ -1,4 +1,4 @@
-name: 'Unit Tests & Coverage'
+name: 'Backend Unit Tests & Coverage'
 
 on:
   push:
@@ -37,20 +37,33 @@ jobs:
 
       # Prepare artifact directory
       - name: Prepare Artifact Directory
-        run: mkdir -p artifacts/test-coverage
+        run: |
+          mkdir -p artifacts/test-coverage/backend
 
       # ---------------------
-      # Backend (Java) Tests & Coverage
+      # Backend (Java) JUnit Tests & Coverage
       # ---------------------
-      - name: Run Backend Tests & Generate Coverage
+      - name: Run Backend JUnit Tests & Generate Coverage
         working-directory: ./backend
         run: |
-          # Run tests and generate JaCoCo coverage report
+          # Run JUnit tests and generate JaCoCo coverage report
           mvn clean test jacoco:report
-          # Copy JaCoCo reports to artifacts
-          cp -r target/site/jacoco/* ../artifacts/test-coverage/backend/
+
+          # Ensure the target directory exists
+          mkdir -p ../artifacts/test-coverage/backend
+
+          # Copy JaCoCo reports to artifacts (ensure directory exists)
+          if [ -d "target/site/jacoco" ]; then
+            echo "Copying JaCoCo reports..."
+            cp -r target/site/jacoco/* ../artifacts/test-coverage/backend/
+            echo "JaCoCo reports copied successfully"
+          else
+            echo "No JaCoCo reports found" > ../artifacts/test-coverage/backend/no-coverage-report.txt
+            echo "JaCoCo directory not found at target/site/jacoco"
+          fi
+
           # Generate test summary
-          echo "=== Backend Test Summary ===" > ../artifacts/test-coverage/backend/test-summary.txt
+          echo "=== Backend JUnit Test Summary ===" > ../artifacts/test-coverage/backend/test-summary.txt
           echo "Date: $(date)" >> ../artifacts/test-coverage/backend/test-summary.txt
           echo "Java Version: $(java -version 2>&1 | head -n 1)" >> ../artifacts/test-coverage/backend/test-summary.txt
           echo "" >> ../artifacts/test-coverage/backend/test-summary.txt
@@ -65,65 +78,15 @@ jobs:
             FAILED=$(find target/surefire-reports -name "*.txt" -exec grep "Tests run:" {} \; | awk '{sum += $6} END {print sum+0}')
             SKIPPED=$(find target/surefire-reports -name "*.txt" -exec grep "Tests run:" {} \; | awk '{sum += $9} END {print sum+0}')
             
-            echo "Tests passed: $PASSED" >> ../artifacts/test-coverage/backend/test-summary.txt
-            echo "Tests failed: $FAILED" >> ../artifacts/test-coverage/backend/test-summary.txt
-            echo "Tests skipped: $SKIPPED" >> ../artifacts/test-coverage/backend/test-summary.txt
+            echo "JUnit tests passed: $PASSED" >> ../artifacts/test-coverage/backend/test-summary.txt
+            echo "JUnit tests failed: $FAILED" >> ../artifacts/test-coverage/backend/test-summary.txt
+            echo "JUnit tests skipped: $SKIPPED" >> ../artifacts/test-coverage/backend/test-summary.txt
             
             if [ "$FAILED" -gt 0 ]; then
-              echo "❌ Some tests failed!" >> ../artifacts/test-coverage/backend/test-summary.txt
+              echo "❌ Some JUnit tests failed!" >> ../artifacts/test-coverage/backend/test-summary.txt
             else
-              echo "✅ All tests passed!" >> ../artifacts/test-coverage/backend/test-summary.txt
+              echo "✅ All JUnit tests passed!" >> ../artifacts/test-coverage/backend/test-summary.txt
             fi
-          fi
-
-      # ---------------------
-      # Frontend (React) Tests
-      # ---------------------
-      - name: Run Frontend Tests
-        working-directory: ./frontend
-        run: |
-          npm install
-          # Run tests if test script exists
-          if npm run | grep -q "test"; then
-            npm test -- --coverage --watchAll=false > test-results.txt 2>&1 || true
-          else
-            echo "No test script defined" > test-results.txt
-          fi
-          # Copy test results to artifacts
-          cp test-results.txt ../artifacts/test-coverage/frontend-test-results.txt
-
-      # ---------------------
-      # Android Tests
-      # ---------------------
-      - name: Run Android Tests
-        working-directory: ./android
-        run: |
-          # Run unit tests
-          ./gradlew test || true
-          # Run instrumented tests if possible
-          ./gradlew connectedAndroidTest || true
-          # Copy test reports to artifacts
-          if [ -d "app/build/reports/tests" ]; then
-            cp -r app/build/reports/tests ../artifacts/test-coverage/android/
-          fi
-
-      # ---------------------
-      # ML (Python) Tests
-      # ---------------------
-      - name: Run ML Tests
-        working-directory: ./ml
-        run: |
-          pip install -r requirements.txt || true
-          # Run tests if they exist
-          if [ -f "test_*.py" ] || [ -d "tests" ]; then
-            python -m pytest --cov=. --cov-report=html --cov-report=term-missing > test-results.txt 2>&1 || true
-          else
-            echo "No tests found" > test-results.txt
-          fi
-          # Copy test results to artifacts
-          cp test-results.txt ../artifacts/test-coverage/ml-test-results.txt
-          if [ -d "htmlcov" ]; then
-            cp -r htmlcov ../artifacts/test-coverage/ml-coverage/
           fi
 
       # ---------------------
@@ -132,5 +95,5 @@ jobs:
       - name: Upload Test Coverage Reports
         uses: actions/upload-artifact@v4
         with:
-          name: test-coverage-reports
+          name: backend-test-coverage-reports
           path: artifacts/test-coverage/
