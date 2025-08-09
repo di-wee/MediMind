@@ -17,6 +17,17 @@ export const getApiBaseUrl = () => {
 
 		console.log('Window location:', { protocol, hostname, port });
 
+		// Handle EC2 deployment scenario - check for EC2 IP or domain
+		if (
+			hostname === '13.250.34.102' ||
+			hostname.includes('ec2') ||
+			hostname.includes('amazonaws')
+		) {
+			const runtimeUrl = `${protocol}//${hostname}:${port}/`;
+			console.log('Using EC2 runtime URL:', runtimeUrl);
+			return runtimeUrl;
+		}
+
 		// Handle local development
 		const runtimeUrl = `${protocol}//${hostname}:${port}/`;
 		console.log('Using runtime URL:', runtimeUrl);

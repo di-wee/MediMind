@@ -179,18 +179,8 @@
       become_user: '{{ app_user }}'
       register: docker_pull_result
 
-    - name: Rebuild frontend image with correct VITE_SERVER
-      shell: |
-        cd {{ app_dir }}/frontend
-        docker build --build-arg VITE_SERVER={{ vite_server }} -t {{ dockerhub_username }}/medimind-frontend:latest .
-      become_user: '{{ app_user }}'
-      register: frontend_rebuild_result
-      ignore_errors: yes
-
-    - name: Display frontend rebuild result
-      debug:
-        var: frontend_rebuild_result.stdout_lines
-      when: frontend_rebuild_result.stdout_lines is defined
+    # Note: Frontend rebuild is disabled to prevent timeout issues
+    # The frontend will use runtime configuration via environment variables and config.json
 
     - name: Create docker-compose systemd service
       template:
