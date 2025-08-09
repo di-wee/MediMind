@@ -1,10 +1,10 @@
-name: Deploy to EC2
+name: Deploy ML to EC2
 
 on:
   push:
-    branches: 
-      - machine-learning
-      - main
+    # branches: 
+    #   - machine-learning
+    #   - main
 
 jobs:
   deploy:
