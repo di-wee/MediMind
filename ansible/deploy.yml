@@ -154,18 +154,22 @@
       shell: |
         cd {{ app_dir }}
         echo "=== Pulling Latest Images ==="
-        # Remove existing images to force fresh pull
-        docker rmi {{ dockerhub_username }}/medimind-backend:latest || true
-        docker rmi {{ dockerhub_username }}/medimind-frontend:latest || true
 
-        # Pull latest images with no-cache
-        docker pull --no-cache {{ dockerhub_username }}/medimind-backend:latest
-        docker pull --no-cache {{ dockerhub_username }}/medimind-frontend:latest
+        # Remove existing images to force fresh pull (ignore errors if they don't exist)
+        docker rmi {{ dockerhub_username }}/medimind-backend:latest 2>/dev/null || echo "Backend image not found, will pull fresh"
+        docker rmi {{ dockerhub_username }}/medimind-frontend:latest 2>/dev/null || echo "Frontend image not found, will pull fresh"
+
+        # Pull latest images (docker pull will always get the latest)
+        echo "Pulling backend image..."
+        docker pull {{ dockerhub_username }}/medimind-backend:latest
+        echo "Pulling frontend image..."
+        docker pull {{ dockerhub_username }}/medimind-frontend:latest
 
         echo "=== New Image Digests ==="
-        docker images --digests | grep {{ dockerhub_username }}
+        docker images --digests | grep {{ dockerhub_username }} || echo "No images found"
       become_user: '{{ app_user }}'
       register: docker_pull_result
+      ignore_errors: yes
 
     - name: Display Docker pull results
       debug:
@@ -190,16 +194,6 @@
     - name: Display docker-compose configuration
       debug:
         var: docker_compose_config.stdout_lines
-
-    - name: Verify Docker images exist
-      shell: |
-        docker pull {{ dockerhub_username }}/medimind-backend:latest
-        docker pull {{ dockerhub_username }}/medimind-frontend:latest
-      become_user: '{{ app_user }}'
-      register: docker_pull_result
-
-    # Note: Frontend rebuild is disabled to prevent timeout issues
-    # The frontend will use runtime configuration via environment variables and config.json
 
     - name: Create docker-compose systemd service
       template:

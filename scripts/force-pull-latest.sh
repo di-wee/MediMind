@@ -48,13 +48,13 @@ docker rm -f medimind-backend medimind-frontend || true
 
 # Remove existing images to force fresh pull
 print_status "Removing existing images..."
-docker rmi $DOCKERHUB_USERNAME/medimind-backend:latest || true
-docker rmi $DOCKERHUB_USERNAME/medimind-frontend:latest || true
+docker rmi $DOCKERHUB_USERNAME/medimind-backend:latest 2>/dev/null || true
+docker rmi $DOCKERHUB_USERNAME/medimind-frontend:latest 2>/dev/null || true
 
-# Pull latest images with no-cache
+# Pull latest images (docker pull will always get the latest)
 print_status "Pulling latest images..."
-docker pull --no-cache $DOCKERHUB_USERNAME/medimind-backend:latest
-docker pull --no-cache $DOCKERHUB_USERNAME/medimind-frontend:latest
+docker pull $DOCKERHUB_USERNAME/medimind-backend:latest
+docker pull $DOCKERHUB_USERNAME/medimind-frontend:latest
 
 # Show new image digests
 print_status "New image digests:"
