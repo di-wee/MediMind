@@ -15,7 +15,7 @@
         msg: "Docker service is {{ 'running' if docker_status.status.ActiveState == 'active' else 'not running' }}"
 
     - name: Check if backend container is running
-      shell: docker ps --filter "name=medimind-backend" --format "table {{.Names}}\t{{.Status}}"
+      shell: docker ps --filter "name=medimind-backend" --format "table {{ '{{' }}.Names{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}"
       register: backend_container
       become_user: '{{ app_user }}'
 
@@ -24,7 +24,7 @@
         msg: 'Backend container: {{ backend_container.stdout }}'
 
     - name: Check if frontend container is running
-      shell: docker ps --filter "name=medimind-frontend" --format "table {{.Names}}\t{{.Status}}"
+      shell: docker ps --filter "name=medimind-frontend" --format "table {{ '{{' }}.Names{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}"
       register: frontend_container
       become_user: '{{ app_user }}'
 

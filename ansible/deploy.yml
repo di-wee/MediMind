@@ -195,7 +195,7 @@
 
     - name: Check container logs if failed
       shell: |
-        if docker ps -a --format "table {{.Names}}\t{{.Status}}" | grep -q "Exited"; then
+        if docker ps -a --format "table {{ '{{' }}.Names{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}" | grep -q "Exited"; then
           echo "=== Backend Container Logs ==="
           docker logs medimind-backend || true
           echo "=== Frontend Container Logs ==="
