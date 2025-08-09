@@ -2,6 +2,8 @@
 - name: Verify App Services
   hosts: medimind_servers
   become: yes
+  vars:
+    app_user: ubuntu
   tasks:
     - name: Check docker-compose service status
       systemd:

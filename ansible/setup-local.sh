@@ -47,15 +47,15 @@ read -p "Choose option (1 or 2): " key_option
 if [ "$key_option" = "1" ]; then
     echo "Please paste your SSH private key content (press Enter when done):"
     read -d '' -r ssh_key_content
-    echo "$ssh_key_content" > ~/.ssh/ec2app-key.pem
-    chmod 600 ~/.ssh/ec2app-key.pem
-    echo "SSH key saved to ~/.ssh/ec2app-key.pem"
+    echo "$ssh_key_content" > ~/.ssh/id_rsa
+    chmod 600 ~/.ssh/id_rsa
+    echo "SSH key saved to ~/.ssh/id_rsa"
 elif [ "$key_option" = "2" ]; then
     read -p "Enter path to your SSH key file: " key_path
     if [ -f "$key_path" ]; then
-        cp "$key_path" ~/.ssh/ec2app-key.pem
-        chmod 600 ~/.ssh/ec2app-key.pem
-        echo "SSH key copied to ~/.ssh/ec2app-key.pem"
+        cp "$key_path" ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        echo "SSH key copied to ~/.ssh/id_rsa"
     else
         echo "Error: Key file not found at $key_path"
         exit 1

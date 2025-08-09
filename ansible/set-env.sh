@@ -79,10 +79,10 @@ if [ -n "$EC2APP_KEY" ]; then
     mkdir -p ~/.ssh
     
     # Write the SSH key to file
-    echo "$EC2APP_KEY" > ~/.ssh/ec2app-key.pem
-    chmod 600 ~/.ssh/ec2app-key.pem
+    echo "$EC2APP_KEY" > ~/.ssh/id_rsa
+    chmod 600 ~/.ssh/id_rsa
     
-    echo -e "${GREEN}✅ SSH key saved to ~/.ssh/ec2app-key.pem${NC}"
+    echo -e "${GREEN}✅ SSH key saved to ~/.ssh/id_rsa${NC}"
 else
     echo -e "${YELLOW}⚠️  EC2APP_KEY not set - you'll need to manually set up SSH key${NC}"
 fi
@@ -108,4 +108,4 @@ echo "DOCKERHUB_USERNAME: $DOCKERHUB_USERNAME"
 echo "DB_HOST: $DB_HOST"
 echo "DB_PORT: $DB_PORT"
 echo "DB_NAME: $DB_NAME"
-echo "SSH Key: ~/.ssh/ec2app-key.pem"
+echo "SSH Key: ~/.ssh/id_rsa"

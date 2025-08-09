@@ -9,7 +9,7 @@ def get_inventory():
             'vars': {
                 'ansible_host': os.environ.get('EC2APP_IP', 'localhost'),
                 'ansible_user': os.environ.get('EC2APP_USER', 'ubuntu'),
-                'ansible_ssh_private_key_file': '~/.ssh/ec2app-key.pem',
+                'ansible_ssh_private_key_file': '~/.ssh/id_rsa',
                 'ansible_python_interpreter': '/usr/bin/python3'
             }
         },
@@ -18,7 +18,7 @@ def get_inventory():
                 'medimind-app': {
                     'ansible_host': os.environ.get('EC2APP_IP', 'localhost'),
                     'ansible_user': os.environ.get('EC2APP_USER', 'ubuntu'),
-                    'ansible_ssh_private_key_file': '~/.ssh/ec2app-key.pem',
+                    'ansible_ssh_private_key_file': '~/.ssh/id_rsa',
                     'ansible_python_interpreter': '/usr/bin/python3'
                 }
             }
