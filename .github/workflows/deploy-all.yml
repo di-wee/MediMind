@@ -40,6 +40,8 @@ jobs:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_NAME: ${{ secrets.DB_NAME }}
+          CORS_ALLOWED_ORIGIN: ${{ secrets.CORS_ALLOWED_ORIGIN }}
+          VITE_SERVER: ${{ secrets.VITE_SERVER }}
         run: |
           cd ansible
           ansible-playbook deploy.yml -i inventory.py

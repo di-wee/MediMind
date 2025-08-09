@@ -12,6 +12,8 @@
     db_host: "{{ lookup('env', 'DB_HOST') }}"
     db_port: "{{ lookup('env', 'DB_PORT') }}"
     db_name: "{{ lookup('env', 'DB_NAME') }}"
+    cors_allowed_origin: "{{ lookup('env', 'CORS_ALLOWED_ORIGIN') | default('http://13.250.34.102:5173') }}"
+    vite_server: "{{ lookup('env', 'VITE_SERVER') | default('http://13.250.34.102:8080/') }}"
 
   tasks:
     - name: Update package cache
@@ -101,6 +103,18 @@
         group: '{{ app_user }}'
         mode: '0644'
 
+    - name: Create runtime config for frontend
+      copy:
+        content: |
+          {
+            "apiBaseUrl": "{{ vite_server }}",
+            "environment": "production"
+          }
+        dest: '{{ app_dir }}/frontend/public/config.json'
+        owner: '{{ app_user }}'
+        group: '{{ app_user }}'
+        mode: '0644'
+
     - name: Check current container status
       shell: docker ps -a --filter "name=medimind"
       become_user: '{{ app_user }}'
@@ -164,6 +178,19 @@
         docker pull {{ dockerhub_username }}/medimind-frontend:latest
       become_user: '{{ app_user }}'
       register: docker_pull_result
+
+    - name: Rebuild frontend image with correct VITE_SERVER
+      shell: |
+        cd {{ app_dir }}/frontend
+        docker build --build-arg VITE_SERVER={{ vite_server }} -t {{ dockerhub_username }}/medimind-frontend:latest .
+      become_user: '{{ app_user }}'
+      register: frontend_rebuild_result
+      ignore_errors: yes
+
+    - name: Display frontend rebuild result
+      debug:
+        var: frontend_rebuild_result.stdout_lines
+      when: frontend_rebuild_result.stdout_lines is defined
 
     - name: Create docker-compose systemd service
       template:
