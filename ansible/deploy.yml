@@ -23,9 +23,17 @@
       apt:
         name:
           - docker.io
-          - docker-compose
           - git
+          - curl
         state: present
+
+    - name: Install Docker Compose plugin
+      shell: |
+        mkdir -p ~/.docker/cli-plugins/
+        curl -SL https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
+        chmod +x ~/.docker/cli-plugins/docker-compose
+      args:
+        creates: ~/.docker/cli-plugins/docker-compose
 
     - name: Start and enable Docker
       systemd:
@@ -38,6 +46,15 @@
         name: '{{ app_user }}'
         groups: docker
         append: yes
+
+    - name: Install Docker Compose plugin for ubuntu user
+      shell: |
+        mkdir -p /home/{{ app_user }}/.docker/cli-plugins/
+        curl -SL https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-linux-x86_64 -o /home/{{ app_user }}/.docker/cli-plugins/docker-compose
+        chmod +x /home/{{ app_user }}/.docker/cli-plugins/docker-compose
+        chown -R {{ app_user }}:{{ app_user }} /home/{{ app_user }}/.docker
+      args:
+        creates: /home/{{ app_user }}/.docker/cli-plugins/docker-compose
 
     - name: Create application directory
       file:
