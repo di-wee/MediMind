@@ -1,7 +1,4 @@
 {
-    "medicationName": "codeine",
-    "intakeQuantity": 1,
-    "frequency": 2,
-    "instructions": "after food",
-    "notes": "fever pain"
+    "intakeQuantity": 0,
+    "frequency": 0
 }

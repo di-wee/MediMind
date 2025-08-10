@@ -1,0 +1,22 @@
+name: Test EC2 SSH
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  test-ssh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add EC2 host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.EC2ML_IP }} >> ~/.ssh/known_hosts
+
+      - name: Write SSH key
+        run: |
+          echo "${{ secrets.EC2ML_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Attempt SSH
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=yes ${{ secrets.EC2ML_USER }}@${{ secrets.EC2ML_IP }} "echo '✅ SSH to EC2 successful'"

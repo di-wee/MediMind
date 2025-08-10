@@ -1,0 +1,25 @@
+# === NER and ML ===
+transformers==4.38.2        # HuggingFace Transformers
+tokenizers>=0.14,<0.19          # Tokenizer version compatible with transformers
+torch>=1.12.0               # PyTorch backend
+datasets                    # Optional: HuggingFace datasets
+seqeval                     # Optional: for NER evaluation
+scikit-learn                # Common ML utilities
+matplotlib                  # For optional plotting (e.g., during training)
+pandas                      # Data wrangling
+
+# === OCR (Tesseract-based) ===
+pytesseract                 # Python wrapper for Tesseract
+Pillow                      # Image processing
+
+# === FastAPI and API handling ===
+fastapi                     # FastAPI web framework
+uvicorn                    # ASGI server to run FastAPI
+python-multipart            # To support file uploads (e.g., images)
+
+# === Utility / Config ===
+pyyaml                      # Useful for config parsing (e.g., in model config files)
+
+# === Optional Dev Tools (comment out if not used) ===
+# tqdm                      # For progress bars (e.g., during preprocessing/training)
+# ipython                   # For interactive testing
