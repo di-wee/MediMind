@@ -101,8 +101,8 @@ class ReminderActivity : AppCompatActivity() {
                 val details = meds.map {
                     val title = "${it.medicationName}:  "
                     val intake = "${it.intakeQuantity} "
-                    val instruction = "Instruction：${it.instructions.ifBlank { "" }}"
-                    val note = "Notes:${it.note.ifBlank { "" }}"
+                    val instruction = "Instructions: ${it.instructions.ifBlank { "" }}"
+                    val note = "Notes: ${it.note.ifBlank { "" }}"
 
                     buildStyledSpannable(title, intake, instruction, note)
                 }.toTypedArray()
