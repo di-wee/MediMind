@@ -4,10 +4,7 @@ on:
   push:
     branches: ["ML-Priscilla"]
     paths:
-      - "**/*.py"
-      - "Dockerfile"
-      - "requirements.txt"
-      - "model_version.txt"
+      - "ml/**"
       - ".github/workflows/deploy-ml.yaml"
   workflow_dispatch:
 
@@ -20,12 +17,12 @@ jobs:
       - name: Read HF model SHA
         id: readsha
         run: |
-          if [ ! -s model_version.txt ]; then
-            echo "ERROR: model_version.txt is missing or empty. Run tools/push_model_and_bump_git.py first."
+          if [ ! -s ml/model_version.txt ]; then
+            echo "ERROR: ml/model_version.txt is missing or empty. Run ml/tools/push_model_and_bump_git.py first."
             exit 1
           fi
-          echo "HF_SHA=$(head -n1 model_version.txt | tr -d '\r\n')" >> $GITHUB_OUTPUT
-          echo "Using HF SHA: $(head -n1 model_version.txt)"
+          echo "HF_SHA=$(head -n1 ml/model_version.txt | tr -d '\r\n')" >> $GITHUB_OUTPUT
+          echo "Using HF SHA: $(head -n1 ml/model_version.txt)"
 
       - name: Docker Hub login
         uses: docker/login-action@v3
@@ -33,14 +30,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # If your Dockerfile is inside ml/, build with that context
       - name: Build image (HF-pinned)
         run: |
           docker build \
+            -f ml/Dockerfile \
+            ml \
             --build-arg HF_MODEL_ID=prizellia/ner-medimind \
             --build-arg HF_REV=${{ steps.readsha.outputs.HF_SHA }} \
             --build-arg HF_TOKEN=${{ secrets.HF_TOKEN }} \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/nerapp:${{ steps.readsha.outputs.HF_SHA }} \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/nerapp:latest .
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/nerapp:latest
 
       - name: Push image
         run: |
@@ -64,7 +64,6 @@ jobs:
             IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/nerapp:${{ steps.readsha.outputs.HF_SHA }}
             CONTAINER=nerapi
 
-            # Install docker if missing
             if ! command -v docker >/dev/null 2>&1; then
               echo "Docker not found. Installing..."
               curl -fsSL https://get.docker.com | sh
@@ -78,4 +77,4 @@ jobs:
               $IMAGE
 
             sudo docker image prune -f
-          '" 
+          '"
