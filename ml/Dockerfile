@@ -22,12 +22,15 @@ ARG HF_TOKEN
 ENV HF_MODEL_ID=$HF_MODEL_ID HF_REV=$HF_REV HF_TOKEN=$HF_TOKEN
 
 # Download the model snapshot at the given revision into /app/model
+# CACHE BUST: Added HF_TOKEN authentication for private repository access
+# TIMESTAMP: 2025-08-10 16:45:00 - Force cache refresh with proper format
 RUN python - <<'PY'
 from huggingface_hub import snapshot_download
 import os
 mid = os.environ["HF_MODEL_ID"]
 rev = os.environ["HF_REV"]
 token = os.environ.get("HF_TOKEN")
+print(f"Downloading model: {mid} @ {rev} with token: {'***' if token else 'None'}")
 snapshot_download(repo_id=mid, revision=rev, local_dir="/app/model", local_dir_use_symlinks=False, token=token)
 print("Downloaded model:", mid, "@", rev)
 PY
