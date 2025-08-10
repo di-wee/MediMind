@@ -1,4 +1,4 @@
-name: "SCA - Dependency Scan (Trivy)"
+name: 'SCA - Dependency Scan (Trivy)'
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
       - backend-(java-springboot)
       - android
       - machine-learning
+
   pull_request:
     branches:
       - main
@@ -15,6 +16,7 @@ on:
       - backend-(java-springboot)
       - android
       - machine-learning
+      - demo/*
 
 jobs:
   sca-trivy:
@@ -31,7 +33,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: '21'
 
       # ---------------------
       # Install Trivy
@@ -46,44 +48,45 @@ jobs:
         run: mkdir -p artifacts/sca
 
       # ---------------------
-      # Backend (Java) Scan
+      # Backend (Java) Build & Scan
       # ---------------------
-      - name: Scan Backend (Java)
+      - name: Build & Scan Backend (Java)
         working-directory: ./backend
         run: |
-          mkdir -p ../artifacts/sca
           # Clean old builds and remove stale bin to avoid false positives
-          mvn clean package -DskipTests
+          mvn clean compile -DskipTests
           rm -rf bin
-          # Scan current folder (excluding bin)
+          # Scan current folder (excluding bin and target)
           trivy fs --security-checks vuln --ignore-unfixed \
-            --skip-dirs bin \
+            --skip-dirs bin,target \
             --format json \
             --output ../artifacts/sca/backend-trivy.json .
 
       # ---------------------
-      # Frontend (Node.js) Scan
+      # Frontend (Node.js) Build & Scan
       # ---------------------
-      - name: Scan Frontend (Node.js)
+      - name: Build & Scan Frontend (Node.js)
         working-directory: ./frontend
         run: |
           npm install
+          npm run build
+          # Scan dependencies and built files
           trivy fs --security-checks vuln --format json \
             --output ../artifacts/sca/frontend-trivy.json .
 
       # ---------------------
       # ML (Python) Scan
       # ---------------------
-      - name: Scan Python ML
+      - name: Scan Python ML Dependencies
         working-directory: ./ml
         run: |
           pip install -r requirements.txt || true
           trivy fs --security-checks vuln --format json \
             --output ../artifacts/sca/ml-trivy.json .
 
-      # # ---------------------
-      # # Android Scan (APK)
-      # # ---------------------
+      # ---------------------
+      # Android Build & Scan
+      # ---------------------
       - name: Build Android APK
         working-directory: ./android
         run: ./gradlew assembleDebug

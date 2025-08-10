@@ -41,6 +41,17 @@ class ReminderReceiver : BroadcastReceiver() {
             Log.e("ReminderReceiver", "Invalid timeMillis")
             return
         }
+        val expectedMillis = intent.getLongExtra("time_millis", -1)
+        val actualMillis = System.currentTimeMillis()
+
+        val expectedTime = Instant.ofEpochMilli(expectedMillis)
+            .atZone(ZoneId.systemDefault()).toLocalTime()
+        val actualTime = Instant.ofEpochMilli(actualMillis)
+            .atZone(ZoneId.systemDefault()).toLocalTime()
+
+        Log.d("ReminderReceiver", "🎯 Expected time from Intent = $expectedTime")
+        Log.d("ReminderReceiver", "⏰ Actual trigger time        = $actualTime")
+
         val patientId = intent.getStringExtra("patient_id")
         if (patientId == null) {
             Log.e("ReminderReceiver", "Missing patient_id in intent extras")
