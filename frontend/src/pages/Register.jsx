@@ -82,6 +82,10 @@ function Register() {
 		console.log('clinic: ', clinicName);
 	};
 
+	const handleSignIn = () => {
+		navigate('/login', { replace: true });
+	};
+
 	useEffect(() => {
 		const fetchAllClinics = async () => {
 			try {
@@ -298,7 +302,7 @@ function Register() {
 									<a
 										href='#'
 										className='link'
-										onClick={(e) => handleSignUp(e)}>
+										onClick={handleSignIn}>
 										Sign in
 									</a>
 								</p>

@@ -1,79 +1,135 @@
 import React, { useContext, useEffect, useState } from 'react';
-import MediMindContext from '../context/MediMindContext';
+
+import MediMindContext from '../context/MediMindContext.jsx';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 import { API_BASE_URL } from '../utils/config';
 
 function DoctorDetails({ mcrNo }) {
-	const [doctorInfo, setDoctorInfo] = useState({});
-	const [clinicOptions, setClinicOptions] = useState([]);
-	const [isEditing, setIsEditing] = useState(false);
-	const [editedInfo, setEditedInfo] = useState({});
 	const mediMindCtx = useContext(MediMindContext);
-	const { doctorDetails } = mediMindCtx;
+	const { doctorDetails, setDoctorDetails } = mediMindCtx;
 
-	const handleEdit = () => {
-		setIsEditing(true);
-		setEditedInfo({ ...doctorInfo });
-	};
+	const [doctorInfo, setDoctorInfo] = useState(doctorDetails);
 
-	const handleSave = async () => {
-		try {
-			const response = await fetch(API_BASE_URL + 'api/doctor/update', {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					mcrNo: doctorInfo.mcrNo,
-					firstName: editedInfo.firstName,
-					lastName: editedInfo.lastName,
-					email: editedInfo.email,
-					clinicId: editedInfo.clinicId,
-				}),
-			});
+	const [isEditing, setIsEditing] = useState(false);
+	const [isChangingPassword, setIsChangingPassword] = useState(false);
+	const [password, setPassword] = useState(doctorInfo.password);
+	const [currentPassVisibility, setCurrentPassVisibility] = useState(false);
+	const [confirmPassVisibility, setConfirmPassVisibility] = useState(false);
 
-			if (response.ok) {
-				setDoctorInfo(editedInfo);
-				setIsEditing(false);
-				// Update the context
-				mediMindCtx.setDoctorDetails(editedInfo);
-			}
-		} catch (error) {
-			console.error('Error updating doctor:', error);
-		}
-	};
+	const [validation, setValidation] = useState({
+		newPassValidation: false,
+		currentPassValidation: false,
+	});
 
-	const handleCancel = () => {
-		setIsEditing(false);
-		setEditedInfo({ ...doctorInfo });
-	};
+	const [newPassword, setNewPassword] = useState('');
+	const [clinicOptions, setClinicOptions] = useState([]);
 
-	const handleInputChange = (field, value) => {
-		setEditedInfo((prev) => ({
-			...prev,
-			[field]: value,
-		}));
-	};
-
-	useEffect(() => {
-		const fetchDoctorDetails = async () => {
+	const handleEditToggle = async () => {
+		//call api to save
+		if (isEditing) {
 			try {
 				const response = await fetch(API_BASE_URL + 'api/doctor/update', {
-					method: 'GET',
+					method: 'PUT',
 					headers: {
 						'Content-Type': 'application/json',
 					},
+					body: JSON.stringify({
+						mcrNo: doctorInfo.mcrNo,
+						email: doctorInfo.email,
+						clinic: doctorInfo.clinic,
+					}),
 				});
-
-				if (response.ok) {
-					const doctor = await response.json();
-					setDoctorInfo(doctor);
-					setEditedInfo(doctor);
+				if (!response.ok) {
+					const errMsg = await response.text();
+					alert('Failed to update doctor info: ' + errMsg);
+					return;
 				}
+				const updateDoctor = await response.json();
+				setDoctorInfo(updateDoctor);
+				setDoctorDetails(updateDoctor);
+				alert('Doctor info updated successfully!');
 			} catch (error) {
-				console.error('Error fetching doctor details:', error);
+				console.error('Update error:', error);
+				alert('Server error');
+			} finally {
+				setIsEditing(false);
 			}
-		};
+		} else {
+			setIsEditing(true);
+		}
+	};
 
+	const handlePasswordToggle = async () => {
+		if (isChangingPassword) {
+			//if either field is empty don't save just revert
+			if (password.length === 0 || newPassword.length === 0) {
+				setNewPassword('');
+				setPassword(doctorInfo.password);
+				setIsChangingPassword(false);
+				setValidation({
+					currentPassValidation: false,
+					newPassValidation: false,
+				});
+				setConfirmPassVisibility(false);
+				setCurrentPassVisibility(false);
+				return;
+			}
+			const currentPassValidation = password !== doctorInfo.password;
+			const newPassValidation = newPassword.length < 6;
+
+			setValidation({
+				currentPassValidation,
+				newPassValidation,
+			});
+
+			if (!currentPassValidation && !newPassValidation) {
+				//save to db
+				try {
+					const response = await fetch(API_BASE_URL + 'api/doctor/update', {
+						method: 'PUT',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							mcrNo: doctorInfo.mcrNo,
+							password: newPassword,
+						}),
+					});
+					if (!response.ok) {
+						const errMsg = await response.text();
+						alert('Failed to update doctor info: ' + errMsg);
+						return;
+					}
+					const updateDoctor = await response.json();
+					setPassword(newPassword);
+					setDoctorInfo(updateDoctor);
+					setDoctorDetails(updateDoctor);
+					alert('Doctor info updated successfully!');
+				} catch (error) {
+					console.error('Update error:', error);
+					alert('Server error');
+				} finally {
+					// reinitialise validation
+					setValidation({
+						currentPassValidation: false,
+						newPassValidation: false,
+					});
+					setIsChangingPassword(false);
+					setNewPassword('');
+					setConfirmPassVisibility(false);
+					setCurrentPassVisibility(false);
+				}
+			}
+			console.log(password);
+			console.log(doctorInfo.password);
+		} else {
+			setIsChangingPassword(true);
+			setPassword('');
+			console.log('currentpassword: ', doctorInfo.password);
+		}
+	};
+
+	useEffect(() => {
 		const fetchAllClinic = async () => {
 			try {
 				const response = await fetch(API_BASE_URL + 'api/web/all-clinics', {
@@ -92,7 +148,6 @@ function DoctorDetails({ mcrNo }) {
 				console.error('Error loading clinics:', error);
 			}
 		};
-		fetchDoctorDetails();
 		fetchAllClinic();
 	}, [mcrNo]);
 
