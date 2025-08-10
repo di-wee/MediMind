@@ -10,7 +10,7 @@
     android:background="#F5F5F5"
     tools:context=".IntakeHistoryFragment">
 
-    <!-- Top App Bar -->
+    <!-- Top App Bar (same style as Profile) -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
@@ -22,28 +22,56 @@
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:contentInsetStartWithNavigation="0dp" />
 
-    <!-- Date filter (Material exposed dropdown) -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/dateFilterLayout"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+    <!-- Filters row (below the app bar) -->
+    <LinearLayout
+        android:id="@+id/filtersBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="8dp"
-        android:hint="Filter by date"
-        app:endIconMode="dropdown_menu">
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:background="@android:color/transparent">
 
-        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-            android:id="@+id/dateFilterDropdown"
-            android:layout_width="match_parent"
+        <!-- Date filter -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:inputType="none"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:hint="Date"
+            app:endIconMode="dropdown_menu"
+            app:boxBackgroundColor="@android:color/white">
 
-    <!-- Content container -->
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/dateFilterDropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Medication filter -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:hint="Medication"
+            app:endIconMode="dropdown_menu"
+            app:boxBackgroundColor="@android:color/white">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/medFilterDropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
+    <!-- Content -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -51,7 +79,6 @@
         android:clipToPadding="false"
         android:paddingBottom="96dp">
 
-        <!-- History list -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/intakeHistoryRecyclerView"
             android:layout_width="match_parent"
@@ -60,10 +87,8 @@
             android:paddingEnd="16dp"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
-            android:clipToPadding="false"
-            tools:listitem="@layout/item_intake_group" />
+            android:clipToPadding="false" />
 
-        <!-- Empty state -->
         <LinearLayout
             android:id="@+id/emptyState"
             android:layout_width="match_parent"
@@ -102,7 +127,6 @@
                 android:paddingEnd="24dp" />
         </LinearLayout>
 
-        <!-- Progress indicator -->
         <ProgressBar
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleLarge"

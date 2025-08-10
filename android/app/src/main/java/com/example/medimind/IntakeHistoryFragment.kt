@@ -8,11 +8,9 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.medimind.adapters.HistoryRow
@@ -26,74 +24,68 @@ import java.util.Locale
 
 class IntakeHistoryFragment : Fragment() {
 
+    // Raw + derived data caches
+    private var fullResponse: List<IntakeHistoryResponse> = emptyList()
+    private var uniqueDates: List<String> = emptyList() // yyyy-MM-dd (sorted desc)
+    private var uniqueMeds: List<String> = emptyList()  // distinct med names (sorted)
+
+    // Current filter selections (null means "All")
+    private var selectedDate: String? = null
+    private var selectedMed: String? = null
+
+    // Views
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var emptyState: LinearLayout
-    private lateinit var dateDropdown: MaterialAutoCompleteTextView
-
-    private var allResponses: List<IntakeHistoryResponse> = emptyList()
-    private var labelToDateKey: LinkedHashMap<String, String> = linkedMapOf() // "Saturday, 9 Aug" -> "2025-08-09"
-    private var adapter: IntakeHistoryStyledAdapter? = null
+    private lateinit var dateFilter: MaterialAutoCompleteTextView
+    private lateinit var medFilter: MaterialAutoCompleteTextView
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_intake_history, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Optional simple navbar + back button (only if your layout has these IDs)
-        setupSimpleNavbar(view)
-
-        // Views
-        progressBar = view.findViewById(R.id.progressBar)
-        emptyState = view.findViewById(R.id.emptyState)
+        // Grab views
         recyclerView = view.findViewById<RecyclerView>(R.id.intakeHistoryRecyclerView).apply {
             layoutManager = LinearLayoutManager(requireContext())
         }
-        dateDropdown = view.findViewById(R.id.dateFilterDropdown)
+        progressBar = view.findViewById(R.id.progressBar)
+        emptyState = view.findViewById(R.id.emptyState)
+        dateFilter = view.findViewById(R.id.dateFilterDropdown)
+        medFilter = view.findViewById(R.id.medFilterDropdown)
 
         val sharedPref = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val patientId = sharedPref.getString("patientId", null)
-
-        // Optional greeting (only if your layout has topGreetingText)
-        val greetingTextView = view.findViewById<TextView?>(R.id.topGreetingText)
 
         if (patientId == null) {
             showEmpty()
             return
         }
 
-        // Load greeting (non-blocking)
-        if (greetingTextView != null) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    val profile = ApiClient.retrofitService.getPatient(patientId)
-                    greetingTextView.text = "Hello, ${profile.firstName}"
-                } catch (_: Exception) {
-                    greetingTextView.text = "Hello"
-                }
-            }
-        }
-
-        // Load history data
-        loadData(patientId)
-    }
-
-    private fun loadData(patientId: String) {
-        progressBar.visibility = View.VISIBLE
-        emptyState.visibility = View.GONE
-        recyclerView.visibility = View.GONE
-
+        // Load data
+        showLoading()
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                allResponses = ApiClient.retrofitService.getIntakeHistory(patientId)
-                setupDateDropdown(allResponses)
-                applyFilter(null) // null = All dates
-                progressBar.visibility = View.GONE
+                fullResponse = ApiClient.retrofitService.getIntakeHistory(patientId)
+
+                // Build distinct lists for filters
+                uniqueDates = fullResponse
+                    .map { it.scheduledTime.substring(0, 10) }
+                    .distinct()
+                    .sortedDescending()
+
+                uniqueMeds = fullResponse
+                    .map { it.medicationName }
+                    .distinct()
+                    .sorted()
+
+                setupFilterDropdowns()
+                applyFiltersAndRender()
             } catch (e: Exception) {
-                progressBar.visibility = View.GONE
                 showEmpty()
                 Toast.makeText(
                     requireContext(),
@@ -104,118 +96,91 @@ class IntakeHistoryFragment : Fragment() {
         }
     }
 
-    /** Build the dropdown items from available dates. */
-    private fun setupDateDropdown(responses: List<IntakeHistoryResponse>) {
-        val sdfIn = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val sdfOut = SimpleDateFormat("EEEE, d MMM", Locale.getDefault())
-
-        // Collect unique date keys (yyyy-MM-dd), newest first
-        val dateKeys = responses.map { it.scheduledTime.substring(0, 10) }
-            .distinct()
-            .sortedDescending()
-
-        labelToDateKey.clear()
-        val labels = mutableListOf<String>()
-        labels += "All dates"
-        dateKeys.forEach { key ->
-            val label = runCatching { sdfOut.format(sdfIn.parse(key)!!) }.getOrElse { key }
-            labelToDateKey[label] = key
-            labels += label
+    private fun setupFilterDropdowns() {
+        // Date dropdown: "All dates" + yyyy-MM-dd
+        val dateLabels = listOf("All dates") + uniqueDates
+        dateFilter.setAdapter(
+            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, dateLabels)
+        )
+        dateFilter.setText("All dates", false)
+        dateFilter.setOnItemClickListener { _, _, pos, _ ->
+            selectedDate = if (pos == 0) null else uniqueDates[pos - 1]
+            applyFiltersAndRender()
         }
 
-        dateDropdown.setAdapter(
-            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, labels)
+        // Medication dropdown: "All" + med names
+        val medLabels = listOf("All") + uniqueMeds
+        medFilter.setAdapter(
+            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, medLabels)
         )
-        dateDropdown.setText("All dates", false)
-
-        dateDropdown.setOnItemClickListener { _, _, position, _ ->
-            val sel = labels[position]
-            if (sel == "All dates") {
-                applyFilter(null)
-            } else {
-                val key = labelToDateKey[sel]
-                applyFilter(key)
-            }
+        medFilter.setText("All", false)
+        medFilter.setOnItemClickListener { _, _, pos, _ ->
+            selectedMed = if (pos == 0) null else uniqueMeds[pos - 1]
+            applyFiltersAndRender()
         }
     }
 
-    /** Rebuild the rows for a specific date key (yyyy-MM-dd) or for all if key==null. */
-    private fun applyFilter(dateKey: String?) {
-        val filtered = if (dateKey == null) {
-            allResponses
-        } else {
-            allResponses.filter { it.scheduledTime.startsWith(dateKey) }
+    private fun applyFiltersAndRender() {
+        // Filter raw data
+        val filtered = fullResponse.filter { item ->
+            (selectedDate == null || item.scheduledTime.startsWith(selectedDate!!)) &&
+            (selectedMed == null || item.medicationName == selectedMed)
         }
 
-        val rows = buildGroupedRows(filtered)
+        // Build rows (grouped by date -> missed/taken -> med name -> times)
+        val rows = buildStyledRowsGrouped(filtered)
 
         if (rows.isEmpty()) {
             showEmpty()
         } else {
-            recyclerView.visibility = View.VISIBLE
-            emptyState.visibility = View.GONE
-            adapter = IntakeHistoryStyledAdapter(rows).also { recyclerView.adapter = it }
+            recyclerView.adapter = IntakeHistoryStyledAdapter(rows)
+            showList()
         }
     }
 
-    private fun showEmpty() {
-        emptyState.visibility = View.VISIBLE
-        recyclerView.visibility = View.GONE
-    }
-
     /**
-     * Grouping: Date -> (Missed by med -> times) + (Taken by med -> times)
+     * Date header -> MISSED section (grouped by med name with times)
+     * -> TAKEN section (grouped by med name with times).
      */
-    private fun buildGroupedRows(response: List<IntakeHistoryResponse>): List<HistoryRow> {
+    private fun buildStyledRowsGrouped(response: List<IntakeHistoryResponse>): List<HistoryRow> {
         if (response.isEmpty()) return emptyList()
 
         val sdfIn = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val sdfOut = SimpleDateFormat("EEEE, d MMM", Locale.getDefault())
-
         val rows = mutableListOf<HistoryRow>()
 
         response.groupBy { it.scheduledTime.substring(0, 10) }
-            .toSortedMap(compareByDescending { it })
+            .toSortedMap(compareByDescending { it }) // newest date first
             .forEach { (dateStr, itemsForDate) ->
-
                 val dateLabel = runCatching { sdfOut.format(sdfIn.parse(dateStr)!!) }
                     .getOrElse { dateStr }
                 rows += HistoryRow.DateHeader(dateLabel)
 
-                val (takenList, missedList) =
-                    itemsForDate.partition { it.status.equals("TAKEN", ignoreCase = true) }
+                val (taken, missed) = itemsForDate.partition { it.status.equals("TAKEN", true) }
 
-                rows += HistoryRow.StatusHeader("Missed", missedList.size, true)
-                if (missedList.isNotEmpty()) {
-                    missedList
-                        .groupBy { it.medicationName }
-                        .toSortedMap(String.CASE_INSENSITIVE_ORDER)
-                        .forEach { (med, items) ->
-                            rows += HistoryRow.MedGroupHeader(med)
-                            items.sortedBy { it.scheduledTime.substring(11, 16) }
-                                .forEach {
-                                    rows += HistoryRow.TimeRow(
-                                        time = it.scheduledTime.substring(11, 16),
-                                        taken = false
-                                    )
-                                }
+                // Missed section
+                rows += HistoryRow.StatusHeader("Missed", missed.size, isMissed = true)
+                missed.groupBy { it.medicationName }.toSortedMap().forEach { (med, medItems) ->
+                    rows += HistoryRow.MedGroupHeader(med)
+                    medItems.sortedBy { it.scheduledTime.substring(11, 16) }
+                        .forEach {
+                            rows += HistoryRow.TimeRow(
+                                time = it.scheduledTime.substring(11, 16),
+                                taken = false
+                            )
                         }
                 }
 
-                rows += HistoryRow.StatusHeader("Taken", takenList.size, false)
-                if (takenList.isNotEmpty()) {
-                    takenList
-                        .groupBy { it.medicationName }
-                        .toSortedMap(String.CASE_INSENSITIVE_ORDER)
-                        .forEach { (med, items) ->
-                            rows += HistoryRow.MedGroupHeader(med)
-                            items.sortedBy { it.scheduledTime.substring(11, 16) }
-                                .forEach {
-                                    rows += HistoryRow.TimeRow(
-                                        time = it.scheduledTime.substring(11, 16),
-                                        taken = true
-                                    )
-                                }
+                // Taken section
+                rows += HistoryRow.StatusHeader("Taken", taken.size, isMissed = false)
+                taken.groupBy { it.medicationName }.toSortedMap().forEach { (med, medItems) ->
+                    rows += HistoryRow.MedGroupHeader(med)
+                    medItems.sortedBy { it.scheduledTime.substring(11, 16) }
+                        .forEach {
+                            rows += HistoryRow.TimeRow(
+                                time = it.scheduledTime.substring(11, 16),
+                                taken = true
+                            )
                         }
                 }
             }
@@ -223,12 +188,23 @@ class IntakeHistoryFragment : Fragment() {
         return rows
     }
 
-    private fun setupSimpleNavbar(view: View) {
-        // These are optional; ensure your layout contains them
-        val backButton = view.findViewById<TextView?>(R.id.btn_back)
-        val pageTitle = view.findViewById<TextView?>(R.id.page_title)
+    // ----- UI state helpers -----
 
-        pageTitle?.text = "Intake History"
-        backButton?.setOnClickListener { findNavController().navigateUp() }
+    private fun showLoading() {
+        progressBar.visibility = View.VISIBLE
+        emptyState.visibility = View.GONE
+        recyclerView.visibility = View.GONE
+    }
+
+    private fun showEmpty() {
+        progressBar.visibility = View.GONE
+        emptyState.visibility = View.VISIBLE
+        recyclerView.visibility = View.GONE
+    }
+
+    private fun showList() {
+        progressBar.visibility = View.GONE
+        emptyState.visibility = View.GONE
+        recyclerView.visibility = View.VISIBLE
     }
 }
