@@ -26,7 +26,7 @@ class MedicineAdapter(
     override fun onBindViewHolder(holder: MedicineViewHolder, position: Int) {
         val medicine = medicines[position]
         holder.medicineNameTextView.text = medicine.medicationName
-        holder.quantityTextView.text = "(Take ${medicine.intakeQuantity} each time.)"
+        holder.quantityTextView.text = "Take ${medicine.intakeQuantity} each time."
         holder.itemView.setOnClickListener{
             onItemClick(medicine)
         }
