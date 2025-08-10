@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Primary brand colors -->
+    <color name="md_theme_light_primary">#1E88E5</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+
+    <!-- Secondary/Accent -->
+    <color name="md_theme_light_secondary">#1565C0</color>
+    <color name="md_theme_light_onSecondary">#FFFFFF</color>
+
+    <!-- Background and surface -->
+    <color name="md_theme_light_background">#FAF7FB</color>
+    <color name="md_theme_light_onBackground">#2D2D2D</color>
+    <color name="md_theme_light_surface">#FFFFFF</color>
+    <color name="md_theme_light_onSurface">#2D2D2D</color>
+
+    <!-- Error color -->
+    <color name="md_theme_light_error">#B3261E</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+
+    <!-- Common colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="link_blue">#1E88E5</color>
+
+    <!-- New app background -->
+    <color name="app_background_light">#F3F3F7</color>
 </resources>

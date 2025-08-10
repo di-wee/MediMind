@@ -1,0 +1,97 @@
+name: Generate Final CI/CD Report
+
+on:
+  workflow_run:
+    workflows:
+      - "SCA - Dependency Scan (Trivy)" # Trigger only after SCA completes
+    types:
+      - completed
+
+jobs:
+  final-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Check GH CLI version
+        run: gh --version
+
+      - name: Wait for all workflows to complete
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          required_workflows=("Linting CI & Build" "SAST - Static Code Analysis & Build" "SCA - Dependency Scan (Trivy)")
+          echo "Ensuring all required workflows are completed on branch ${GITHUB_REF_NAME}..."
+          
+          for workflow in "${required_workflows[@]}"; do
+            while true; do
+              status=$(gh run list \
+                --workflow "$workflow" \
+                --branch "${GITHUB_REF_NAME}" \
+                --json status \
+                --jq '.[0].status')
+              
+              echo "Latest status for $workflow: $status"
+              if [ "$status" = "completed" ]; then
+                break
+              fi
+              echo "$workflow not finished yet. Waiting 60s..."
+              sleep 60
+            done
+          done
+
+      - name: Prepare artifacts folder
+        run: mkdir -p artifacts
+
+      - name: Download latest artifacts from all workflows
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          workflows=("Linting CI & Build" "SAST - Static Code Analysis & Build" "SCA - Dependency Scan (Trivy)")
+          
+          for workflow in "${workflows[@]}"; do
+            echo "Fetching latest run for $workflow..."
+            run_id=$(gh run list \
+              --workflow "$workflow" \
+              --branch "${GITHUB_REF_NAME}" \
+              --json databaseId,status \
+              --jq '[.[] | select(.status=="completed")][0].databaseId' || true)
+            
+            if [ -z "$run_id" ]; then
+              echo "No completed runs found for $workflow"
+              continue
+            fi
+            echo "Downloading artifacts for run $run_id of $workflow..."
+            gh run download "$run_id" --dir "artifacts/$workflow" || echo "No artifacts for $workflow"
+          done
+
+      - name: Combine reports into final report
+        run: |
+          mkdir -p artifacts/final
+          report_file="artifacts/final/final-report.txt"
+          
+          echo "======================" > "$report_file"
+          echo "MediMind CI/CD Final Report - $(date)" >> "$report_file"
+          echo "======================" >> "$report_file"
+
+          for workflow in "Linting CI & Build" "SAST - Static Code Analysis & Build" "SCA - Dependency Scan (Trivy)"; do
+            echo "" >> "$report_file"
+            echo "=== $workflow Report ===" >> "$report_file"
+            if [ -d "artifacts/$workflow" ]; then
+              find "artifacts/$workflow" -type f \( -name "*.txt" -o -name "*.log" \) -exec cat {} \; >> "$report_file"
+            else
+              echo "No artifacts found for $workflow" >> "$report_file"
+            fi
+          done
+
+          echo "Final report generated at $report_file"
+
+      - name: Upload Final Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-report
+          path: artifacts/final/final-report.txt

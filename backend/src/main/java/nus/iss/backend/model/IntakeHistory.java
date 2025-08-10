@@ -1,0 +1,45 @@
+package nus.iss.backend.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
+
+import java.sql.Types;
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.UUID;
+
+@Entity
+@Getter
+@Setter
+@Table(name = "Medication_Intake_History")
+public class IntakeHistory {
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @JdbcTypeCode(Types.VARCHAR)
+    @Column(name="Id", updatable = false, nullable = false)
+    private UUID id;
+    @Column(name = "Logged_Date")
+    private LocalDate loggedDate;
+    @Column(name="Is_Taken",nullable = false)
+    private boolean isTaken;
+    @Column(name = "Doctor_Note")
+    private String doctorNote;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "Patient_Id",nullable = false)
+    private Patient patient;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name="Schedule_Id",nullable = false)
+    private Schedule schedule;
+}

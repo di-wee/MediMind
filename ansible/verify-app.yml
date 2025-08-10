@@ -1,0 +1,97 @@
+---
+- name: Verify App Services
+  hosts: medimind_servers
+  become: yes
+  vars:
+    app_user: ubuntu
+  tasks:
+    - name: Check docker-compose service status
+      systemd:
+        name: medimind-docker
+      register: docker_status
+
+    - name: Display docker service status
+      debug:
+        msg: "Docker service is {{ 'running' if docker_status.status.ActiveState == 'active' else 'not running' }}"
+
+    - name: Check if backend container is running
+      shell: docker ps --filter "name=medimind-backend" --format "table {{ '{{' }}.Names{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}"
+      register: backend_container
+      become_user: '{{ app_user }}'
+
+    - name: Display backend container status
+      debug:
+        msg: 'Backend container: {{ backend_container.stdout }}'
+
+    - name: Check if frontend container is running
+      shell: docker ps --filter "name=medimind-frontend" --format "table {{ '{{' }}.Names{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}"
+      register: frontend_container
+      become_user: '{{ app_user }}'
+
+    - name: Display frontend container status
+      debug:
+        msg: 'Frontend container: {{ frontend_container.stdout }}'
+
+    - name: Check if backend is responding
+      uri:
+        url: http://localhost:8080/
+        method: GET
+      register: backend_health
+      ignore_errors: yes
+
+    - name: Display backend health
+      debug:
+        msg: "Backend health check: {{ 'OK' if backend_health.status == 200 else 'FAILED' }}"
+
+    - name: Check backend patients endpoint
+      uri:
+        url: http://localhost:8080/api/doctor/test
+        method: GET
+      register: backend_test
+      ignore_errors: yes
+
+    - name: Display backend  status
+      debug:
+        msg: "Backend patients endpoint: {{ 'OK' if backend_test.status == 200 else 'FAILED' }}"
+
+    - name: Check backend doctors endpoint
+      uri:
+        url: http://localhost:8080/doctors
+        method: GET
+      register: backend_doctors
+      ignore_errors: yes
+
+    - name: Display backend doctors status
+      debug:
+        msg: "Backend doctors endpoint: {{ 'OK' if backend_doctors.status == 200 else 'FAILED' }}"
+
+    - name: Check if frontend is responding
+      uri:
+        url: http://localhost:5173/
+        method: GET
+        status_code: [200, 301, 302]
+      register: frontend_health
+      ignore_errors: yes
+
+    - name: Display frontend health
+      debug:
+        msg: "Frontend health check: {{ 'OK' if frontend_health.status == 200 else 'FAILED' }}"
+
+    - name: Check frontend container status
+      shell: docker ps --filter "name=medimind-frontend" --format "{{ '{{' }}.Status{{ '}}' }}"
+      become_user: '{{ app_user }}'
+      register: frontend_container_status
+      changed_when: false
+
+    - name: Display frontend container status
+      debug:
+        msg: 'Frontend container status: {{ frontend_container_status.stdout }}'
+
+    - name: Display service URLs
+      debug:
+        msg: |
+          === Docker Services Status ===
+          Backend Root: http://{{ ansible_default_ipv4.address }}:8080/
+          Backend Patients: http://{{ ansible_default_ipv4.address }}:8080/patients
+          Backend Doctors: http://{{ ansible_default_ipv4.address }}:8080/doctors
+          Frontend: http://{{ ansible_default_ipv4.address }}:5173

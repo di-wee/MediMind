@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="100dp">
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:textAlignment="center"
+        android:background="#673AB7"
+        android:textColor="@color/white"
+        android:text="Manual Key In New Med"
+        android:textSize="30sp"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp"
+        android:paddingBottom="20dp">
+
+        <TextView
+            android:id="@+id/medicationNameLabelManual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text = "Medication: "
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/medicationNameInputManual"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:hint="paracetamol"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp"
+        android:paddingBottom="20dp">
+
+        <TextView
+            android:id="@+id/dosageLabelManual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text = "Quantity: "
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/dosageInputManual"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:hint="2"
+            android:layout_marginStart="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text =" /tablet(s)"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp"
+        android:paddingBottom="20dp">
+
+        <TextView
+            android:id="@+id/frequencyLabelManual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text = "Frequency: "
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/frequencyInputManual"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:hint="2"
+            android:layout_marginStart="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text =" times/day"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp"
+        android:paddingBottom="20dp">
+
+        <TextView
+            android:id="@+id/instructionLabelManual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text = "Instruction: "
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/instructionInputManual"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:hint="before or afer meal"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp"
+        android:paddingBottom="20dp">
+
+        <TextView
+            android:id="@+id/noteLabelManual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text = "Note: "
+            android:textSize="18sp"/>
+        <EditText
+            android:id="@+id/noteInputManual"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:hint="For fever/pain. May cause drowsiness"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="20dp">
+
+        <Button
+            android:id="@+id/btnBackFromManual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:text="Back" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/btnSaveFromManual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="Save"/>
+
+    </LinearLayout>
+
+
+
+
+
+
+
+
+</LinearLayout>

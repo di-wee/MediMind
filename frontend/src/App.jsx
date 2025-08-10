@@ -1,18 +1,28 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
 import './App.css';
-import { Route, Link, Routes } from 'react-router';
+import { Route, Routes } from 'react-router-dom';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import PatientProfile from './pages/PatientProfile';
-import MedicationLog from './pages/MedicationLog';
+import MedicationLog from './components/MedicationLog';
 import LandingPage from './pages/LandingPage';
+import AddPatientPage from './pages/AddPatientPage';
+import Register from './pages/Register';
+import DoctorProfile from './pages/DoctorProfile';
+import MediMindContext from './context/MediMindContext';
+import { useState } from 'react';
 
 function App() {
+	const [doctorDetails, setDoctorDetails] = useState({});
+	const [completedSignUp, setCompletedSignUp] = useState(false);
 	return (
 		<>
-			<main>
+			<MediMindContext.Provider
+				value={{
+					doctorDetails,
+					setDoctorDetails,
+					completedSignUp,
+					setCompletedSignUp,
+				}}>
 				<Routes>
 					<Route
 						path='/'
@@ -23,9 +33,32 @@ function App() {
 						}
 					/>
 					<Route
+						path='/addpatient'
+						element={
+							<ProtectedRoute>
+								<AddPatientPage />
+							</ProtectedRoute>
+						}
+					/>
+
+					<Route
+						path='/profile/:mcrNo'
+						element={
+							<ProtectedRoute>
+								<DoctorProfile />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path='/register'
+						element={<Register />}
+					/>
+
+					<Route
 						path='/login'
 						element={<Login />}
 					/>
+
 					<Route
 						path='/patient/:patientId'
 						element={
@@ -34,16 +67,8 @@ function App() {
 							</ProtectedRoute>
 						}
 					/>
-					<Route
-						path='/patient/:patientId/:medicationId/log'
-						element={
-							<ProtectedRoute>
-								<MedicationLog />
-							</ProtectedRoute>
-						}
-					/>
 				</Routes>
-			</main>
+			</MediMindContext.Provider>
 		</>
 	);
 }

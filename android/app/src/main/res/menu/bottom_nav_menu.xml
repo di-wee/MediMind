@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/homeFragment"
+        android:title="Home"
+        android:icon="@drawable/ic_home" />
+    <item
+        android:id="@+id/intakeHistoryFragment"
+        android:title="Log"
+        android:icon="@drawable/ic_log" />
+    <item
+        android:id="@+id/activeMedicineListFragment"
+        android:title="Medication"
+        android:icon="@drawable/ic_medication" />
+    <item
+        android:id="@+id/profileFragment"
+        android:title="Profile"
+        android:icon="@drawable/ic_profile" />
+</menu>
