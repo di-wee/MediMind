@@ -21,7 +21,8 @@ res = api.upload_folder(
     repo_type="model",
     folder_path=MODEL_DIR
 )
-hf_sha = res.commit_hash
+# Fix: Use the correct attribute name
+hf_sha = res.commit_url.split('/')[-1]  # Extract SHA from commit URL
 print(f"Pushed to HF repo '{HF_REPO}', SHA: {hf_sha}")
 
 # === Update model_version.txt ===
