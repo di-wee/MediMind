@@ -4,7 +4,10 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="40dp">
+    android:background="#F5F5F5"
+    android:paddingHorizontal="32dp"
+    android:padding="24dp"
+    android:layout_marginBottom="10dp">
 
     <Button
         android:id="@+id/btnBack"
@@ -21,7 +24,8 @@
         android:layout_marginBottom="8dp"
         android:text="@string/name_place_holder"
         android:textSize="24sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:textColor="#111111"/>
 
     <Button
         android:id="@+id/btnMedicationPurpose"
@@ -38,13 +42,15 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:textSize="16sp"
+        android:backgroundTint="#ff4444"
         android:text="@string/delete"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_marginTop="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -59,7 +65,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="8dp"
+                android:paddingStart="8dp">
 
                 <TextView
                     android:id="@+id/frequencyLabel"
@@ -91,7 +98,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Time(h):"
-                android:textSize="16sp"/>
+                android:textSize="16sp"
+                android:paddingStart="8dp"/>
 
             <ScrollView
                 android:id="@+id/timeInputScrollView"
@@ -117,9 +125,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="80dp"
             android:text="Save"/>
 
     </LinearLayout>
-
 </LinearLayout>

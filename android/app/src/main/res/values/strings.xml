@@ -8,5 +8,7 @@
     <string name="purpose">Medication Purpose</string>
     <string name="delete">Delete Medication</string>
     <string name="back">Back</string>
+    <string name="for_fever_pain_may_cause_drowsiness">For fever/pain. May cause drowsiness</string>
+    <string name="before_or_after_meal">before or after meal</string>
 
 </resources>
