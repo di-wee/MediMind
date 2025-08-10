@@ -8,7 +8,7 @@ on:
       - "Dockerfile"
       - "requirements.txt"
       - "model_version.txt"
-      - ".github/workflows/deploy-ml.yaml" # <- matches your filename
+      - ".github/workflows/deploy-ml.yaml"
   workflow_dispatch:
 
 jobs:
@@ -66,7 +66,7 @@ jobs:
 
             # Install docker if missing
             if ! command -v docker >/dev/null 2>&1; then
-              echo \"Docker not found. Installing...\"
+              echo "Docker not found. Installing..."
               curl -fsSL https://get.docker.com | sh
             fi
 
@@ -78,4 +78,4 @@ jobs:
               $IMAGE
 
             sudo docker image prune -f
-          '"
+          '" 
