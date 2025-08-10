@@ -8,9 +8,11 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.medimind.adapters.HistoryRow
@@ -41,6 +43,10 @@ class IntakeHistoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Optional simple navbar + back button (only if your layout has these IDs)
+        setupSimpleNavbar(view)
+
+        // Views
         progressBar = view.findViewById(R.id.progressBar)
         emptyState = view.findViewById(R.id.emptyState)
         recyclerView = view.findViewById<RecyclerView>(R.id.intakeHistoryRecyclerView).apply {
@@ -51,11 +57,27 @@ class IntakeHistoryFragment : Fragment() {
         val sharedPref = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val patientId = sharedPref.getString("patientId", null)
 
+        // Optional greeting (only if your layout has topGreetingText)
+        val greetingTextView = view.findViewById<TextView?>(R.id.topGreetingText)
+
         if (patientId == null) {
             showEmpty()
             return
         }
 
+        // Load greeting (non-blocking)
+        if (greetingTextView != null) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val profile = ApiClient.retrofitService.getPatient(patientId)
+                    greetingTextView.text = "Hello, ${profile.firstName}"
+                } catch (_: Exception) {
+                    greetingTextView.text = "Hello"
+                }
+            }
+        }
+
+        // Load history data
         loadData(patientId)
     }
 
@@ -69,7 +91,6 @@ class IntakeHistoryFragment : Fragment() {
                 allResponses = ApiClient.retrofitService.getIntakeHistory(patientId)
                 setupDateDropdown(allResponses)
                 applyFilter(null) // null = All dates
-
                 progressBar.visibility = View.GONE
             } catch (e: Exception) {
                 progressBar.visibility = View.GONE
@@ -143,10 +164,9 @@ class IntakeHistoryFragment : Fragment() {
     }
 
     /**
-     * Same grouping you approved earlier: Date -> (Missed by med -> times) + (Taken by med -> times)
-     * If a single date is filtered, you will still see its DateHeader for clarity.
+     * Grouping: Date -> (Missed by med -> times) + (Taken by med -> times)
      */
-    private fun buildGroupedRows(response: List<IntakeHistoryResponse>): List<com.example.medimind.adapters.HistoryRow> {
+    private fun buildGroupedRows(response: List<IntakeHistoryResponse>): List<HistoryRow> {
         if (response.isEmpty()) return emptyList()
 
         val sdfIn = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -201,5 +221,14 @@ class IntakeHistoryFragment : Fragment() {
             }
 
         return rows
+    }
+
+    private fun setupSimpleNavbar(view: View) {
+        // These are optional; ensure your layout contains them
+        val backButton = view.findViewById<TextView?>(R.id.btn_back)
+        val pageTitle = view.findViewById<TextView?>(R.id.page_title)
+
+        pageTitle?.text = "Intake History"
+        backButton?.setOnClickListener { findNavController().navigateUp() }
     }
 }

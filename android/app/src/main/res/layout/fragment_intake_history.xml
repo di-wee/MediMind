@@ -3,11 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:fitsSystemWindows="true"
-    android:background="#F5F5F5">
+    android:background="#F5F5F5"
+    tools:context=".IntakeHistoryFragment">
 
     <!-- Top App Bar -->
     <com.google.android.material.appbar.MaterialToolbar
@@ -18,12 +19,13 @@
         app:title="Intake History"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
+        app:navigationIcon="?attr/homeAsUpIndicator"
         app:contentInsetStartWithNavigation="0dp" />
 
     <!-- Date filter (Material exposed dropdown) -->
     <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:id="@+id/dateFilterLayout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -38,7 +40,7 @@
             android:layout_height="wrap_content"
             android:inputType="none"
             android:paddingStart="4dp"
-            android:paddingEnd="4dp"/>
+            android:paddingEnd="4dp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Content container -->
