@@ -35,14 +35,14 @@
             android:id="@+id/medicationNameLabel"
             android:layout_width="125dp"
             android:layout_height="wrap_content"
-            android:text = "Medication: "
+            android:text = "@string/medication_name_label"
             android:textSize="18sp"/>
         <EditText
             android:id="@+id/medicationNameInput"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="paracetamol"
+            android:hint="@string/medication_name_hint"
             android:layout_marginStart="8dp"/>
     </LinearLayout>
 
@@ -55,19 +55,19 @@
             android:id="@+id/intakeQuantityLabel"
             android:layout_width="125dp"
             android:layout_height="wrap_content"
-            android:text = "Intake Quantity: "
+            android:text = "@string/intake_quantity_label"
             android:textSize="18sp"/>
         <EditText
             android:id="@+id/intakeQuantityInput"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="2"
+            android:hint="@string/hint_2"
             android:layout_marginStart="8dp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text =" /tablet(s)"/>
+            android:text ="@string/tablets_label"/>
     </LinearLayout>
 
     <LinearLayout
@@ -79,19 +79,19 @@
             android:id="@+id/frequencyLabel"
             android:layout_width="125dp"
             android:layout_height="wrap_content"
-            android:text = "Frequency: "
+            android:text = "@string/frequency_label"
             android:textSize="18sp"/>
         <EditText
             android:id="@+id/frequencyInput"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="2"
+            android:hint="@string/hint_2"
             android:layout_marginStart="8dp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text =" times/day"/>
+            android:text ="@string/times_day_label"/>
     </LinearLayout>
 
     <LinearLayout
@@ -103,7 +103,7 @@
             android:id="@+id/instructionLabel"
             android:layout_width="125dp"
             android:layout_height="wrap_content"
-            android:text = "Instruction: "
+            android:text = "@string/instruction_label"
             android:textSize="18sp"/>
         <EditText
             android:id="@+id/instructionInput"
@@ -123,7 +123,7 @@
             android:id="@+id/noteLabel"
             android:layout_width="125dp"
             android:layout_height="wrap_content"
-            android:text = "Note: "
+            android:text = "@string/note_label"
             android:textSize="18sp"/>
         <EditText
             android:id="@+id/noteInput"
