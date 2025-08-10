@@ -84,26 +84,6 @@
                     tools:text="user@example.com"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- NRIC -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:boxBackgroundColor="#FFFFFF"
-                app:boxStrokeColor="#BDBDBD"
-                app:boxStrokeWidth="1dp"
-                app:hintTextColor="#BDBDBD"
-                android:hint="NRIC">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editNRIC"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textCapCharacters"
-                    tools:text="S1234567A"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
             <!-- First Name -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -159,26 +139,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     tools:text="Male"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- DOB -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:boxBackgroundColor="#FFFFFF"
-                app:boxStrokeColor="#BDBDBD"
-                app:boxStrokeWidth="1dp"
-                app:hintTextColor="#BDBDBD"
-                android:hint="DOB (YYYY-MM-DD)">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editDob"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="date"
-                    tools:text="1996-05-22"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- New Password (Optional) -->
