@@ -5,37 +5,76 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
     android:background="@color/white"
     tools:context=".IntakeHistoryFragment">
 
-    <!-- Reusable top navigation bar (includes greeting + logout) -->
-    <include
-        layout="@layout/top_nav_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <!-- Title of the screen -->
-    <TextView
-        android:id="@+id/historyTitle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Intake History"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:textColor="@color/black" />
+        android:background="#4A90E2"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="48dp"
+        android:paddingBottom="16dp">
 
-    <!-- RecyclerView that lists grouped medication intake logs -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/intakeHistoryRecyclerView"
+        <!-- Back Button -->
+        <TextView
+            android:id="@+id/btn_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/white"
+            android:text="←"
+            android:textSize="20sp"
+            android:textColor="#4A90E2"
+            android:gravity="center"
+            android:contentDescription="Back" />
+
+        <!-- Page Title -->
+        <TextView
+            android:id="@+id/page_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:text="Intake History"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!-- Content area with padding -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingBottom="8dp"
-        android:scrollbars="vertical"
-        tools:listitem="@layout/item_intake_group" />
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Title of the screen -->
+        <TextView
+            android:id="@+id/historyTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Intake History"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:textColor="@color/black" />
+
+        <!-- RecyclerView that lists grouped medication intake logs -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/intakeHistoryRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp"
+            android:scrollbars="vertical"
+            tools:listitem="@layout/item_intake_group" />
+
+    </LinearLayout>
 
 </LinearLayout>
