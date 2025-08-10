@@ -18,7 +18,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # --- Pin exact HF model revision into the image (set via build-args in CI) ---
 ARG HF_MODEL_ID=prizellia/ner-medimind
 ARG HF_REV=main
-ENV HF_MODEL_ID=$HF_MODEL_ID HF_REV=$HF_REV
+ARG HF_TOKEN
+ENV HF_MODEL_ID=$HF_MODEL_ID HF_REV=$HF_REV HF_TOKEN=$HF_TOKEN
 
 # Download the model snapshot at the given revision into /app/model
 RUN python - <<'PY'
@@ -26,11 +27,12 @@ from huggingface_hub import snapshot_download
 import os
 mid = os.environ["HF_MODEL_ID"]
 rev = os.environ["HF_REV"]
-snapshot_download(repo_id=mid, revision=rev, local_dir="/app/model", local_dir_use_symlinks=False)
+token = os.environ.get("HF_TOKEN")
+snapshot_download(repo_id=mid, revision=rev, local_dir="/app/model", local_dir_use_symlinks=False, token=token)
 print("Downloaded model:", mid, "@", rev)
 PY
 
-# Copy your app code last (so code edits don’t force re-download of the model)
+# Copy your app code last (so code edits don't force re-download of the model)
 COPY . .
 
 # Healthcheck expects FastAPI to expose GET /health returning 200

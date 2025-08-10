@@ -38,6 +38,7 @@ jobs:
           docker build \
             --build-arg HF_MODEL_ID=prizellia/ner-medimind \
             --build-arg HF_REV=${{ steps.readsha.outputs.HF_SHA }} \
+            --build-arg HF_TOKEN=${{ secrets.HF_TOKEN }} \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/nerapp:${{ steps.readsha.outputs.HF_SHA }} \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/nerapp:latest .
 
