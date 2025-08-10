@@ -1,40 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/intakeHistoryLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/white"
+    android:fitsSystemWindows="true"
+    android:background="#F5F5F5"
     tools:context=".IntakeHistoryFragment">
 
-    <!-- Reusable top navigation bar (includes greeting + logout) -->
+    <!-- Reusable top navigation bar (Hello + Logout) -->
     <include
         layout="@layout/top_nav_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <!-- Title of the screen -->
+    <!-- Screen title -->
     <TextView
         android:id="@+id/historyTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Intake History"
-        android:textSize="22sp"
+        android:textSize="20sp"
         android:textStyle="bold"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:textColor="@color/black" />
+        android:textColor="@android:color/black"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp" />
 
-    <!-- RecyclerView that lists grouped medication intake logs -->
+    <!-- Progress indicator -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"
+        android:indeterminate="true"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp" />
+
+    <!-- Empty state -->
+    <LinearLayout
+        android:id="@+id/emptyState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/med_schedule_placeholder"
+            android:contentDescription="@string/app_name"
+            android:alpha="0.9" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No intake history yet"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="12dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="When you record medication intakes, they’ll show up here."
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:gravity="center"
+            android:layout_marginTop="6dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp" />
+    </LinearLayout>
+
+    <!-- RecyclerView list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/intakeHistoryRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:paddingBottom="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
         android:scrollbars="vertical"
         tools:listitem="@layout/item_intake_group" />
 
