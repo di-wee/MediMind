@@ -1,80 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/intakeHistoryLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/white"
+    android:fitsSystemWindows="true"
+    android:background="#F5F5F5"
     tools:context=".IntakeHistoryFragment">
 
-    <LinearLayout
+    <!-- Top App Bar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:title="Intake History"
+        app:titleCentered="true"
+        app:titleTextColor="@android:color/white"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:contentInsetStartWithNavigation="0dp" />
+
+    <!-- Date filter (Material exposed dropdown) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/dateFilterLayout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#4A90E2"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="48dp"
-        android:paddingBottom="16dp">
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:hint="Filter by date"
+        app:endIconMode="dropdown_menu">
 
-        <!-- Back Button -->
-        <TextView
-            android:id="@+id/btn_back"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@android:color/white"
-            android:text="←"
-            android:textSize="20sp"
-            android:textColor="#4A90E2"
-            android:gravity="center"
-            android:contentDescription="Back" />
-
-        <!-- Page Title -->
-        <TextView
-            android:id="@+id/page_title"
-            android:layout_width="0dp"
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/dateFilterDropdown"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="16dp"
-            android:text="Intake History"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:inputType="none"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-    </LinearLayout>
-
-    <!-- Content area with padding -->
-    <LinearLayout
+    <!-- Content container -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:clipToPadding="false"
+        android:paddingBottom="96dp">
 
-        <!-- Title of the screen -->
-        <TextView
-            android:id="@+id/historyTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Intake History"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:textColor="@color/black" />
-
-        <!-- RecyclerView that lists grouped medication intake logs -->
+        <!-- History list -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/intakeHistoryRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:clipToPadding="false"
+            android:layout_height="match_parent"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
             android:paddingBottom="8dp"
-            android:scrollbars="vertical"
+            android:clipToPadding="false"
             tools:listitem="@layout/item_intake_group" />
 
-    </LinearLayout>
+        <!-- Empty state -->
+        <LinearLayout
+            android:id="@+id/emptyState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="24dp">
+
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@drawable/med_schedule_placeholder"
+                android:contentDescription="@string/app_name"
+                app:tint="#BDBDBD"
+                android:alpha="0.9" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No intake history yet"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#333333"
+                android:layout_marginTop="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Your medication logs will appear here once you start logging."
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:gravity="center"
+                android:layout_marginTop="6dp"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp" />
+        </LinearLayout>
+
+        <!-- Progress indicator -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </FrameLayout>
 
 </LinearLayout>
