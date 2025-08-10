@@ -1,41 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/intakeHistoryLayout"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/white"
-    tools:context=".IntakeHistoryFragment">
+    android:fitsSystemWindows="true"
+    android:background="#F5F5F5">
 
-    <!-- Reusable top navigation bar (includes greeting + logout) -->
-    <include
-        layout="@layout/top_nav_bar"
+    <!-- Top App Bar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:title="Intake History"
+        app:titleCentered="true"
+        app:titleTextColor="@android:color/white"
+        app:contentInsetStartWithNavigation="0dp" />
 
-    <!-- Title of the screen -->
-    <TextView
-        android:id="@+id/historyTitle"
+    <!-- Date filter (Material exposed dropdown) -->
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:id="@+id/dateFilterLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Intake History"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:textColor="@color/black" />
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:hint="Filter by date"
+        app:endIconMode="dropdown_menu">
 
-    <!-- RecyclerView that lists grouped medication intake logs -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/intakeHistoryRecyclerView"
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/dateFilterDropdown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Content container -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:paddingBottom="8dp"
-        android:scrollbars="vertical"
-        tools:listitem="@layout/item_intake_group" />
+        android:paddingBottom="96dp">
+
+        <!-- History list -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/intakeHistoryRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:clipToPadding="false"
+            tools:listitem="@layout/item_intake_group" />
+
+        <!-- Empty state -->
+        <LinearLayout
+            android:id="@+id/emptyState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="24dp">
+
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@drawable/med_schedule_placeholder"
+                android:contentDescription="@string/app_name"
+                app:tint="#BDBDBD"
+                android:alpha="0.9" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No intake history yet"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#333333"
+                android:layout_marginTop="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Your medication logs will appear here once you start logging."
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:gravity="center"
+                android:layout_marginTop="6dp"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp" />
+        </LinearLayout>
+
+        <!-- Progress indicator -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </FrameLayout>
 
 </LinearLayout>
