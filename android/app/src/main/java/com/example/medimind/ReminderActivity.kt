@@ -37,7 +37,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.card.MaterialCardView
 import androidx.core.content.ContextCompat
 
-
 class ReminderActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,8 +59,10 @@ class ReminderActivity : AppCompatActivity() {
             }
             try {
                 val time = convertMillisToLocalTimeString(timeMillis)
-                val service = ApiClient.retrofitService
 
+                Log.d("ReminderActivity", "🔔 Triggered at millis: $timeMillis → ${convertMillisToLocalTimeString(timeMillis)}")
+
+                val service = ApiClient.retrofitService
                 val scheduleListRequest = ScheduleListRequest(time,patientId)
                 val response = service.getSchedulesByTime(scheduleListRequest)
                 if (!response.isSuccessful || response.body().isNullOrEmpty()) {
@@ -80,6 +81,9 @@ class ReminderActivity : AppCompatActivity() {
 
                 val medsRequest = MedicationIdListRequest(finalMedIds.toList())
                 val unorderedMeds = service.getMedications(medsRequest)
+                Log.d("ReminderActivity", "finalMedIds = $finalMedIds")
+                Log.d("ReminderActivity", "unorderedMeds IDs = ${unorderedMeds.map { it.id }}")
+
                 val medsMap = unorderedMeds.associateBy { it.id }
 
                 val meds = filteredSchedules.mapNotNull { medsMap[it.medicineId] }
@@ -287,19 +291,23 @@ class ReminderActivity : AppCompatActivity() {
             .toLocalTime()
         return localTime.toString()
     }
+
     fun increaseSnoozeCount(context: Context,scheduleId: String){
         val prefs = context.getSharedPreferences("SnoozePrefs", Context.MODE_PRIVATE)
         val current = prefs.getInt(scheduleId, 0)
         prefs.edit().putInt(scheduleId, current + 1).apply()
     }
+
     fun clearSnoozeCount(context: Context,scheduleId:String){
         val prefs = context.getSharedPreferences("SnoozePrefs", Context.MODE_PRIVATE)
         prefs.edit().remove(scheduleId).apply()
     }
+
     fun getSnoozeCount(context: Context,scheduleId:String):Int{
         val prefs = context.getSharedPreferences("SnoozePrefs", Context.MODE_PRIVATE)
         return prefs.getInt(scheduleId, 0)
     }
+
     fun buildStyledSpannable(
         title: String,
         intake: String,
