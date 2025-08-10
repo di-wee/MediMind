@@ -1,0 +1,264 @@
+---
+- name: Deploy MediMind Application with Docker
+  hosts: medimind_servers
+  become: yes
+  vars:
+    app_user: ubuntu
+    app_dir: /home/{{ app_user }}/MediMind
+    backend_service: medimind-docker
+    dockerhub_username: "{{ lookup('env', 'DOCKERHUB_USERNAME') }}"
+    db_username: "{{ lookup('env', 'DB_USERNAME') }}"
+    db_password: "{{ lookup('env', 'DB_PASSWORD') }}"
+    db_host: "{{ lookup('env', 'DB_HOST') }}"
+    db_port: "{{ lookup('env', 'DB_PORT') }}"
+    db_name: "{{ lookup('env', 'DB_NAME') }}"
+    cors_allowed_origin: "{{ lookup('env', 'CORS_ALLOWED_ORIGIN') | default('http://3.0.180.110:5173') }}"
+    vite_server: "{{ lookup('env', 'VITE_SERVER') | default('http://3.0.180.110:8080/') }}"
+
+  tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        name:
+          - docker.io
+          - git
+          - curl
+        state: present
+
+    - name: Install Docker Compose plugin
+      shell: |
+        mkdir -p ~/.docker/cli-plugins/
+        curl -SL https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
+        chmod +x ~/.docker/cli-plugins/docker-compose
+      args:
+        creates: ~/.docker/cli-plugins/docker-compose
+      register: docker_compose_install
+
+    - name: Start and enable Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Wait for Docker to be ready
+      shell: docker info
+      register: docker_ready
+      retries: 10
+      delay: 5
+      until: docker_ready.rc == 0
+      ignore_errors: yes
+
+    - name: Add ubuntu user to docker group
+      user:
+        name: '{{ app_user }}'
+        groups: docker
+        append: yes
+
+    - name: Ensure ubuntu user can access Docker socket
+      file:
+        path: /var/run/docker.sock
+        mode: '0666'
+        state: file
+
+    - name: Install Docker Compose plugin for ubuntu user
+      shell: |
+        mkdir -p /home/{{ app_user }}/.docker/cli-plugins/
+        curl -SL https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-linux-x86_64 -o /home/{{ app_user }}/.docker/cli-plugins/docker-compose
+        chmod +x /home/{{ app_user }}/.docker/cli-plugins/docker-compose
+        chown -R {{ app_user }}:{{ app_user }} /home/{{ app_user }}/.docker
+      args:
+        creates: /home/{{ app_user }}/.docker/cli-plugins/docker-compose
+      register: docker_compose_user_install
+
+    - name: Verify Docker Compose plugin installation
+      shell: docker compose version
+      become_user: '{{ app_user }}'
+      register: docker_compose_version
+      changed_when: false
+
+    - name: Create application directory
+      file:
+        path: '{{ app_dir }}'
+        state: directory
+        owner: '{{ app_user }}'
+        group: '{{ app_user }}'
+        mode: '0755'
+
+    - name: Clone or update repository
+      git:
+        repo: https://github.com/di-wee/MediMind.git
+        dest: '{{ app_dir }}'
+        version: main
+        force: yes
+
+    - name: Create docker-compose.yml
+      template:
+        src: docker-compose.yml.j2
+        dest: '{{ app_dir }}/docker-compose.yml'
+        owner: '{{ app_user }}'
+        group: '{{ app_user }}'
+        mode: '0644'
+
+    - name: Create runtime config for frontend
+      copy:
+        content: |
+          {
+            "apiBaseUrl": "{{ vite_server }}",
+            "environment": "production"
+          }
+        dest: '{{ app_dir }}/frontend/public/config.json'
+        owner: '{{ app_user }}'
+        group: '{{ app_user }}'
+        mode: '0644'
+
+    - name: Check current container status
+      shell: docker ps -a --filter "name=medimind"
+      become_user: '{{ app_user }}'
+      register: current_containers
+      changed_when: false
+
+    - name: Display current containers
+      debug:
+        var: current_containers.stdout_lines
+
+    - name: Stop and remove existing containers
+      shell: |
+        cd {{ app_dir }}
+        docker compose down --remove-orphans || true
+        docker rm -f medimind-backend medimind-frontend || true
+        # Remove any containers with similar names
+        docker ps -a --filter "name=medimind" --format "{{.ID}}" | xargs -r docker rm -f || true
+        # Clean up dangling containers
+        docker container prune -f || true
+      become_user: '{{ app_user }}'
+      ignore_errors: yes
+
+    - name: Check current image digests
+      shell: |
+        cd {{ app_dir }}
+        echo "=== Current Image Digests ==="
+        docker images --digests | grep {{ dockerhub_username }} || echo "No images found"
+      become_user: '{{ app_user }}'
+      register: current_digests
+      changed_when: false
+
+    - name: Display current digests
+      debug:
+        var: current_digests.stdout_lines
+
+    - name: Validate Docker Hub username
+      fail:
+        msg: 'DOCKERHUB_USERNAME environment variable is not set'
+      when: dockerhub_username is not defined or dockerhub_username == ""
+
+    - name: Remove existing backend image
+      shell: docker rmi {{ dockerhub_username }}/medimind-backend:latest 2>/dev/null || echo 'Backend image not found, will pull fresh'
+      become_user: '{{ app_user }}'
+      ignore_errors: yes
+
+    - name: Remove existing frontend image
+      shell: docker rmi {{ dockerhub_username }}/medimind-frontend:latest 2>/dev/null || echo 'Frontend image not found, will pull fresh'
+      become_user: '{{ app_user }}'
+      ignore_errors: yes
+
+    - name: Pull latest backend image
+      shell: docker pull {{ dockerhub_username }}/medimind-backend:latest
+      become_user: '{{ app_user }}'
+      register: backend_pull_result
+
+    - name: Pull latest frontend image
+      shell: docker pull {{ dockerhub_username }}/medimind-frontend:latest
+      become_user: '{{ app_user }}'
+      register: frontend_pull_result
+
+    - name: Display pull results
+      debug:
+        msg:
+          - 'Backend pull: {{ backend_pull_result.stdout }}'
+          - 'Frontend pull: {{ frontend_pull_result.stdout }}'
+
+    - name: Check final image digests
+      shell: docker images --digests | grep {{ dockerhub_username }} || echo 'No images found'
+      become_user: '{{ app_user }}'
+      register: final_digests
+      changed_when: false
+
+    - name: Display final digests
+      debug:
+        var: final_digests.stdout_lines
+
+    - name: Start Docker Compose services with latest images
+      community.docker.docker_compose_v2:
+        project_src: '{{ app_dir }}'
+        state: present
+        pull: always
+      become_user: '{{ app_user }}'
+
+    - name: Test docker-compose configuration
+      shell: docker compose config
+      become_user: '{{ app_user }}'
+      args:
+        chdir: '{{ app_dir }}'
+      register: docker_compose_config
+      changed_when: false
+
+    - name: Display docker-compose configuration
+      debug:
+        var: docker_compose_config.stdout_lines
+
+    - name: Create docker-compose systemd service
+      template:
+        src: docker-compose.service.j2
+        dest: /etc/systemd/system/{{ backend_service }}.service
+        mode: '0644'
+      notify: restart docker-compose service
+
+    - name: Start and enable docker-compose service
+      systemd:
+        name: '{{ backend_service }}'
+        state: started
+        enabled: yes
+        daemon_reload: yes
+
+    - name: Wait for containers to start
+      wait_for:
+        timeout: 30
+
+    - name: Check container status
+      shell: docker ps -a
+      become_user: '{{ app_user }}'
+      register: container_status
+      changed_when: false
+
+    - name: Display container status
+      debug:
+        var: container_status.stdout_lines
+
+    - name: Check container logs if failed
+      shell: |
+        if docker ps -a --format "table {{ '{{' }}.Names{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}" | grep -q "Exited"; then
+          echo "=== Backend Container Logs ==="
+          docker logs medimind-backend || true
+          echo "=== Frontend Container Logs ==="
+          docker logs medimind-frontend || true
+        fi
+      become_user: '{{ app_user }}'
+      register: container_logs
+      changed_when: false
+      ignore_errors: yes
+
+    - name: Display container logs
+      debug:
+        var: container_logs.stdout_lines
+      when: container_logs.stdout_lines is defined
+
+  handlers:
+    - name: restart docker-compose service
+      systemd:
+        name: '{{ backend_service }}'
+        state: restarted
+        daemon_reload: yes

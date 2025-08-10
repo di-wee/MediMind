@@ -3,6 +3,7 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 import React, { useContext, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MediMindContext from '../context/MediMindContext';
+import { API_BASE_URL } from '../utils/config';
 
 function Login() {
 	const [validation, setValidation] = useState(false);
@@ -31,17 +32,14 @@ function Login() {
 		}
 
 		try {
-			const response = await fetch(
-				import.meta.env.VITE_SERVER + 'api/web/login',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({ mcrNo, password }),
-					credentials: 'include',
-				}
-			);
+			const response = await fetch(API_BASE_URL + 'api/web/login', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ mcrNo, password }),
+				credentials: 'include',
+			});
 			if (!response.ok) {
 				throw new Error('Invalid credentials');
 			}

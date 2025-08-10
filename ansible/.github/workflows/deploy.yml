@@ -1,0 +1,58 @@
+name: Deploy MediMind Application
+
+on:
+  push:
+    branches: [main]
+    paths: ['ansible/**']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Ansible
+        run: |
+          pip install ansible
+          ansible-galaxy collection install community.docker
+
+      - name: Setup environment variables
+        run: |
+          cd ansible
+          chmod +x set-env.sh
+          source set-env.sh
+        env:
+          EC2APP_IP: ${{ secrets.EC2APP_IP }}
+          EC2APP_USER: ${{ secrets.EC2APP_USER }}
+          EC2APP_KEY: ${{ secrets.EC2APP_KEY }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+
+      - name: Deploy with Ansible
+        run: |
+          cd ansible
+          ansible-playbook deploy.yml -i inventory.py
+        env:
+          EC2APP_IP: ${{ secrets.EC2APP_IP }}
+          EC2APP_USER: ${{ secrets.EC2APP_USER }}
+          EC2APP_KEY: ${{ secrets.EC2APP_KEY }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
