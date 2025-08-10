@@ -38,7 +38,7 @@
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:clipToPadding="false"
-            tools:listitem="@layout/row_history_med" />
+            tools:listitem="@layout/item_intake_group" />
 
         <!-- Empty state -->
         <LinearLayout
@@ -55,7 +55,7 @@
                 android:layout_height="120dp"
                 android:src="@drawable/med_schedule_placeholder"
                 android:contentDescription="@string/app_name"
-                android:tint="#BDBDBD"
+                app:tint="#BDBDBD"
                 android:alpha="0.9" />
 
             <TextView
