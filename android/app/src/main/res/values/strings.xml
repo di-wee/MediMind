@@ -3,4 +3,10 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="your_medication_list">Your Medication List</string>
+    <string name="name_place_holder">Name</string>
+    <string name="save">Save</string>
+    <string name="purpose">Medication Purpose</string>
+    <string name="delete">Delete Medication</string>
+    <string name="back">Back</string>
+
 </resources>

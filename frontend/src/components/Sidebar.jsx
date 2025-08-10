@@ -6,6 +6,7 @@ import {
 import React, { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import MediMindContext from '../context/MediMindContext';
+import { API_BASE_URL } from '../utils/config';
 
 function Sidebar() {
 	const location = useLocation();
@@ -14,13 +15,10 @@ function Sidebar() {
 
 	const handleLogout = async () => {
 		try {
-			const response = await fetch(
-				import.meta.env.VITE_SERVER + 'api/web/logout',
-				{
-					method: 'POST',
-					credentials: 'include',
-				}
-			);
+			const response = await fetch(API_BASE_URL + 'api/web/logout', {
+				method: 'POST',
+				credentials: 'include',
+			});
 
 			if (!response.ok) {
 				throw new Error('Error clearing session for logout!');
