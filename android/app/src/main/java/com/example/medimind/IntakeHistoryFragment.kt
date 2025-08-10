@@ -26,12 +26,12 @@ class IntakeHistoryFragment : Fragment() {
 
     // Raw + derived data caches
     private var fullResponse: List<IntakeHistoryResponse> = emptyList()
-    private var uniqueDates: List<String> = emptyList()           // yyyy-MM-dd (sorted desc)
-    private var uniqueMeds: List<String> = emptyList()            // distinct med names (sorted)
+    private var uniqueDates: List<String> = emptyList() // yyyy-MM-dd (sorted desc)
+    private var uniqueMeds: List<String> = emptyList()  // distinct med names (sorted)
 
-    // Current filter selections
-    private var selectedDate: String? = null      // null = All dates
-    private var selectedMed: String? = null       // null = All medications
+    // Current filter selections (null means "All")
+    private var selectedDate: String? = null
+    private var selectedMed: String? = null
 
     // Views
     private lateinit var recyclerView: RecyclerView
@@ -41,7 +41,8 @@ class IntakeHistoryFragment : Fragment() {
     private lateinit var medFilter: MaterialAutoCompleteTextView
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_intake_history, container, false)
 
@@ -59,6 +60,7 @@ class IntakeHistoryFragment : Fragment() {
 
         val sharedPref = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val patientId = sharedPref.getString("patientId", null)
+
         if (patientId == null) {
             showEmpty()
             return
@@ -75,6 +77,7 @@ class IntakeHistoryFragment : Fragment() {
                     .map { it.scheduledTime.substring(0, 10) }
                     .distinct()
                     .sortedDescending()
+
                 uniqueMeds = fullResponse
                     .map { it.medicationName }
                     .distinct()
@@ -82,11 +85,13 @@ class IntakeHistoryFragment : Fragment() {
 
                 setupFilterDropdowns()
                 applyFiltersAndRender()
-
             } catch (e: Exception) {
                 showEmpty()
-                Toast.makeText(requireContext(),
-                    "Failed to load intake history: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Failed to load intake history: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -94,18 +99,20 @@ class IntakeHistoryFragment : Fragment() {
     private fun setupFilterDropdowns() {
         // Date dropdown: "All dates" + yyyy-MM-dd
         val dateLabels = listOf("All dates") + uniqueDates
-        dateFilter.setAdapter(ArrayAdapter(requireContext(),
-            android.R.layout.simple_list_item_1, dateLabels))
+        dateFilter.setAdapter(
+            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, dateLabels)
+        )
         dateFilter.setText("All dates", false)
         dateFilter.setOnItemClickListener { _, _, pos, _ ->
             selectedDate = if (pos == 0) null else uniqueDates[pos - 1]
             applyFiltersAndRender()
         }
 
-        // Medication dropdown: "All medications" + med names
+        // Medication dropdown: "All" + med names
         val medLabels = listOf("All") + uniqueMeds
-        medFilter.setAdapter(ArrayAdapter(requireContext(),
-            android.R.layout.simple_list_item_1, medLabels))
+        medFilter.setAdapter(
+            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, medLabels)
+        )
         medFilter.setText("All", false)
         medFilter.setOnItemClickListener { _, _, pos, _ ->
             selectedMed = if (pos == 0) null else uniqueMeds[pos - 1]
@@ -117,7 +124,7 @@ class IntakeHistoryFragment : Fragment() {
         // Filter raw data
         val filtered = fullResponse.filter { item ->
             (selectedDate == null || item.scheduledTime.startsWith(selectedDate!!)) &&
-                    (selectedMed == null || item.medicationName == selectedMed)
+            (selectedMed == null || item.medicationName == selectedMed)
         }
 
         // Build rows (grouped by date -> missed/taken -> med name -> times)
@@ -132,7 +139,8 @@ class IntakeHistoryFragment : Fragment() {
     }
 
     /**
-     * Date header -> MISSED section (grouped by med name with times) -> TAKEN section (same).
+     * Date header -> MISSED section (grouped by med name with times)
+     * -> TAKEN section (grouped by med name with times).
      */
     private fun buildStyledRowsGrouped(response: List<IntakeHistoryResponse>): List<HistoryRow> {
         if (response.isEmpty()) return emptyList()
@@ -142,7 +150,7 @@ class IntakeHistoryFragment : Fragment() {
         val rows = mutableListOf<HistoryRow>()
 
         response.groupBy { it.scheduledTime.substring(0, 10) }
-            .toSortedMap(compareByDescending { it })   // newest date first
+            .toSortedMap(compareByDescending { it }) // newest date first
             .forEach { (dateStr, itemsForDate) ->
                 val dateLabel = runCatching { sdfOut.format(sdfIn.parse(dateStr)!!) }
                     .getOrElse { dateStr }
@@ -155,7 +163,12 @@ class IntakeHistoryFragment : Fragment() {
                 missed.groupBy { it.medicationName }.toSortedMap().forEach { (med, medItems) ->
                     rows += HistoryRow.MedGroupHeader(med)
                     medItems.sortedBy { it.scheduledTime.substring(11, 16) }
-                        .forEach { rows += HistoryRow.TimeRow(time = it.scheduledTime.substring(11, 16), taken = false) }
+                        .forEach {
+                            rows += HistoryRow.TimeRow(
+                                time = it.scheduledTime.substring(11, 16),
+                                taken = false
+                            )
+                        }
                 }
 
                 // Taken section
@@ -163,11 +176,19 @@ class IntakeHistoryFragment : Fragment() {
                 taken.groupBy { it.medicationName }.toSortedMap().forEach { (med, medItems) ->
                     rows += HistoryRow.MedGroupHeader(med)
                     medItems.sortedBy { it.scheduledTime.substring(11, 16) }
-                        .forEach { rows += HistoryRow.TimeRow(time = it.scheduledTime.substring(11, 16), taken = true) }
+                        .forEach {
+                            rows += HistoryRow.TimeRow(
+                                time = it.scheduledTime.substring(11, 16),
+                                taken = true
+                            )
+                        }
                 }
             }
+
         return rows
     }
+
+    // ----- UI state helpers -----
 
     private fun showLoading() {
         progressBar.visibility = View.VISIBLE

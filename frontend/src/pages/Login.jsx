@@ -133,7 +133,7 @@ function Login() {
 
 								<button
 									type='submit'
-									className='btn-demo'
+									className='btn-submit'
 									onClick={(e) => handleLogin(e)}>
 									Sign in
 								</button>
