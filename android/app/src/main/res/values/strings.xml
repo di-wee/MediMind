@@ -16,8 +16,9 @@
     <string name="intake_quantity_label">Intake Quantity:</string>
     <string name="tablets_label">/tablet(s)</string>
     <string name="frequency_label">Frequency:</string>
-    <string name="times_day_label">times/day</string>
+    <string name="times_day_label">time(s)/day</string>
     <string name="instruction_label">Instruction:</string>
     <string name="note_label">Note:</string>
+    <string name="time_h_label">Time(h):</string>
 
 </resources>

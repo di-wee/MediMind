@@ -47,8 +47,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_marginTop="8dp">
 
@@ -66,13 +65,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginBottom="8dp"
-                android:paddingStart="8dp">
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp">
 
                 <TextView
                     android:id="@+id/frequencyLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Frequency:"
+                    android:text="@string/frequency_label"
                     android:textSize="16sp"/>
 
                 <EditText
@@ -81,14 +81,14 @@
                     android:layout_height="wrap_content"
                     android:inputType="number"
                     android:maxLength="2"
-                    android:hint="3"
+                    android:hint="@string/hint_2"
                     android:layout_marginStart="8dp"/>
 
                 <TextView
                     android:id="@+id/frequencySuffix"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="/day"
+                    android:text="@string/times_day_label"
                     android:textSize="16sp"
                     android:layout_marginStart="4dp"/>
             </LinearLayout>
@@ -97,7 +97,7 @@
                 android:id="@+id/timeLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Time(h):"
+                android:text="@string/time_h_label"
                 android:textSize="16sp"
                 android:paddingStart="8dp"/>
 
@@ -127,7 +127,7 @@
             android:textSize="16sp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="80dp"
-            android:text="Save"/>
+            android:text="@string/save"/>
 
     </LinearLayout>
 </LinearLayout>
