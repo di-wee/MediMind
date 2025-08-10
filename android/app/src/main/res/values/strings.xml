@@ -8,5 +8,17 @@
     <string name="purpose">Medication Purpose</string>
     <string name="delete">Delete Medication</string>
     <string name="back">Back</string>
+    <string name="for_fever_pain_may_cause_drowsiness">For fever/pain. May cause drowsiness</string>
+    <string name="before_or_after_meal">before or after meal</string>
+    <string name="hint_2">2</string>
+    <string name="medication_name_hint">paracetamol</string>
+    <string name="medication_name_label">Medication:</string>
+    <string name="intake_quantity_label">Intake Quantity:</string>
+    <string name="tablets_label">/tablet(s)</string>
+    <string name="frequency_label">Frequency:</string>
+    <string name="times_day_label">time(s) /day</string>
+    <string name="instruction_label">Instruction:</string>
+    <string name="note_label">Note:</string>
+    <string name="time_h_label">Time(h):</string>
 
 </resources>
