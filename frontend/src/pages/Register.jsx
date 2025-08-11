@@ -9,6 +9,7 @@ function Register() {
 	const [validation, setValidation] = useState({
 		MCRNo: false,
 		ConfirmPass: false,
+		EmailDomain: false,
 	});
 	const [passVisibility, setPassVisibility] = useState(false);
 	const [confirmPassVisibility, setConfirmPassVisibility] = useState(false);
