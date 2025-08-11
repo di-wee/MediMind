@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import nus.iss.backend.exceptions.ItemNotFound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.servlet.http.HttpServletRequest;
 
 @CrossOrigin
 @RestController
@@ -32,6 +33,21 @@ public class DoctorController {
     public ResponseEntity<String> testEndpoint() {
         logger.info("Test endpoint called");
         return ResponseEntity.ok("DoctorController is working!");
+    }
+
+    // Add a debug endpoint to check security headers
+    @GetMapping("/debug-headers")
+    public ResponseEntity<String> debugHeaders(HttpServletRequest request) {
+        logger.info("Debug headers endpoint called");
+        StringBuilder headers = new StringBuilder();
+        headers.append("Security Headers Check:\n");
+        headers.append("X-Frame-Options: ").append(request.getHeader("X-Frame-Options")).append("\n");
+        headers.append("X-Content-Type-Options: ").append(request.getHeader("X-Content-Type-Options")).append("\n");
+        headers.append("X-XSS-Protection: ").append(request.getHeader("X-XSS-Protection")).append("\n");
+        headers.append("Referrer-Policy: ").append(request.getHeader("Referrer-Policy")).append("\n");
+        headers.append("Content-Security-Policy: ").append(request.getHeader("Content-Security-Policy")).append("\n");
+        
+        return ResponseEntity.ok(headers.toString());
     }
 
     @PutMapping("/update")
