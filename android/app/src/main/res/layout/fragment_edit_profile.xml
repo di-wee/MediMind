@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:paddingStart="24dp"
             android:paddingEnd="24dp"
-            android:paddingTop="16dp"
+            android:paddingTop="8dp"
             android:paddingBottom="24dp">
 
             <!-- Profile Icon -->
