@@ -28,5 +28,7 @@
     <string name="edit_medication">Edit Medication</string>
     <string name="image_details">Image Details</string>
     <string name="add_manually">Add Manually</string>
+    <string name="close">Close</string>
+    <string name="add_new_med">Add New Med</string>
 
 </resources>
