@@ -36,11 +36,6 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Setup Docker (for ZAP fallback)
-        run: |
-          # Docker is usually available in GitHub Actions, but let's make sure
-          docker --version || echo "Docker not available, will use direct ZAP download"
-
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:

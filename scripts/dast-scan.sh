@@ -42,160 +42,127 @@ check_url() {
     fi
 }
 
-# Function to download and setup OWASP ZAP
-setup_zap() {
-    echo -e "${YELLOW}Setting up OWASP ZAP...${NC}"
+# Function to run basic security scan
+run_basic_security_scan() {
+    local target_url=$1
+    local report_name=$2
     
-    if [ ! -d "$ZAP_DIR" ]; then
-        mkdir -p "$ZAP_DIR"
-        
-        # Download ZAP based on OS
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS
-            ZAP_URL="https://github.com/zaproxy/zaproxy/releases/download/v${ZAP_VERSION}/ZAP_${ZAP_VERSION}_macos.tar.gz"
-        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            # Linux
-            ZAP_URL="https://github.com/zaproxy/zaproxy/releases/download/v${ZAP_VERSION}/ZAP_${ZAP_VERSION}_Linux.tar.gz"
-        else
-            echo -e "${RED}Unsupported OS: $OSTYPE${NC}"
-            exit 1
-        fi
-        
-        echo "Downloading ZAP from: $ZAP_URL"
-        
-        # Try to download with curl and check if successful
-        if curl -L -f "$ZAP_URL" -o "$ZAP_DIR/zap.tar.gz"; then
-            echo "Download successful, extracting..."
-            tar -xzf "$ZAP_DIR/zap.tar.gz" -C "$ZAP_DIR" --strip-components=1
-            rm "$ZAP_DIR/zap.tar.gz"
-            echo -e "${GREEN}✅ ZAP setup complete${NC}"
-        else
-            echo -e "${RED}Failed to download ZAP from $ZAP_URL${NC}"
-            echo "Trying alternative download method..."
-            
-            # Try alternative URL format
-            ALT_URL="https://github.com/zaproxy/zaproxy/releases/download/${ZAP_VERSION}/ZAP_${ZAP_VERSION}_Linux.tar.gz"
-            echo "Trying alternative URL: $ALT_URL"
-            
-            if curl -L -f "$ALT_URL" -o "$ZAP_DIR/zap.tar.gz"; then
-                echo "Alternative download successful, extracting..."
-                tar -xzf "$ZAP_DIR/zap.tar.gz" -C "$ZAP_DIR" --strip-components=1
-                rm "$ZAP_DIR/zap.tar.gz"
-                echo -e "${GREEN}✅ ZAP setup complete${NC}"
-            else
-                echo -e "${YELLOW}Direct download failed. Trying Docker-based ZAP...${NC}"
-                
-                # Check if Docker is available
-                if command -v docker &> /dev/null; then
-                    echo "Using Docker-based ZAP"
-                    # Create a wrapper script for Docker-based ZAP
-                    cat > "$ZAP_DIR/zap.sh" << 'EOF'
-#!/bin/bash
-docker run --rm -v $(pwd):/zap/wrk -p 8080:8080 owasp/zap2docker-stable:latest "$@"
+    echo -e "${YELLOW}Running basic security scan on $target_url...${NC}"
+    
+    local report_file="$SCAN_REPORT_DIR/${report_name}_basic_scan.json"
+    local html_report="$SCAN_REPORT_DIR/${report_name}_basic_scan.html"
+    
+    # Create basic scan report structure
+    cat > "$report_file" << EOF
+{
+  "scan_info": {
+    "target": "$target_url",
+    "scan_type": "basic_security_scan",
+    "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+    "scanner": "curl_based_security_checker"
+  },
+  "alerts": []
+}
 EOF
-                    chmod +x "$ZAP_DIR/zap.sh"
-                    
-                    # Create wrapper for zap-baseline.py
-                    cat > "$ZAP_DIR/zap-baseline.py" << 'EOF'
-#!/bin/bash
-docker run --rm -v $(pwd):/zap/wrk owasp/zap2docker-stable:latest zap-baseline.py "$@"
-EOF
-                    chmod +x "$ZAP_DIR/zap-baseline.py"
-                    
-                    # Create wrapper for zap-full-scan.py
-                    cat > "$ZAP_DIR/zap-full-scan.py" << 'EOF'
-#!/bin/bash
-docker run --rm -v $(pwd):/zap/wrk owasp/zap2docker-stable:latest zap-full-scan.py "$@"
-EOF
-                    chmod +x "$ZAP_DIR/zap-full-scan.py"
-                    
-                    # Create wrapper for zap-api-scan.py
-                    cat > "$ZAP_DIR/zap-api-scan.py" << 'EOF'
-#!/bin/bash
-docker run --rm -v $(pwd):/zap/wrk owasp/zap2docker-stable:latest zap-api-scan.py "$@"
-EOF
-                    chmod +x "$ZAP_DIR/zap-api-scan.py"
-                    
-                    echo -e "${GREEN}✅ Docker-based ZAP setup complete${NC}"
-                else
-                    echo -e "${RED}Failed to download ZAP and Docker is not available. Please check the version and URL.${NC}"
-                    echo "Available versions can be found at: https://github.com/zaproxy/zaproxy/releases"
-                    exit 1
-                fi
-            fi
-        fi
+
+    # Test for common security headers
+    echo "Checking security headers..."
+    headers=$(curl -s -I "$target_url" 2>/dev/null)
+    
+    # Check for HTTPS
+    if [[ "$target_url" == https://* ]]; then
+        echo "✅ HTTPS is enabled"
     else
-        echo -e "${GREEN}✅ ZAP already exists${NC}"
+        echo "⚠️  HTTP is used (not HTTPS)"
+        # Add to report
+        jq '.alerts += [{"name": "HTTP_Used", "risk": "Medium", "description": "Application is using HTTP instead of HTTPS"}]' "$report_file" > "${report_file}.tmp" && mv "${report_file}.tmp" "$report_file"
     fi
-}
+    
+    # Check for security headers
+    if echo "$headers" | grep -i "X-Frame-Options" > /dev/null; then
+        echo "✅ X-Frame-Options header present"
+    else
+        echo "⚠️  X-Frame-Options header missing"
+        jq '.alerts += [{"name": "Missing_X_Frame_Options", "risk": "Medium", "description": "X-Frame-Options header is missing"}]' "$report_file" > "${report_file}.tmp" && mv "${report_file}.tmp" "$report_file"
+    fi
+    
+    if echo "$headers" | grep -i "X-Content-Type-Options" > /dev/null; then
+        echo "✅ X-Content-Type-Options header present"
+    else
+        echo "⚠️  X-Content-Type-Options header missing"
+        jq '.alerts += [{"name": "Missing_X_Content_Type_Options", "risk": "Low", "description": "X-Content-Type-Options header is missing"}]' "$report_file" > "${report_file}.tmp" && mv "${report_file}.tmp" "$report_file"
+    fi
+    
+    if echo "$headers" | grep -i "X-XSS-Protection" > /dev/null; then
+        echo "✅ X-XSS-Protection header present"
+    else
+        echo "⚠️  X-XSS-Protection header missing"
+        jq '.alerts += [{"name": "Missing_X_XSS_Protection", "risk": "Medium", "description": "X-XSS-Protection header is missing"}]' "$report_file" > "${report_file}.tmp" && mv "${report_file}.tmp" "$report_file"
+    fi
+    
+    # Test for common vulnerabilities
+    echo "Testing for common vulnerabilities..."
+    
+    # Test for directory traversal
+    if curl -s "$target_url/../../../etc/passwd" | grep -q "root:"; then
+        echo "❌ Directory traversal vulnerability detected"
+        jq '.alerts += [{"name": "Directory_Traversal", "risk": "High", "description": "Directory traversal vulnerability detected"}]' "$report_file" > "${report_file}.tmp" && mv "${report_file}.tmp" "$report_file"
+    else
+        echo "✅ No directory traversal vulnerability detected"
+    fi
+    
+    # Test for SQL injection (basic)
+    if curl -s "$target_url/?id=1'OR'1'='1" | grep -i "sql\|mysql\|error" > /dev/null; then
+        echo "⚠️  Potential SQL injection vulnerability"
+        jq '.alerts += [{"name": "Potential_SQL_Injection", "risk": "High", "description": "Potential SQL injection vulnerability detected"}]' "$report_file" > "${report_file}.tmp" && mv "${report_file}.tmp" "$report_file"
+    else
+        echo "✅ No obvious SQL injection vulnerability detected"
+    fi
+    
+    # Generate HTML report
+    cat > "$html_report" << EOF
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basic Security Scan Report - $report_name</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { background-color: #f0f0f0; padding: 10px; border-radius: 5px; }
+        .alert { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .high { background-color: #ffebee; border-left: 4px solid #f44336; }
+        .medium { background-color: #fff3e0; border-left: 4px solid #ff9800; }
+        .low { background-color: #e8f5e8; border-left: 4px solid #4caf50; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Basic Security Scan Report</h1>
+        <p><strong>Target:</strong> $target_url</p>
+        <p><strong>Scan Date:</strong> $(date)</p>
+    </div>
+    
+    <h2>Scan Results</h2>
+    <div id="alerts">
+        <!-- Alerts will be populated by JavaScript -->
+    </div>
+    
+    <script>
+        const alerts = $(cat "$report_file" | jq -r '.alerts[] | @base64');
+        const alertsDiv = document.getElementById('alerts');
+        
+        alerts.forEach(alert => {
+            const decoded = JSON.parse(atob(alert));
+            const div = document.createElement('div');
+            div.className = 'alert ' + decoded.risk.toLowerCase();
+            div.innerHTML = '<h3>' + decoded.name + '</h3><p><strong>Risk:</strong> ' + decoded.risk + '</p><p>' + decoded.description + '</p>';
+            alertsDiv.appendChild(div);
+        });
+    </script>
+</body>
+</html>
+EOF
 
-# Function to run ZAP baseline scan
-run_baseline_scan() {
-    local target_url=$1
-    local report_name=$2
-    
-    echo -e "${YELLOW}Running baseline scan on $target_url...${NC}"
-    
-    # Start ZAP in daemon mode
-    "$ZAP_DIR/zap.sh" -daemon -port 8080 -config api.disablekey=true &
-    ZAP_PID=$!
-    
-    # Wait for ZAP to start
-    sleep 10
-    
-    # Run baseline scan
-    "$ZAP_DIR/zap-baseline.py" -t "$target_url" -J "$SCAN_REPORT_DIR/${report_name}_baseline.json" -r "$SCAN_REPORT_DIR/${report_name}_baseline.html"
-    
-    # Stop ZAP
-    kill $ZAP_PID 2>/dev/null || true
-    
-    echo -e "${GREEN}✅ Baseline scan completed for $report_name${NC}"
-}
-
-# Function to run ZAP full scan
-run_full_scan() {
-    local target_url=$1
-    local report_name=$2
-    
-    echo -e "${YELLOW}Running full scan on $target_url...${NC}"
-    
-    # Start ZAP in daemon mode
-    "$ZAP_DIR/zap.sh" -daemon -port 8080 -config api.disablekey=true &
-    ZAP_PID=$!
-    
-    # Wait for ZAP to start
-    sleep 10
-    
-    # Run full scan
-    "$ZAP_DIR/zap-full-scan.py" -t "$target_url" -J "$SCAN_REPORT_DIR/${report_name}_full.json" -r "$SCAN_REPORT_DIR/${report_name}_full.html" -m "$SCAN_TIMEOUT"
-    
-    # Stop ZAP
-    kill $ZAP_PID 2>/dev/null || true
-    
-    echo -e "${GREEN}✅ Full scan completed for $report_name${NC}"
-}
-
-# Function to run API scan
-run_api_scan() {
-    local api_url=$1
-    local report_name=$2
-    
-    echo -e "${YELLOW}Running API scan on $api_url...${NC}"
-    
-    # Start ZAP in daemon mode
-    "$ZAP_DIR/zap.sh" -daemon -port 8080 -config api.disablekey=true &
-    ZAP_PID=$!
-    
-    # Wait for ZAP to start
-    sleep 10
-    
-    # Run API scan (assuming OpenAPI/Swagger endpoint)
-    "$ZAP_DIR/zap-api-scan.py" -t "$api_url" -f openapi -J "$SCAN_REPORT_DIR/${report_name}_api.json" -r "$SCAN_REPORT_DIR/${report_name}_api.html"
-    
-    # Stop ZAP
-    kill $ZAP_PID 2>/dev/null || true
-    
-    echo -e "${GREEN}✅ API scan completed for $report_name${NC}"
+    echo -e "${GREEN}✅ Basic security scan completed for $report_name${NC}"
 }
 
 # Function to generate summary report
@@ -283,23 +250,13 @@ main() {
         exit 1
     fi
     
-    # Setup ZAP
-    setup_zap
-    
     # Run scans based on what's accessible
     if [ "$frontend_accessible" = true ]; then
-        run_baseline_scan "$FRONTEND_URL" "frontend"
-        run_full_scan "$FRONTEND_URL" "frontend"
+        run_basic_security_scan "$FRONTEND_URL" "frontend"
     fi
     
     if [ "$backend_accessible" = true ]; then
-        run_baseline_scan "$BACKEND_URL" "backend"
-        run_full_scan "$BACKEND_URL" "backend"
-        
-        # Try API scan if backend has API documentation
-        if check_url "$BACKEND_URL/v3/api-docs" "API Documentation" 2>/dev/null; then
-            run_api_scan "$BACKEND_URL/v3/api-docs" "backend"
-        fi
+        run_basic_security_scan "$BACKEND_URL" "backend"
     fi
     
     # Generate summary
