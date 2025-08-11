@@ -1,4 +1,7 @@
 {
-    "intakeQuantity": 0,
-    "frequency": 0
+    "medicationName": "Paracetamol",
+    "intakeQuantity": 1,
+    "frequency": 2,
+    "instructions": "after food",
+    "notes": "fever pain"
 }
