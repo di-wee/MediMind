@@ -1,22 +1,31 @@
 package com.example.medimind
 
-import android.app.DatePickerDialog
 import android.os.Bundle
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.medimind.network.ApiClient
 import com.example.medimind.network.RegisterRequest
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.GregorianCalendar
+import java.util.Locale
 import java.util.regex.Pattern
 
 class RegisterUserFragment : Fragment() {
+
+    private var selectedGender: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,67 +35,63 @@ class RegisterUserFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        // --- Top App Bar (back arrow) ---
+        view.findViewById<MaterialToolbar>(R.id.topAppBar)?.apply {
+            // Optional: set/update title if not set in XML
+            // title = "Create New Account"
+            setNavigationOnClickListener {
+                findNavController().navigateUp()
+            }
+        }
 
-        val clinicSpinner = view.findViewById<Spinner>(R.id.spinnerClinic)
+        // 1) Replace Spinner reference
+        // val clinicSpinner = view.findViewById<Spinner>(R.id.spinnerClinic)
+        val clinicDropdown =
+            view.findViewById<com.google.android.material.textfield.MaterialAutoCompleteTextView>(
+                R.id.autoCompleteClinic
+            )
 
-        // Mutable list for clinic names and a mapping for IDs
+        // 2) Keep your lists
         val clinicNames = mutableListOf<String>()
         val nameToIdMap = mutableMapOf<String, String>()
 
-        // Adapter initially empty until data is fetched
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, clinicNames)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        clinicSpinner.adapter = adapter
+        // 3) Adapter for the dropdown
+        val clinicAdapter = ArrayAdapter(requireContext(),
+            android.R.layout.simple_list_item_1, clinicNames)
+        clinicDropdown.setAdapter(clinicAdapter)
 
-        // Fetch clinics dynamically from backend
+        // 4) Load clinics (unchanged logic, just notify the new adapter)
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val response = ApiClient.retrofitService.getClinics()
                 clinicNames.clear()
                 nameToIdMap.clear()
-
-                // Populate lists with data from backend
                 response._embedded.clinics.forEach {
                     clinicNames.add(it.clinicName)
                     nameToIdMap[it.clinicName] = it.id
                 }
-
-                adapter.notifyDataSetChanged()
+                clinicAdapter.notifyDataSetChanged()
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Failed to load clinics: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
 
-        // DatePicker for DOB
-        val dobTextView = view.findViewById<TextView>(R.id.inputDOB)
-        dobTextView.setOnClickListener {
-            val calendar = Calendar.getInstance()
-            val year = calendar.get(Calendar.YEAR)
-            val month = calendar.get(Calendar.MONTH)
-            val day = calendar.get(Calendar.DAY_OF_MONTH)
+        // --- Gender buttons ---
+        val btnMale = view.findViewById<MaterialButton>(R.id.btnMale)
+        val btnFemale = view.findViewById<MaterialButton>(R.id.btnFemale)
 
-            val dpd = DatePickerDialog(requireContext(), { _, y, m, d ->
-                val monthStr = String.format("%02d", m + 1)
-                val dayStr = String.format("%02d", d)
-                dobTextView.text = "$y-$monthStr-$dayStr"
-            }, year, month, day)
-
-            dpd.show()
+        btnMale.setOnClickListener {
+            btnMale.isChecked = true
+            btnFemale.isChecked = false
+            selectedGender = "Male"
+        }
+        btnFemale.setOnClickListener {
+            btnFemale.isChecked = true
+            btnMale.isChecked = false
+            selectedGender = "Female"
         }
 
-        // Setup gender dropdown
-        val genderSpinner = view.findViewById<Spinner>(R.id.spinnerGender)
-        val genderOptions = listOf("Male", "Female")
-        val genderAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, genderOptions)
-        genderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        genderSpinner.adapter = genderAdapter
-
-        // Back to login
-        view.findViewById<Button>(R.id.backToLoginButton).setOnClickListener {
-            findNavController().navigateUp()
-        }
-
-        // Fields
+        // --- Fields ---
         val emailField = view.findViewById<EditText>(R.id.inputEmail)
         val passwordField = view.findViewById<EditText>(R.id.inputPassword)
         val confirmPasswordField = view.findViewById<EditText>(R.id.inputConfirmPassword)
@@ -94,20 +99,33 @@ class RegisterUserFragment : Fragment() {
         val firstNameField = view.findViewById<EditText>(R.id.inputFirstName)
         val lastNameField = view.findViewById<EditText>(R.id.inputLastName)
 
-        // Register button action
-        view.findViewById<Button>(R.id.registerButton).setOnClickListener {
+        // DOB inputs (DD/MM/YYYY split)
+        val dobDay = view.findViewById<TextInputEditText>(R.id.dobDay)
+        val dobMonth = view.findViewById<TextInputEditText>(R.id.dobMonth)
+        val dobYear = view.findViewById<TextInputEditText>(R.id.dobYear)
 
+        fun moveNext(from: TextInputEditText, to: TextInputEditText?, max: Int) {
+            from.doAfterTextChanged {
+                if ((it?.length ?: 0) >= max) to?.requestFocus()
+            }
+        }
+        moveNext(dobDay, dobMonth, 2)
+        moveNext(dobMonth, dobYear, 2)
+
+        // --- Register button ---
+        view.findViewById<Button>(R.id.registerButton).setOnClickListener {
             val email = emailField.text.toString().trim()
             val password = passwordField.text.toString()
             val confirmPassword = confirmPasswordField.text.toString()
             val nric = nricField.text.toString().trim()
             val firstName = firstNameField.text.toString().trim()
             val lastName = lastNameField.text.toString().trim()
-            val gender = genderSpinner.selectedItem?.toString() ?: ""
-            val dob = dobTextView.text.toString()
-            val selectedClinicName = clinicSpinner.selectedItem?.toString() ?: ""
+            val gender = selectedGender ?: ""
+            val dayStr = dobDay.text?.toString()?.trim() ?: ""
+            val monthStr = dobMonth.text?.toString()?.trim() ?: ""
+            val yearStr = dobYear.text?.toString()?.trim() ?: ""
 
-            // --------- VALIDATION START ----------
+            // ---- VALIDATION ----
             if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 emailField.error = "Enter a valid email"
                 return@setOnClickListener
@@ -139,24 +157,49 @@ class RegisterUserFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            if (dob.isEmpty() || dob == "Select DOB") {
-                Toast.makeText(requireContext(), "Please select a date of birth", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
             if (gender.isEmpty()) {
                 Toast.makeText(requireContext(), "Please select a gender", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            // --------- VALIDATION END ----------
 
-            // Build request – sending clinicName (you can switch to clinicId if needed)
+            if (dayStr.isEmpty() || monthStr.isEmpty() || yearStr.isEmpty()) {
+                Toast.makeText(
+                    requireContext(),
+                    "Please enter your full date of birth",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            val day = dayStr.toIntOrNull()
+            val month = monthStr.toIntOrNull()
+            val year = yearStr.toIntOrNull()
+
+            if (day == null || month == null || year == null || !isValidDate(year, month, day)) {
+                Toast.makeText(
+                    requireContext(),
+                    "Enter a valid date (DD/MM/YYYY)",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+            // ---- END VALIDATION ----
+
+            val dob = String.format(Locale.US, "%04d-%02d-%02d", year, month, day)
+
+            val selectedClinicName = clinicDropdown.text?.toString() ?: ""
             val request = RegisterRequest(
-                email, password, nric, firstName, lastName,
-                gender, dob, selectedClinicName
+                email = email,
+                password = password,
+                nric = nric,
+                firstName = firstName,
+                lastName = lastName,
+                gender = gender,
+                dob = dob,
+                clinicName = selectedClinicName
             )
 
-            lifecycleScope.launch {
+            viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     val response = ApiClient.retrofitService.register(request)
                     Toast.makeText(
@@ -166,9 +209,26 @@ class RegisterUserFragment : Fragment() {
                     ).show()
                     findNavController().navigate(R.id.action_registerUserFragment_to_loginFragment)
                 } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Registration failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Registration failed: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
+        }
+    }
+
+    private fun isValidDate(year: Int, month: Int, day: Int): Boolean {
+        return try {
+            if (year < 1900 || year > 2100) return false
+            val cal = GregorianCalendar()
+            cal.isLenient = false
+            cal.set(year, month - 1, day) // Calendar month is 0-based
+            cal.time // triggers validation
+            true
+        } catch (e: Exception) {
+            false
         }
     }
 }

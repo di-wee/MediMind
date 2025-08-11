@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import MediMindContext from '../context/MediMindContext';
+import { API_BASE_URL } from '../utils/config';
 
 //wrapper component that will check if login is still valid before showing page
 function ProtectedRoute({ children }) {
@@ -14,13 +15,10 @@ function ProtectedRoute({ children }) {
 	useEffect(() => {
 		const checkSession = async () => {
 			try {
-				const response = await fetch(
-					import.meta.env.VITE_SERVER + 'api/web/session-info',
-					{
-						method: 'GET',
-						credentials: 'include',
-					}
-				);
+				const response = await fetch(API_BASE_URL + 'api/web/session-info', {
+					method: 'GET',
+					credentials: 'include',
+				});
 				const doctor = await response.json();
 				if (response.ok) {
 					setIsLoggedIn(true);

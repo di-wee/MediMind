@@ -5,20 +5,36 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="100dp">
+   >
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:paddingLeft="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/btnBackFromManual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:text="Back" />
+    </LinearLayout>
+
 
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
         android:textAlignment="center"
-        android:background="#673AB7"
+        android:background="#1E88E5"
         android:textColor="@color/white"
         android:text="Manual Key In New Med"
         android:textSize="30sp"/>
 
     <LinearLayout
+        android:layout_marginTop="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -50,7 +66,7 @@
             android:id="@+id/dosageLabelManual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text = "Quantity: "
+            android:text = "Intake Quantity: "
             android:textSize="18sp"/>
         <EditText
             android:id="@+id/dosageInputManual"
@@ -115,7 +131,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingLeft="20dp"
-        android:paddingBottom="20dp">
+        android:paddingBottom="10dp">
 
         <TextView
             android:id="@+id/noteLabelManual"
@@ -134,15 +150,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         android:orientation="horizontal"
-        android:paddingTop="20dp">
-
-        <Button
-            android:id="@+id/btnBackFromManual"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:text="Back" />
+        android:paddingTop="0dp">
 
         <View
             android:layout_width="0dp"
@@ -151,7 +162,7 @@
 
         <Button
             android:id="@+id/btnSaveFromManual"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:text="Save"/>

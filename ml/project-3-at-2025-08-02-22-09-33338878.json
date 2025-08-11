@@ -1,0 +1,882 @@
+[
+  {
+    "text": "ENHANCIN 625MG  AUGMENTIN      Qty   10.00 tab s Take 1 tab s 2 times a day Take after food    To complete course of Antibiotics",
+    "id": 18,
+    "label": [
+      {
+        "start": 0,
+        "end": 8,
+        "text": "ENHANCIN",
+        "labels": [
+          "B-MEDICATION_NAME"
+        ]
+      },
+      {
+        "start": 9,
+        "end": 14,
+        "text": "625MG",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 16,
+        "end": 25,
+        "text": "AUGMENTIN",
+        "labels": [
+          "B-MEDICATION_NAME"
+        ]
+      },
+      {
+        "start": 31,
+        "end": 53,
+        "text": "Qty 10.00 tab s Take",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 54,
+        "end": 55,
+        "text": "1",
+        "labels": [
+          "B-DOSAGE"
+        ]
+      },
+      {
+        "start": 56,
+        "end": 59,
+        "text": "tab",
+        "labels": [
+          "I-DOSAGE"
+        ]
+      },
+      {
+        "start": 62,
+        "end": 63,
+        "text": "2",
+        "labels": [
+          "B-FREQUENCY"
+        ]
+      },
+      {
+        "start": 64,
+        "end": 69,
+        "text": "times",
+        "labels": [
+          "I-FREQUENCY"
+        ]
+      },
+      {
+        "start": 70,
+        "end": 75,
+        "text": "a day",
+        "labels": [
+          "B-FREQUENCY"
+        ]
+      },
+      {
+        "start": 76,
+        "end": 80,
+        "text": "Take",
+        "labels": [
+          "B-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 81,
+        "end": 91,
+        "text": "after food",
+        "labels": [
+          "I-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 98,
+        "end": 106,
+        "text": "complete",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 107,
+        "end": 128,
+        "text": "course of Antibiotics",
+        "labels": [
+          "I-NOTE"
+        ]
+      },
+      {
+        "start": 60,
+        "end": 61,
+        "text": "s",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 95,
+        "end": 97,
+        "text": "To",
+        "labels": [
+          "O"
+        ]
+      }
+    ],
+    "annotator": 1,
+    "annotation_id": 3,
+    "created_at": "2025-08-02T08:44:50.714420Z",
+    "updated_at": "2025-08-02T08:45:08.082754Z",
+    "lead_time": 133.234
+  },
+  {
+    "text": "MONTELUKAST 10MG    Qty   10.00tab s Take 1 tab s Every night OPEN AIRWAY    Take after food",
+    "id": 19,
+    "label": [
+      {
+        "start": 0,
+        "end": 11,
+        "text": "MONTELUKAST",
+        "labels": [
+          "B-MEDICATION_NAME"
+        ]
+      },
+      {
+        "start": 42,
+        "end": 43,
+        "text": "1",
+        "labels": [
+          "B-FREQUENCY"
+        ]
+      },
+      {
+        "start": 44,
+        "end": 47,
+        "text": "tab",
+        "labels": [
+          "I-FREQUENCY"
+        ]
+      },
+      {
+        "start": 50,
+        "end": 55,
+        "text": "Every",
+        "labels": [
+          "B-FREQUENCY"
+        ]
+      },
+      {
+        "start": 56,
+        "end": 61,
+        "text": "night",
+        "labels": [
+          "I-FREQUENCY"
+        ]
+      },
+      {
+        "start": 77,
+        "end": 81,
+        "text": "Take",
+        "labels": [
+          "B-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 82,
+        "end": 92,
+        "text": "after food",
+        "labels": [
+          "I-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 62,
+        "end": 66,
+        "text": "OPEN",
+        "labels": [
+          "B-NOTE"
+        ]
+      },
+      {
+        "start": 67,
+        "end": 73,
+        "text": "AIRWAY",
+        "labels": [
+          "I-NOTE"
+        ]
+      },
+      {
+        "start": 12,
+        "end": 41,
+        "text": "10MG Qty 10.00tab s Take",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 48,
+        "end": 49,
+        "text": "s",
+        "labels": [
+          "O"
+        ]
+      }
+    ],
+    "annotator": 1,
+    "annotation_id": 4,
+    "created_at": "2025-08-02T08:48:35.981260Z",
+    "updated_at": "2025-08-02T08:48:35.981260Z",
+    "lead_time": 205.402
+  },
+  {
+    "text": "Prenisolone 5 mg    Qty  12.00 tab s Take 1 tab s Every morning Take after food",
+    "id": 20,
+    "label": [
+      {
+        "start": 0,
+        "end": 11,
+        "text": "Prenisolone",
+        "labels": [
+          "B-MEDICATION_NAME"
+        ]
+      },
+      {
+        "start": 12,
+        "end": 36,
+        "text": "5 mg Qty 12.00 tab s",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 37,
+        "end": 41,
+        "text": "Take",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 42,
+        "end": 43,
+        "text": "1",
+        "labels": [
+          "B-DOSAGE"
+        ]
+      },
+      {
+        "start": 44,
+        "end": 47,
+        "text": "tab",
+        "labels": [
+          "I-DOSAGE"
+        ]
+      },
+      {
+        "start": 48,
+        "end": 49,
+        "text": "s",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 50,
+        "end": 55,
+        "text": "Every",
+        "labels": [
+          "B-FREQUENCY"
+        ]
+      },
+      {
+        "start": 56,
+        "end": 63,
+        "text": "morning",
+        "labels": [
+          "I-FREQUENCY"
+        ]
+      },
+      {
+        "start": 64,
+        "end": 68,
+        "text": "Take",
+        "labels": [
+          "B-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 69,
+        "end": 79,
+        "text": "after food",
+        "labels": [
+          "I-INSTRUCTION"
+        ]
+      }
+    ],
+    "annotator": 1,
+    "annotation_id": 5,
+    "created_at": "2025-08-02T08:49:43.974049Z",
+    "updated_at": "2025-08-02T08:49:43.974049Z",
+    "lead_time": 66.554
+  },
+  {
+    "text": "Telfast 180 mg   Qty   10.00 tab s Take 1 tab s 1 time a day For NOSE ALLERGY ITCH    Take after food",
+    "id": 21,
+    "label": [
+      {
+        "start": 0,
+        "end": 7,
+        "text": "Telfast",
+        "labels": [
+          "B-MEDICATION_NAME"
+        ]
+      },
+      {
+        "start": 40,
+        "end": 41,
+        "text": "1",
+        "labels": [
+          "B-DOSAGE"
+        ]
+      },
+      {
+        "start": 42,
+        "end": 45,
+        "text": "tab",
+        "labels": [
+          "I-DOSAGE"
+        ]
+      },
+      {
+        "start": 48,
+        "end": 49,
+        "text": "1",
+        "labels": [
+          "B-FREQUENCY"
+        ]
+      },
+      {
+        "start": 50,
+        "end": 54,
+        "text": "time",
+        "labels": [
+          "I-FREQUENCY"
+        ]
+      },
+      {
+        "start": 65,
+        "end": 69,
+        "text": "NOSE",
+        "labels": [
+          "B-NOTE"
+        ]
+      },
+      {
+        "start": 86,
+        "end": 90,
+        "text": "Take",
+        "labels": [
+          "B-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 91,
+        "end": 101,
+        "text": "after food",
+        "labels": [
+          "I-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 8,
+        "end": 39,
+        "text": "180 mg Qty 10.00 tab s Take",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 46,
+        "end": 47,
+        "text": "s",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 55,
+        "end": 64,
+        "text": "a day For",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 70,
+        "end": 82,
+        "text": "ALLERGY ITCH",
+        "labels": [
+          "I-NOTE"
+        ]
+      }
+    ],
+    "annotator": 1,
+    "annotation_id": 6,
+    "created_at": "2025-08-02T08:51:50.807569Z",
+    "updated_at": "2025-08-02T08:51:50.807569Z",
+    "lead_time": 125.739
+  },
+  {
+    "text": "Celebrex cap 200mg    Qty 10.00 cap s Take 1 cap s 2 times a day Painkiller Anti  inflammation   Take after food",
+    "id": 22,
+    "label": [
+      {
+        "start": 0,
+        "end": 8,
+        "text": "Celebrex",
+        "labels": [
+          "B-MEDICATION_NAME"
+        ]
+      },
+      {
+        "start": 43,
+        "end": 44,
+        "text": "1",
+        "labels": [
+          "B-DOSAGE"
+        ]
+      },
+      {
+        "start": 45,
+        "end": 48,
+        "text": "cap",
+        "labels": [
+          "I-DOSAGE"
+        ]
+      },
+      {
+        "start": 51,
+        "end": 52,
+        "text": "2",
+        "labels": [
+          "B-FREQUENCY"
+        ]
+      },
+      {
+        "start": 53,
+        "end": 58,
+        "text": "times",
+        "labels": [
+          "I-FREQUENCY"
+        ]
+      },
+      {
+        "start": 65,
+        "end": 75,
+        "text": "Painkiller",
+        "labels": [
+          "B-NOTE"
+        ]
+      },
+      {
+        "start": 76,
+        "end": 80,
+        "text": "Anti",
+        "labels": [
+          "B-NOTE"
+        ]
+      },
+      {
+        "start": 82,
+        "end": 94,
+        "text": "inflammation",
+        "labels": [
+          "I-NOTE"
+        ]
+      },
+      {
+        "start": 97,
+        "end": 101,
+        "text": "Take",
+        "labels": [
+          "B-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 102,
+        "end": 112,
+        "text": "after food",
+        "labels": [
+          "I-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 9,
+        "end": 42,
+        "text": "cap 200mg Qty 10.00 cap s Take",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 59,
+        "end": 64,
+        "text": "a day",
+        "labels": [
+          "O"
+        ]
+      }
+    ],
+    "annotator": 1,
+    "annotation_id": 7,
+    "created_at": "2025-08-02T08:52:56.308447Z",
+    "updated_at": "2025-08-02T08:52:56.308447Z",
+    "lead_time": 64.424
+  },
+  {
+    "text": "Mac Lozenges    Qty  24.00 tab s Suck 1 tab s 3 times a day Take as Instructed",
+    "id": 23,
+    "label": [
+      {
+        "start": 4,
+        "end": 12,
+        "text": "Lozenges",
+        "labels": [
+          "B-MEDICATION_NAME"
+        ]
+      },
+      {
+        "start": 38,
+        "end": 39,
+        "text": "1",
+        "labels": [
+          "B-DOSAGE"
+        ]
+      },
+      {
+        "start": 40,
+        "end": 43,
+        "text": "tab",
+        "labels": [
+          "I-DOSAGE"
+        ]
+      },
+      {
+        "start": 46,
+        "end": 47,
+        "text": "3",
+        "labels": [
+          "B-FREQUENCY"
+        ]
+      },
+      {
+        "start": 48,
+        "end": 53,
+        "text": "times",
+        "labels": [
+          "I-FREQUENCY"
+        ]
+      },
+      {
+        "start": 60,
+        "end": 64,
+        "text": "Take",
+        "labels": [
+          "B-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 65,
+        "end": 78,
+        "text": "as Instructed",
+        "labels": [
+          "I-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 0,
+        "end": 3,
+        "text": "Mac",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 16,
+        "end": 37,
+        "text": "Qty 24.00 tab s Suck",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 44,
+        "end": 45,
+        "text": "s",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 54,
+        "end": 59,
+        "text": "a day",
+        "labels": [
+          "O"
+        ]
+      }
+    ],
+    "annotator": 1,
+    "annotation_id": 8,
+    "created_at": "2025-08-02T08:54:44.685428Z",
+    "updated_at": "2025-08-02T08:54:44.685428Z",
+    "lead_time": 105.006
+  },
+  {
+    "text": "RABEPRAZOLE 20MG    Qty  7.00 tab s Take 1 tab s 1 time a day  For Gastric    Take before food",
+    "id": 24,
+    "label": [
+      {
+        "start": 0,
+        "end": 11,
+        "text": "RABEPRAZOLE",
+        "labels": [
+          "B-MEDICATION_NAME"
+        ]
+      },
+      {
+        "start": 41,
+        "end": 42,
+        "text": "1",
+        "labels": [
+          "B-DOSAGE"
+        ]
+      },
+      {
+        "start": 43,
+        "end": 46,
+        "text": "tab",
+        "labels": [
+          "I-DOSAGE"
+        ]
+      },
+      {
+        "start": 49,
+        "end": 50,
+        "text": "1",
+        "labels": [
+          "B-FREQUENCY"
+        ]
+      },
+      {
+        "start": 51,
+        "end": 55,
+        "text": "time",
+        "labels": [
+          "I-FREQUENCY"
+        ]
+      },
+      {
+        "start": 67,
+        "end": 74,
+        "text": "Gastric",
+        "labels": [
+          "B-NOTE"
+        ]
+      },
+      {
+        "start": 78,
+        "end": 82,
+        "text": "Take",
+        "labels": [
+          "B-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 83,
+        "end": 94,
+        "text": "before food",
+        "labels": [
+          "I-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 12,
+        "end": 40,
+        "text": "20MG Qty 7.00 tab s Take",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 47,
+        "end": 48,
+        "text": "s",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 56,
+        "end": 66,
+        "text": "a day For",
+        "labels": [
+          "O"
+        ]
+      }
+    ],
+    "annotator": 1,
+    "annotation_id": 9,
+    "created_at": "2025-08-02T08:58:21.825000Z",
+    "updated_at": "2025-08-02T08:58:21.825000Z",
+    "lead_time": 215.818
+  },
+  {
+    "text": "PROGESIC  Paracetamol   500 mg Tablet Take 2 TAB S 3 times a day for fever, aches, pain WITH OR WITHOUT FOOD STOP WHEN SYMPTOMS ARE BETTER WHEN NECESSARY",
+    "id": 25,
+    "label": [
+      {
+        "start": 0,
+        "end": 8,
+        "text": "PROGESIC",
+        "labels": [
+          "B-MEDICATION_NAME"
+        ]
+      },
+      {
+        "start": 10,
+        "end": 21,
+        "text": "Paracetamol",
+        "labels": [
+          "I-MEDICATION_NAME"
+        ]
+      },
+      {
+        "start": 43,
+        "end": 44,
+        "text": "2",
+        "labels": [
+          "B-DOSAGE"
+        ]
+      },
+      {
+        "start": 45,
+        "end": 48,
+        "text": "TAB",
+        "labels": [
+          "I-DOSAGE"
+        ]
+      },
+      {
+        "start": 51,
+        "end": 52,
+        "text": "3",
+        "labels": [
+          "B-FREQUENCY"
+        ]
+      },
+      {
+        "start": 53,
+        "end": 58,
+        "text": "times",
+        "labels": [
+          "I-FREQUENCY"
+        ]
+      },
+      {
+        "start": 88,
+        "end": 92,
+        "text": "WITH",
+        "labels": [
+          "B-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 93,
+        "end": 108,
+        "text": "OR WITHOUT FOOD",
+        "labels": [
+          "I-INSTRUCTION"
+        ]
+      },
+      {
+        "start": 139,
+        "end": 143,
+        "text": "WHEN",
+        "labels": [
+          "B-NOTE"
+        ]
+      },
+      {
+        "start": 144,
+        "end": 153,
+        "text": "NECESSARY",
+        "labels": [
+          "I-NOTE"
+        ]
+      },
+      {
+        "start": 24,
+        "end": 42,
+        "text": "500 mg Tablet Take",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 49,
+        "end": 50,
+        "text": "S",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 69,
+        "end": 74,
+        "text": "fever",
+        "labels": [
+          "B-NOTE"
+        ]
+      },
+      {
+        "start": 76,
+        "end": 81,
+        "text": "aches",
+        "labels": [
+          "I-NOTE"
+        ]
+      },
+      {
+        "start": 83,
+        "end": 87,
+        "text": "pain",
+        "labels": [
+          "I-NOTE"
+        ]
+      },
+      {
+        "start": 59,
+        "end": 68,
+        "text": "a day for",
+        "labels": [
+          "O"
+        ]
+      },
+      {
+        "start": 109,
+        "end": 138,
+        "text": "STOP WHEN SYMPTOMS ARE BETTER",
+        "labels": [
+          "O"
+        ]
+      }
+    ],
+    "annotator": 1,
+    "annotation_id": 10,
+    "created_at": "2025-08-02T09:10:43.570694Z",
+    "updated_at": "2025-08-02T09:10:43.570694Z",
+    "lead_time": 592.545
+  }
+]

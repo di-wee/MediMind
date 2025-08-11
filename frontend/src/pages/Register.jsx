@@ -1,20 +1,22 @@
+import { XCircleIcon } from '@heroicons/react/16/solid';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MediMindContext from '../context/MediMindContext';
+import { API_BASE_URL } from '../utils/config';
 
 function Register() {
-	const navigate = useNavigate();
 	const [validation, setValidation] = useState({
 		MCRNo: false,
 		ConfirmPass: false,
 	});
-	const [clinicList, setClinicList] = useState([]);
 	const [passVisibility, setPassVisibility] = useState(false);
 	const [confirmPassVisibility, setConfirmPassVisibility] = useState(false);
-
+	const [clinicList, setClinicList] = useState([]);
 	const mediMindCtx = useContext(MediMindContext);
-	const { setCompletedSignUp } = mediMindCtx;
+	const { completedSignUp, setCompletedSignUp } = mediMindCtx;
+
+	const navigate = useNavigate();
 
 	const mcrRef = useRef();
 	const firstNameRef = useRef();
@@ -23,13 +25,6 @@ function Register() {
 	const passwordRef = useRef();
 	const confirmPassRef = useRef();
 	const clinicRef = useRef();
-
-	// temporarily hard-coded, to eventually call GET API to extract list of clinics
-
-	const handleSignIn = (e) => {
-		e.preventDefault();
-		navigate('/login', { replace: true });
-	};
 
 	const handleSignUp = async (e) => {
 		e.preventDefault();
@@ -62,23 +57,20 @@ function Register() {
 		if (hasErrors) return; // stopping logic if validation triggered
 
 		try {
-			const response = await fetch(
-				import.meta.env.VITE_SERVER + 'api/web/register',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						mcrNo,
-						firstName,
-						lastName,
-						email,
-						password,
-						clinicName,
-					}),
-				}
-			);
+			const response = await fetch(API_BASE_URL + 'api/web/register', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					mcrNo,
+					firstName,
+					lastName,
+					email,
+					password,
+					clinicName,
+				}),
+			});
 
 			if (response.ok) {
 				setCompletedSignUp(true);
@@ -93,15 +85,12 @@ function Register() {
 	useEffect(() => {
 		const fetchAllClinics = async () => {
 			try {
-				const response = await fetch(
-					import.meta.env.VITE_SERVER + 'api/web/all-clinics',
-					{
-						method: 'GET',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-					}
-				);
+				const response = await fetch(API_BASE_URL + 'api/web/all-clinics', {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				});
 
 				if (!response.ok) {
 					throw new Error('Error retrieving clinics!');
@@ -309,7 +298,7 @@ function Register() {
 									<a
 										href='#'
 										className='link'
-										onClick={(e) => handleSignIn(e)}>
+										onClick={(e) => handleSignUp(e)}>
 										Sign in
 									</a>
 								</p>

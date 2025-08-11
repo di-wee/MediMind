@@ -3,6 +3,7 @@ import Header from '../components/Header';
 import { useContext, useEffect, useState } from 'react';
 import MediMindContext from '../context/MediMindContext';
 import UnassignPatientList from '../components/UnassignPatientList';
+import { API_BASE_URL } from '../utils/config';
 
 export default function AddPatientPage() {
 	const [searchTerm, setSearchTerm] = useState('');
@@ -15,19 +16,16 @@ export default function AddPatientPage() {
 		console.log(`Assigning patient with ID: ${patientId}`);
 
 		try {
-			const response = await fetch(
-				import.meta.env.VITE_SERVER + 'api/patients/assign',
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						patientId,
-						doctorId: doctorDetails.mcrNo,
-					}),
-				}
-			);
+			const response = await fetch(API_BASE_URL + 'api/patients/assign', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					patientId,
+					doctorId: doctorDetails.mcrNo,
+				}),
+			});
 
 			if (response.ok) {
 				//to update state to get the component to refresh
@@ -43,8 +41,7 @@ export default function AddPatientPage() {
 		const fetchUnassignedPatients = async () => {
 			try {
 				const response = await fetch(
-					import.meta.env.VITE_SERVER +
-						`api/patients/unassigned/${doctorDetails.mcrNo}`,
+					API_BASE_URL + `api/patients/unassigned/${doctorDetails.mcrNo}`,
 					{
 						method: 'GET',
 						headers: {

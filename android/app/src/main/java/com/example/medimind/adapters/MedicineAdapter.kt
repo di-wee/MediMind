@@ -14,19 +14,19 @@ class MedicineAdapter(
 ) : RecyclerView.Adapter<MedicineAdapter.MedicineViewHolder>() {
 
     inner class MedicineViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val medicineNameTextView: TextView = itemView.findViewById(R.id.medicineName)
-        val quantityTextView: TextView = itemView.findViewById(R.id.intakeQuantity)
+        val medicineNameTextView: TextView = itemView.findViewById(R.id.medicationNameText)
+        val quantityTextView: TextView = itemView.findViewById(R.id.quantityText)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MedicineViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_medicine, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_schedule_medication, parent, false)
         return MedicineViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: MedicineViewHolder, position: Int) {
         val medicine = medicines[position]
         holder.medicineNameTextView.text = medicine.medicationName
-        holder.quantityTextView.text = "(Take ${medicine.intakeQuantity} each time.)"
+        holder.quantityTextView.text = "Take ${medicine.intakeQuantity} each time."
         holder.itemView.setOnClickListener{
             onItemClick(medicine)
         }

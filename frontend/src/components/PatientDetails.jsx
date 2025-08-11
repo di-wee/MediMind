@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import MedicationList from './MedicationList';
+import { API_BASE_URL } from '../utils/config';
 
 function PatientDetails({ patientId }) {
 	const [patientInfo, setPatientInfo] = useState({});
@@ -11,7 +12,7 @@ function PatientDetails({ patientId }) {
 			try {
 				console.log('PatientDetails mounted with patientId:', patientId);
 				const response = await fetch(
-					import.meta.env.VITE_SERVER + `api/patient/${patientId}`,
+					API_BASE_URL + `api/patient/${patientId}`,
 					{
 						method: 'GET',
 						headers: {
@@ -53,7 +54,7 @@ function PatientDetails({ patientId }) {
 		const fetchPatientMedicationList = async () => {
 			try {
 				const response = await fetch(
-					import.meta.env.VITE_SERVER + `api/patient/${patientId}/medications`,
+					API_BASE_URL + `api/patient/${patientId}/medications`,
 					{
 						method: 'GET',
 						headers: {

@@ -1,0 +1,12 @@
+=== Backend Test Summary ===
+Date: Fri Aug  8 17:42:24 +08 2025
+Java Version: java version "21" 2023-09-19 LTS
+
+Total test classes:        9
+Tests passed: 69
+Tests failed: 0
+Tests skipped: 0
+✅ All tests passed!
+
+=== Coverage Summary ===
+Coverage report: target/site/jacoco/index.html

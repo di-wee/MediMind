@@ -6,7 +6,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object MLApiClient {
-    private const val BASE_URL = "http://52.221.236.188:8000" // Your EC2 ML endpoint
+    private const val BASE_URL = "http://54.255.65.62:8000" // Your EC2 ML endpoint
 
     private val retrofit: Retrofit by lazy {
         val logging = HttpLoggingInterceptor().apply {

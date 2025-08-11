@@ -1,0 +1,99 @@
+name: 'Backend Unit Tests & Coverage'
+
+on:
+  push:
+    branches:
+      - main
+      - frontend-(react)
+      - backend-(java-springboot)
+      - android
+      - machine-learning
+
+  pull_request:
+    branches:
+      - main
+      - frontend-(react)
+      - backend-(java-springboot)
+      - android
+      - machine-learning
+      - demo/*
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ---------------------
+      # Set up Java 21 for backend tests
+      # ---------------------
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # Prepare artifact directory
+      - name: Prepare Artifact Directory
+        run: |
+          mkdir -p artifacts/test-coverage/backend
+
+      # ---------------------
+      # Backend (Java) JUnit Tests & Coverage
+      # ---------------------
+      - name: Run Backend JUnit Tests & Generate Coverage
+        working-directory: ./backend
+        run: |
+          # Run JUnit tests and generate JaCoCo coverage report
+          mvn clean test jacoco:report
+
+          # Ensure the target directory exists
+          mkdir -p ../artifacts/test-coverage/backend
+
+          # Copy JaCoCo reports to artifacts (ensure directory exists)
+          if [ -d "target/site/jacoco" ]; then
+            echo "Copying JaCoCo reports..."
+            cp -r target/site/jacoco/* ../artifacts/test-coverage/backend/
+            echo "JaCoCo reports copied successfully"
+          else
+            echo "No JaCoCo reports found" > ../artifacts/test-coverage/backend/no-coverage-report.txt
+            echo "JaCoCo directory not found at target/site/jacoco"
+          fi
+
+          # Generate test summary
+          echo "=== Backend JUnit Test Summary ===" > ../artifacts/test-coverage/backend/test-summary.txt
+          echo "Date: $(date)" >> ../artifacts/test-coverage/backend/test-summary.txt
+          echo "Java Version: $(java -version 2>&1 | head -n 1)" >> ../artifacts/test-coverage/backend/test-summary.txt
+          echo "" >> ../artifacts/test-coverage/backend/test-summary.txt
+
+          # Count test results if surefire reports exist
+          if [ -d "target/surefire-reports" ]; then
+            TOTAL_TESTS=$(find target/surefire-reports -name "*.txt" -exec grep -l "Tests run:" {} \; | wc -l)
+            echo "Total test classes: $TOTAL_TESTS" >> ../artifacts/test-coverage/backend/test-summary.txt
+            
+            # Count passed/failed tests
+            PASSED=$(find target/surefire-reports -name "*.txt" -exec grep "Tests run:" {} \; | awk '{sum += $3} END {print sum+0}')
+            FAILED=$(find target/surefire-reports -name "*.txt" -exec grep "Tests run:" {} \; | awk '{sum += $6} END {print sum+0}')
+            SKIPPED=$(find target/surefire-reports -name "*.txt" -exec grep "Tests run:" {} \; | awk '{sum += $9} END {print sum+0}')
+            
+            echo "JUnit tests passed: $PASSED" >> ../artifacts/test-coverage/backend/test-summary.txt
+            echo "JUnit tests failed: $FAILED" >> ../artifacts/test-coverage/backend/test-summary.txt
+            echo "JUnit tests skipped: $SKIPPED" >> ../artifacts/test-coverage/backend/test-summary.txt
+            
+            if [ "$FAILED" -gt 0 ]; then
+              echo "❌ Some JUnit tests failed!" >> ../artifacts/test-coverage/backend/test-summary.txt
+            else
+              echo "✅ All JUnit tests passed!" >> ../artifacts/test-coverage/backend/test-summary.txt
+            fi
+          fi
+
+      # ---------------------
+      # Upload Test Coverage Reports
+      # ---------------------
+      - name: Upload Test Coverage Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-coverage-reports
+          path: artifacts/test-coverage/
