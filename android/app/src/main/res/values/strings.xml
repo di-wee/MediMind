@@ -27,5 +27,6 @@
     <string name="time_h_label">Time(h):</string>
     <string name="edit_medication">Edit Medication</string>
     <string name="image_details">Image Details</string>
+    <string name="add_manually">Add Manually</string>
 
 </resources>

@@ -90,7 +90,7 @@
             app:boxStrokeColor="#BDBDBD"
             app:boxStrokeWidth="1dp"
             android:hint="@string/frequency_label_with_unit"
-            app:placeholderText="@string/medication_name_hint"
+            app:placeholderText="@string/hint_2"
             app:placeholderTextColor="#BDBDBD"
             app:hintEnabled="true"
             app:hintAnimationEnabled="false">
@@ -99,8 +99,7 @@
                 android:id="@+id/frequencyInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number"
-                tools:text="@string/hint_2"/>
+                android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
