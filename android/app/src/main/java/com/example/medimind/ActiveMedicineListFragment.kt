@@ -22,6 +22,10 @@ class ActiveMedicineListFragment : Fragment() {
     private lateinit var adapter: MedicineAdapter
     private var medicineList = mutableListOf<MedicationResponse>()
 
+    // NEW: views for empty/loading states
+    private lateinit var emptyState: View
+    private var progressBar: View? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -35,13 +39,20 @@ class ActiveMedicineListFragment : Fragment() {
         recyclerView = view.findViewById(R.id.medicineListRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        // NEW: grab empty/progress views (progressBar optional)
+        emptyState = view.findViewById(R.id.emptyState)
+        progressBar = view.findViewById(R.id.progressBar)
+
         // Set up adapter with click listener to navigate and pass medicineName
         adapter = MedicineAdapter(medicineList) { medicine ->
             val bundle = Bundle().apply {
                 putString("medicineName", medicine.medicationName)
                 putString("medicineId", medicine.id)
             }
-            findNavController().navigate(R.id.action_activeMedicineListFragment_to_viewMedicineDetailsFragment, bundle)
+            findNavController().navigate(
+                R.id.action_activeMedicineListFragment_to_viewMedicineDetailsFragment,
+                bundle
+            )
         }
         recyclerView.adapter = adapter
 
@@ -49,8 +60,10 @@ class ActiveMedicineListFragment : Fragment() {
         val patientId = sharedPreferences.getString("patientId", null)
 
         if (patientId != null) {
+            showLoading() // NEW
             fetchActiveMedications(patientId)
         } else {
+            showEmpty()   // NEW: show empty instead of a blank list
             Toast.makeText(context, "No patientId found", Toast.LENGTH_SHORT).show()
         }
     }
@@ -66,11 +79,33 @@ class ActiveMedicineListFragment : Fragment() {
                 medicineList.clear()
                 medicineList.addAll(activeNames)
                 adapter.notifyDataSetChanged()
+
+                // NEW: toggle empty/list
+                if (medicineList.isEmpty()) showEmpty() else showList()
             } catch (e: Exception) {
                 e.printStackTrace()
+                showEmpty() // NEW: fall back to empty state on error
                 Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
-}
 
+    // --- NEW: simple UI state helpers ---
+    private fun showLoading() {
+        progressBar?.visibility = View.VISIBLE
+        emptyState.visibility = View.GONE
+        recyclerView.visibility = View.GONE
+    }
+
+    private fun showEmpty() {
+        progressBar?.visibility = View.GONE
+        emptyState.visibility = View.VISIBLE
+        recyclerView.visibility = View.GONE
+    }
+
+    private fun showList() {
+        progressBar?.visibility = View.GONE
+        emptyState.visibility = View.GONE
+        recyclerView.visibility = View.VISIBLE
+    }
+}
