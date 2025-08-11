@@ -36,15 +36,6 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Start MySQL Database
-        run: |
-          sudo systemctl start mysql || sudo service mysql start || true
-          sudo mysql -e "CREATE DATABASE IF NOT EXISTS medimind;"
-          sudo mysql -e "CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'password';"
-          sudo mysql -e "GRANT ALL PRIVILEGES ON medimind.* TO 'root'@'localhost';"
-          sudo mysql -e "FLUSH PRIVILEGES;"
-          echo "✅ MySQL database setup complete"
-
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
@@ -53,18 +44,17 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Build and start Backend
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          CORS_ALLOWED_ORIGIN: http://localhost:3000
         run: |
           cd backend
           mvn clean compile
           echo "Starting backend application..."
-
-          # Set environment variables for database connection
-          export DB_HOST=localhost
-          export DB_PORT=3306
-          export DB_NAME=medimind
-          export DB_USERNAME=root
-          export DB_PASSWORD=password
-          export CORS_ALLOWED_ORIGIN=http://localhost:3000
 
           # Start backend with explicit port configuration
           mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=8080 -Dserver.address=0.0.0.0" &
