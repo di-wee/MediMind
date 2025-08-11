@@ -66,23 +66,25 @@ public class DatabaseSeeder implements CommandLineRunner {
             return entityManager.createQuery("SELECT c FROM Clinic c", Clinic.class).getResultList();
         }
 
-        List<String> clinicNames = Arrays.asList(
-                "Raffles Medical Clinic",
-                "Healthway Medical Centre",
-                "Parkway Shenton Clinic",
-                "OneCare Family Clinic",
-                "Fullerton Health Clinic"
+        // Define clinics with their email domains
+        Map<String, String> clinicData = Map.of(
+                "Raffles Medical Clinic", "rafflesmedical.com",
+                "Healthway Medical Centre", "healthway.com.sg",
+                "Parkway Shenton Clinic", "parkwayshenton.com",
+                "OneCare Family Clinic", "onecare.com.sg",
+                "Fullerton Health Clinic", "fullertonhealth.com"
         );
 
         List<Clinic> clinics = new ArrayList<>();
-        for (String name : clinicNames) {
+        for (Map.Entry<String, String> entry : clinicData.entrySet()) {
             Clinic clinic = new Clinic();
-            clinic.setClinicName(name);
+            clinic.setClinicName(entry.getKey());
+            clinic.setEmailDomain(entry.getValue());
+            clinic.setRequireEmailVerification(true);
             //saving to db
             entityManager.persist(clinic);
             clinics.add(clinic);
         }
-
 
         return clinics;
     }

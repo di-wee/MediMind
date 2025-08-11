@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession;
 import nus.iss.backend.dao.LoginReqWeb;
 import nus.iss.backend.dao.RegistrationRequestWeb;
 import nus.iss.backend.exceptions.InvalidCredentialsException;
+import nus.iss.backend.exceptions.InvalidEmailDomainException;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.exceptions.UserAlreadyExist;
 import nus.iss.backend.model.Clinic;
@@ -100,6 +101,9 @@ public ResponseEntity<Doctor> register(@RequestBody RegistrationRequestWeb reque
         } catch (ItemNotFound e) {
             logger.error("Error when registering Doctor: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (InvalidEmailDomainException e) {
+            logger.error("Email domain validation failed: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
 }

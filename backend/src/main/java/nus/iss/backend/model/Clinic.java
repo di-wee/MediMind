@@ -27,8 +27,15 @@ public class Clinic {
     @JdbcTypeCode(Types.VARCHAR)
     @Column(name = "Clinic_UUID", updatable = false, nullable = false)
     private UUID id;
+
     @Column(name = "Clinic_Name")
     private String clinicName;
+
+    @Column(name = "Email_Domain")
+    private String emailDomain;
+
+    @Column(name = "Require_Email_Verification")
+    private boolean requireEmailVerification = true;
 
     @JsonIgnore
     @OneToMany(mappedBy = "clinic", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
