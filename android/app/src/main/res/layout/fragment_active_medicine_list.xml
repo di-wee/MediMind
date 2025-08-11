@@ -12,10 +12,11 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
+        app:navigationIconTint="@android:color/white"
         app:title="@string/your_medication_list"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
-        app:contentInsetStartWithNavigation="0dp" />
+        app:contentInsetStartWithNavigation="0dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/medicineListRecyclerView"

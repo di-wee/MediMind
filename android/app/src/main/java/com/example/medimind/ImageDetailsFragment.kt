@@ -22,6 +22,7 @@ import com.example.medimind.data.ImageOutput
 import com.example.medimind.network.ApiClient
 import com.example.medimind.network.MLApiClient
 import com.example.medimind.network.newMedicationRequest
+import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -49,6 +50,12 @@ class ImageDetailsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
+        // Back arrow
+        view.findViewById<MaterialToolbar>(R.id.topAppBar).setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
+
         val imageUriString = arguments?.getString("imageUri")
         val imageUri = imageUriString?.let { Uri.parse(it) }
 
@@ -106,10 +113,10 @@ class ImageDetailsFragment : Fragment() {
             }
 
             // Use NavController to navigate back
-            val backBtnFromImageDetails = view.findViewById<Button>(R.id.btnBackFromImageDetails)
-            backBtnFromImageDetails.setOnClickListener {
-                findNavController().popBackStack()
-            }
+//            val backBtnFromImageDetails = view.findViewById<Button>(R.id.btnBackFromImageDetails)
+//            backBtnFromImageDetails.setOnClickListener {
+//                findNavController().popBackStack()
+//            }
 
             val saveBtnFromImageDetails = view.findViewById<Button>(R.id.btnSaveFromImageDetails)
             saveBtnFromImageDetails.setOnClickListener {
