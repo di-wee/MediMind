@@ -10,7 +10,7 @@
     android:background="#F5F5F5"
     tools:context=".IntakeHistoryFragment">
 
-    <!-- Top App Bar (same style as Profile) -->
+    <!-- Top App Bar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
@@ -19,10 +19,10 @@
         app:title="Intake History"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:contentInsetStartWithNavigation="0dp" />
+        app:contentInsetStartWithNavigation="0dp"
+        app:navigationIcon="@null" />
 
-    <!-- Filters row (below the app bar) -->
+    <!-- Filters row -->
     <LinearLayout
         android:id="@+id/filtersBar"
         android:layout_width="match_parent"
@@ -83,7 +83,7 @@
             android:id="@+id/intakeHistoryRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingStart="16dp"
+            android:paddingStart="20dp"
             android:paddingEnd="16dp"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
