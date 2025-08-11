@@ -23,5 +23,7 @@
     <string name="instruction_label">Instruction:</string>
     <string name="note_label">Note:</string>
     <string name="time_h_label">Time(h):</string>
+    <string name="close">Close</string>
+    <string name="add_new_med">Add New Med</string>
 
 </resources>
