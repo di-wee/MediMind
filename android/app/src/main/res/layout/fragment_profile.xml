@@ -9,23 +9,18 @@
     android:fitsSystemWindows="true"
     android:background="#F5F5F5">
 
-    <!-- Top App Bar: no back button, centered title -->
+    <!-- Top App Bar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary">
-
-        <TextView
-            android:id="@+id/toolbarTitle"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="My Profile"
-            android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
-    </com.google.android.material.appbar.MaterialToolbar>
+        android:background="?attr/colorPrimary"
+        app:title="My Profile"
+        app:titleTextAppearance="@style/ToolbarTitleBold"
+        app:titleTextColor="@android:color/white"
+        app:titleCentered="true"
+        app:navigationIcon="@null"
+        app:menu="@menu/menu_home_topbar" />
 
     <!-- Scrollable content -->
     <androidx.core.widget.NestedScrollView
@@ -50,7 +45,7 @@
                 android:layout_width="200dp"
                 android:layout_height="200dp"
                 android:layout_gravity="center"
-                android:layout_marginBottom="4dp"
+                android:layout_marginBottom="8dp"
                 android:src="@drawable/medimind_profile_ic"
                 android:contentDescription="@string/app_name" />
 

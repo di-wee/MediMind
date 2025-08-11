@@ -23,16 +23,7 @@
             android:layout_gravity="center"
             android:layout_marginBottom="8dp"
             android:contentDescription="@string/app_name"
-            android:src="@drawable/medimind_login_ic" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="MediMind"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="#111111"
-            android:layout_gravity="center" />
+            android:src="@drawable/medimind_splash_logo" />
 
         <!-- Email -->
         <com.google.android.material.textfield.TextInputLayout

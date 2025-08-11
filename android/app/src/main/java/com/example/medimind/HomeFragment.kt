@@ -122,18 +122,40 @@ class HomeFragment : Fragment() {
 
         // Load schedule
         if (patientId != null) {
+            val prefs = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            val hasScheduleKey = "hasScheduleData"
+
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     val raw = ApiClient.retrofitService.getDailySchedule(patientId)
                     val grouped = groupScheduleItems(raw)
+
+                    // Persist that this user has have schedule data once code sees any
+                    if (raw.isNotEmpty()) {
+                        prefs.edit().putBoolean(hasScheduleKey, true).apply()
+                    }
+
                     emptyStateContainer.visibility = if (raw.isEmpty()) View.VISIBLE else View.GONE
                     scheduleRecyclerView.adapter = GroupedScheduleAdapter(grouped)
                 } catch (e: Exception) {
+                    // If code has not seen data before, treat as "no meds yet" and don't toast
+                    val hasEverHadData = prefs.getBoolean(hasScheduleKey, false)
+
                     emptyStateContainer.visibility = View.VISIBLE
-                    Toast.makeText(requireContext(), "Failed to load schedule: ${e.message}", Toast.LENGTH_LONG).show()
+                    scheduleRecyclerView.adapter = GroupedScheduleAdapter(emptyList())
+
+                    if (hasEverHadData) {
+                        Toast.makeText(
+                            requireContext(),
+                            "Failed to load schedule. Please try again.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             }
         }
+
+
 
         // ---- FAB Speed Dial ----
         fabMain = view.findViewById(R.id.fabMain)
