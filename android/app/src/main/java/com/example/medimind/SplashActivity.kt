@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 
 class SplashActivity : AppCompatActivity() {
@@ -27,6 +28,13 @@ class SplashActivity : AppCompatActivity() {
         
         setContentView(R.layout.activity_splash)
         
+        // disable back button during splash screen
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // do nothing - prevents users from going back during splash
+            }
+        })
+        
         // handle the splash screen transition
         Handler(Looper.getMainLooper()).postDelayed({
             startMainActivity()
@@ -40,10 +48,5 @@ class SplashActivity : AppCompatActivity() {
         
         // optional: add transition animation
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-    }
-    
-    override fun onBackPressed() {
-        // disable back button on splash screen
-        // do nothing - prevents users from going back during splash
     }
 }
