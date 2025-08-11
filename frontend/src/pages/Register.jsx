@@ -9,12 +9,13 @@ function Register() {
 	const [validation, setValidation] = useState({
 		MCRNo: false,
 		ConfirmPass: false,
+		EmailDomain: false,
 	});
 	const [passVisibility, setPassVisibility] = useState(false);
 	const [confirmPassVisibility, setConfirmPassVisibility] = useState(false);
 	const [clinicList, setClinicList] = useState([]);
 	const mediMindCtx = useContext(MediMindContext);
-	const { completedSignUp, setCompletedSignUp } = mediMindCtx;
+	const { setCompletedSignUp } = mediMindCtx;
 
 	const navigate = useNavigate();
 
@@ -72,9 +73,18 @@ function Register() {
 				}),
 			});
 
+			if (response.status === 400) {
+				// email domain validation failed or other validation error
+				setValidation((prev) => ({ ...prev, EmailDomain: true }));
+				return;
+			}
+
 			if (response.ok) {
 				setCompletedSignUp(true);
 				navigate('/login', { replace: true });
+			} else {
+				const errMsg = await response.text();
+				console.error('Registration failed: ' + errMsg);
 			}
 		} catch (err) {
 			console.error('Error with registration: ', err);
@@ -84,6 +94,20 @@ function Register() {
 
 	const handleSignIn = () => {
 		navigate('/login', { replace: true });
+	};
+
+	const handleEmailChange = () => {
+		// clear email domain validation when user types in email field
+		if (validation.EmailDomain) {
+			setValidation((prev) => ({ ...prev, EmailDomain: false }));
+		}
+	};
+
+	const handleClinicChange = () => {
+		// clear email domain validation when user changes clinic
+		if (validation.EmailDomain) {
+			setValidation((prev) => ({ ...prev, EmailDomain: false }));
+		}
 	};
 
 	useEffect(() => {
@@ -194,8 +218,14 @@ function Register() {
 										className='form-input'
 										placeholder='name@company.com'
 										ref={emailRef}
+										onChange={handleEmailChange}
 										required
 									/>
+									{validation['EmailDomain'] && (
+										<p className='inline-val-msg'>
+											Email is not verified for the specified clinic.
+										</p>
+									)}
 								</div>
 								<div>
 									<label
@@ -208,6 +238,7 @@ function Register() {
 										id='clinic'
 										className='form-input'
 										ref={clinicRef}
+										onChange={handleClinicChange}
 										required>
 										<option
 											value=''

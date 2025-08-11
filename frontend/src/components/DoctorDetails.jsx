@@ -19,6 +19,7 @@ function DoctorDetails({ mcrNo }) {
 	const [validation, setValidation] = useState({
 		newPassValidation: false,
 		currentPassValidation: false,
+		emailDomain: false,
 	});
 
 	const [newPassword, setNewPassword] = useState('');
@@ -39,23 +40,37 @@ function DoctorDetails({ mcrNo }) {
 						clinic: doctorInfo.clinic,
 					}),
 				});
+
+				if (response.status === 400) {
+					// Email domain validation failed
+
+					setValidation((prev) => ({ ...prev, emailDomain: true }));
+
+					return; // Don't exit editing mode, let user fix the email
+				}
+
 				if (!response.ok) {
 					const errMsg = await response.text();
-					alert('Failed to update doctor info: ' + errMsg);
+					console.error('Update error: ', errMsg);
+					setIsEditing(false); // Exit editing mode for other errors
 					return;
 				}
+
 				const updateDoctor = await response.json();
 				setDoctorInfo(updateDoctor);
 				setDoctorDetails(updateDoctor);
+				// clear email domain validation error on successful update
+				setValidation((prev) => ({ ...prev, emailDomain: false }));
 				alert('Doctor info updated successfully!');
+				setIsEditing(false); // Exit editing mode on success
 			} catch (error) {
 				console.error('Update error:', error);
-				alert('Server error');
-			} finally {
-				setIsEditing(false);
+				setIsEditing(false); // Exit editing mode for unexpected errors
 			}
 		} else {
 			setIsEditing(true);
+			// clear validation errors when starting to edit
+			setValidation((prev) => ({ ...prev, emailDomain: false }));
 		}
 	};
 
@@ -203,6 +218,11 @@ function DoctorDetails({ mcrNo }) {
 								}
 								disabled={!isEditing}
 							/>
+							{validation.emailDomain && (
+								<p className='inline-val-msg'>
+									Email is not verified for the specified clinic.
+								</p>
+							)}
 						</div>
 						<div className='w-xl'>
 							<label className='form-label'>Practicing Clinic</label>

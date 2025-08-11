@@ -1,6 +1,7 @@
 package nus.iss.backend.controller;
 
 import nus.iss.backend.dao.DoctorUpdateReqWeb;
+import nus.iss.backend.exceptions.InvalidEmailDomainException;
 import nus.iss.backend.model.Doctor;
 import nus.iss.backend.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,13 @@ public class DoctorController {
         }catch (ItemNotFound e) {
             logger.error("Doctor not found (Status Code: " + HttpStatus.NOT_FOUND + "): " + e);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (InvalidEmailDomainException e) {
+            logger.error("Email domain validation failed for doctor {}: {}", update.getMcrNo(), e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }catch (Exception e) {
+            logger.error("Unexpected error updating doctor {}: {}", update.getMcrNo(), e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
         }
     }
 }

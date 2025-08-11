@@ -3,6 +3,7 @@ package nus.iss.backend.service.Implementation;
 import nus.iss.backend.dao.DoctorUpdateReqWeb;
 import nus.iss.backend.dao.RegistrationRequestWeb;
 import nus.iss.backend.exceptions.InvalidCredentialsException;
+import nus.iss.backend.exceptions.InvalidEmailDomainException;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.exceptions.UserAlreadyExist;
 import nus.iss.backend.model.Clinic;
@@ -38,6 +39,31 @@ public class DoctorImpl implements DoctorService {
         return doctor;
     }
 
+    private void validateEmailDomain(String email, Clinic clinic) {
+        if (clinic.getEmailDomain() == null || clinic.getEmailDomain().trim().isEmpty()) {
+            logger.warn("No email domain configured for clinic: {}", clinic.getClinicName());
+            return; // Skip validation if no domain is configured
+        }
+
+        if (!email.contains("@")) {
+            throw new InvalidEmailDomainException("Invalid email format: missing @ symbol");
+        }
+
+        String emailDomain = email.substring(email.indexOf("@") + 1).toLowerCase();
+        String clinicDomain = clinic.getEmailDomain().toLowerCase();
+
+        if (!emailDomain.equals(clinicDomain)) {
+            logger.error("Email domain mismatch. Expected: {}, Got: {}", clinicDomain, emailDomain);
+            throw new InvalidEmailDomainException(
+                    String.format("Email domain '%s' does not match clinic domain '%s'. " +
+                                    "Please use an email address from your clinic's domain.",
+                            emailDomain, clinicDomain)
+            );
+        }
+
+        logger.info("Email domain validation passed for clinic: {}", clinic.getClinicName());
+    }
+
     public Doctor findDoctorByMcrNo (String mcrNo) {
         return doctorRepo.findDoctorByMcrNo(mcrNo);
 
@@ -57,6 +83,9 @@ public class DoctorImpl implements DoctorService {
             logger.error("Clinic name: " + request.getClinicName());
             throw new ItemNotFound("Clinic not found!");
         }
+        // validate email domain
+        validateEmailDomain(request.getEmail(), clinic);
+
         Doctor newDoctor = new Doctor();
         newDoctor.setMcrNo(request.getMcrNo());
         newDoctor.setFirstName(request.getFirstName());
@@ -75,13 +104,21 @@ public class DoctorImpl implements DoctorService {
         if (doctor == null) {
             throw new ItemNotFound("Doctor not found!");
         }
+        Clinic targetClinic = doctor.getClinic(); // default is current clinic
+        boolean clinicChanged = false;
+
         // update clinic logic
         if(request.getClinic() != null){
-            Clinic clinic = request.getClinic();
+            Clinic newClinic = request.getClinic();
             // check if the clinic is different from the current one
-            if (clinic != doctor.getClinic()) {
+            if (!newClinic.getId().equals(doctor.getClinic().getId())) {
+                logger.info("Doctor {} changing clinic from {} to {}",
+                        request.getMcrNo(), doctor.getClinic().getClinicName(), newClinic.getClinicName());
+
                 patientService.unassignAllPatientsFromDoctor(doctor.getMcrNo());
-                doctor.setClinic(clinic);
+                doctor.setClinic(newClinic);
+                targetClinic = newClinic; // update target clinic to new clinic
+                clinicChanged = true; // mark that the clinic has changed
             }
 
         }
@@ -93,10 +130,22 @@ public class DoctorImpl implements DoctorService {
 
         //update email logic
         if (request.getEmail() != null) {
-            doctor.setEmail(request.getEmail());
+            String newEmail = request.getEmail();
+
+            validateEmailDomain(newEmail, targetClinic);
+            doctor.setEmail(newEmail);
+            logger.info("Doctor {} email updated to: {}", request.getMcrNo(), newEmail);
+
+        } else if (clinicChanged) {
+            validateEmailDomain(doctor.getEmail(), targetClinic);
+            logger.info("Doctor {} clinic changed, current email validated against new clinic: {}",
+                    request.getMcrNo(), targetClinic.getClinicName());
         }
         doctorRepo.saveAndFlush(doctor);
         return doctor;
     }
+
+
+
 
 }
