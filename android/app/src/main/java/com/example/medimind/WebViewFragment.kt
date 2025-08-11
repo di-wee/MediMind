@@ -59,10 +59,6 @@ class WebViewFragment : Fragment() {
         } else {
             binding.webview.loadData("No URL provided", "text/html", "UTF-8")
         }
-
-//        binding.btnBackWebView.setOnClickListener {
-//            findNavController().popBackStack()
-//        }
     }
 
     override fun onDestroyView() {

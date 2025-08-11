@@ -63,11 +63,18 @@ class ImageDetailsFragment : Fragment() {
         val patientId = sharedPreference.getString("patientId", null)
 
         val imagePreview = view.findViewById<ImageView>(R.id.imagePreview)
-        val nameInput = view.findViewById<EditText>(R.id.medicationNameInput)
-        val intakeQuantityInput = view.findViewById<EditText>(R.id.intakeQuantityInput)
-        val frequencyInput = view.findViewById<EditText>(R.id.frequencyInput)
-        val instructionInput = view.findViewById<EditText>(R.id.instructionInput)
-        val noteInput = view.findViewById<EditText>(R.id.noteInput)
+
+        val nameInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.medicationNameInput)
+        val intakeQuantityInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.intakeQuantityInput)
+        val frequencyInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.frequencyInput)
+        val instructionInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.instructionInput)
+        val noteInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.noteInput)
+
+//        val nameInput = view.findViewById<EditText>(R.id.medicationNameInput)
+//        val intakeQuantityInput = view.findViewById<EditText>(R.id.intakeQuantityInput)
+//        val frequencyInput = view.findViewById<EditText>(R.id.frequencyInput)
+//        val instructionInput = view.findViewById<EditText>(R.id.instructionInput)
+//        val noteInput = view.findViewById<EditText>(R.id.noteInput)
 
         if (imageUri != null) {
             imagePreview.setImageURI(imageUri)
@@ -112,11 +119,6 @@ class ImageDetailsFragment : Fragment() {
                 }
             }
 
-            // Use NavController to navigate back
-//            val backBtnFromImageDetails = view.findViewById<Button>(R.id.btnBackFromImageDetails)
-//            backBtnFromImageDetails.setOnClickListener {
-//                findNavController().popBackStack()
-//            }
 
             val saveBtnFromImageDetails = view.findViewById<Button>(R.id.btnSaveFromImageDetails)
             saveBtnFromImageDetails.setOnClickListener {

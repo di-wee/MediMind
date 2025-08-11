@@ -129,10 +129,6 @@ class ViewMedicineDetailsFragment : Fragment() {
 
             // alarm will deactive in future
         }
-
-//        view.findViewById<Button>(R.id.btnBack).setOnClickListener {
-//            findNavController().popBackStack()
-//        }
     }
 
     private fun generateTimeFields(frequency:Int, presetTimes: List<String> = emptyList()) {
