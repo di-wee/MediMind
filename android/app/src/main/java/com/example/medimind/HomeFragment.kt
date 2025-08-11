@@ -62,13 +62,6 @@ class HomeFragment : Fragment() {
     private var pendingImageUri: Uri? = null
     private var shouldNavigateToImageDetails = false
 
-    // Calendar helpers (for strip + "Today, 11 Aug" in content area)
-    private val dayFormat = SimpleDateFormat("EEE", Locale.getDefault())
-    private val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
-    private val fullDateFormat = SimpleDateFormat("dd MMM", Locale.getDefault())
-    private var selectedDateView: View? = null
-    private var selectedCalendar: Calendar? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -126,13 +119,6 @@ class HomeFragment : Fragment() {
         emptyStateContainer = view.findViewById(R.id.emptyStateContainer)
         scheduleRecyclerView = view.findViewById(R.id.scheduleRecyclerView)
         scheduleRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-        // Mid-page "Today, 11 Aug" label (keep or remove in XML if redundant)
-        view.findViewById<TextView>(R.id.todayLabel)?.text =
-            "Today, ${fullDateFormat.format(Date())}"
-
-        // Calendar strip
-        view.findViewById<LinearLayout>(R.id.calendarStrip)?.let { populateCalendarStrip(it) }
 
         // Load schedule
         if (patientId != null) {
@@ -288,68 +274,6 @@ class HomeFragment : Fragment() {
             Toast.makeText(requireContext(), "Please allow camera permission", Toast.LENGTH_SHORT).show()
         }
     }
-
-    private fun populateCalendarStrip(calendarLayout: LinearLayout) {
-        val today = Calendar.getInstance()
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
-        }
-
-        for (i in 0..6) {
-            val dayCopy = calendar.clone() as Calendar
-
-            val container = LinearLayout(requireContext()).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER_HORIZONTAL
-                setPadding(16, 8, 16, 8)
-            }
-
-            val dayText = TextView(requireContext()).apply {
-                text = dayFormat.format(dayCopy.time)
-                textSize = 14f
-                setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
-                gravity = Gravity.CENTER
-            }
-
-            val dateText = TextView(requireContext()).apply {
-                text = dateFormat.format(dayCopy.time)
-                textSize = 14f
-                setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
-                gravity = Gravity.CENTER
-            }
-
-            container.addView(dayText)
-            container.addView(dateText)
-
-            container.setOnClickListener {
-                (selectedDateView as? LinearLayout)?.let { prev ->
-                    val prevDate = prev.getChildAt(1) as TextView
-                    prevDate.background = null
-                    prevDate.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
-                    val prevDay = prev.getChildAt(0) as TextView
-                    prevDay.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
-                }
-
-                dateText.background = ContextCompat.getDrawable(requireContext(), R.drawable.circle_blue_bg)
-                dateText.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
-                dayText.setTextColor(Color.parseColor("#1E88E5"))
-
-                selectedDateView = container
-                selectedCalendar = dayCopy
-            }
-
-            if (isSameDay(dayCopy, today)) {
-                container.post { container.performClick() }
-            }
-
-            calendarLayout.addView(container)
-            calendar.add(Calendar.DAY_OF_MONTH, 1)
-        }
-    }
-
-    private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean =
-        cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
 
     override fun onResume() {
         super.onResume()

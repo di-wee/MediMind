@@ -38,43 +38,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <!-- Calendar container -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@color/white"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"
-                    android:layout_marginBottom="8dp">
-
-                    <HorizontalScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:scrollbars="none"
-                        android:fillViewport="true"
-                        android:layout_marginBottom="8dp">
-
-                        <LinearLayout
-                            android:id="@+id/calendarStrip"
-                            android:orientation="horizontal"
-                            android:gravity="center"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-                    </HorizontalScrollView>
-
-                    <TextView
-                        android:id="@+id/todayLabel"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="Today, 24 Jul"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:textColor="@color/md_theme_light_primary"
-                        android:layout_marginBottom="8dp" />
-                </LinearLayout>
-
                 <!-- Schedule list -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/scheduleRecyclerView"
