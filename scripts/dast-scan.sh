@@ -54,7 +54,7 @@ setup_zap() {
             # macOS
             ZAP_URL="https://github.com/zaproxy/zaproxy/releases/download/v${ZAP_VERSION}/ZAP_${ZAP_VERSION}_macos.tar.gz"
         elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            # Linux
+            # Linux - Fixed URL format
             ZAP_URL="https://github.com/zaproxy/zaproxy/releases/download/v${ZAP_VERSION}/ZAP_${ZAP_VERSION}_Linux.tar.gz"
         else
             echo -e "${RED}Unsupported OS: $OSTYPE${NC}"
@@ -63,6 +63,25 @@ setup_zap() {
         
         echo "Downloading ZAP from: $ZAP_URL"
         curl -L "$ZAP_URL" -o "$ZAP_DIR/zap.tar.gz"
+        
+        # Check if download was successful
+        if [ ! -f "$ZAP_DIR/zap.tar.gz" ] || [ ! -s "$ZAP_DIR/zap.tar.gz" ]; then
+            echo -e "${RED}❌ Failed to download ZAP from $ZAP_URL${NC}"
+            echo "Trying alternative download method..."
+            # Try alternative URL format
+            if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+                ALT_URL="https://github.com/zaproxy/zaproxy/releases/download/v${ZAP_VERSION}/ZAP_${ZAP_VERSION}_Linux.tar.gz"
+                curl -L "$ALT_URL" -o "$ZAP_DIR/zap.tar.gz"
+            fi
+        fi
+        
+        # Verify the downloaded file
+        if [ ! -f "$ZAP_DIR/zap.tar.gz" ] || [ ! -s "$ZAP_DIR/zap.tar.gz" ]; then
+            echo -e "${RED}❌ ZAP download failed. Please check the URL and try again.${NC}"
+            exit 1
+        fi
+        
+        echo "Extracting ZAP..."
         tar -xzf "$ZAP_DIR/zap.tar.gz" -C "$ZAP_DIR" --strip-components=1
         rm "$ZAP_DIR/zap.tar.gz"
         

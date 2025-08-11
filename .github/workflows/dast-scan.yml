@@ -36,6 +36,15 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Start MySQL Database
+        run: |
+          sudo systemctl start mysql || sudo service mysql start || true
+          sudo mysql -e "CREATE DATABASE IF NOT EXISTS medimind;"
+          sudo mysql -e "CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'password';"
+          sudo mysql -e "GRANT ALL PRIVILEGES ON medimind.* TO 'root'@'localhost';"
+          sudo mysql -e "FLUSH PRIVILEGES;"
+          echo "✅ MySQL database setup complete"
+
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
@@ -48,17 +57,40 @@ jobs:
           cd backend
           mvn clean compile
           echo "Starting backend application..."
-          mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=8080" &
+
+          # Set environment variables for database connection
+          export DB_HOST=localhost
+          export DB_PORT=3306
+          export DB_NAME=medimind
+          export DB_USERNAME=root
+          export DB_PASSWORD=password
+          export CORS_ALLOWED_ORIGIN=http://localhost:3000
+
+          # Start backend with explicit port configuration
+          mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=8080 -Dserver.address=0.0.0.0" &
+          BACKEND_PID=$!
+          echo "Backend PID: $BACKEND_PID"
+
           echo "Waiting for backend to start..."
           sleep 30
 
-          # Verify backend is running
-          for i in {1..10}; do
-            if curl -s http://localhost:8080/api/doctor/test > /dev/null 2>&1; then
-              echo "✅ Backend is running on port 8080"
+          # Verify backend is running with multiple endpoints
+          for i in {1..15}; do
+            echo "Checking backend... attempt $i/15"
+            
+            # Try multiple endpoints
+            if curl -s http://localhost:8080/actuator/health > /dev/null 2>&1; then
+              echo "✅ Backend health endpoint is accessible"
+              break
+            elif curl -s http://localhost:8080/api/doctor/test > /dev/null 2>&1; then
+              echo "✅ Backend API endpoint is accessible"
+              break
+            elif curl -s http://localhost:8080/ > /dev/null 2>&1; then
+              echo "✅ Backend root endpoint is accessible"
               break
             fi
-            echo "Waiting for backend to start... attempt $i/10"
+            
+            echo "Backend not ready yet... waiting 10 seconds"
             sleep 10
           done
 
@@ -67,6 +99,8 @@ jobs:
           ps aux | grep java || true
           echo "Port 8080 status:"
           netstat -tlnp | grep 8080 || true
+          echo "Backend logs (last 20 lines):"
+          tail -20 backend.log 2>/dev/null || echo "No backend log file found"
 
       - name: Build and start Frontend
         run: |
