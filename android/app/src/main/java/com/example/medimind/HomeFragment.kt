@@ -1,5 +1,5 @@
 package com.example.medimind
-
+//test
 import android.Manifest
 import android.app.Dialog
 import android.content.Context
