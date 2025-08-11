@@ -19,6 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.medimind.data.EditMedRequest
 import com.example.medimind.network.ApiClient
+import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
@@ -45,6 +46,11 @@ class ViewMedicineDetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Back arrow
+        view.findViewById<MaterialToolbar>(R.id.topAppBar).setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
 
         medicineName = arguments?.getString("medicineName") ?: "Unknown Medicine"
         medicineId = arguments?.getString("medicineId") ?: return
@@ -122,10 +128,6 @@ class ViewMedicineDetailsFragment : Fragment() {
                 .show()
 
             // alarm will deactive in future
-        }
-
-        view.findViewById<Button>(R.id.btnBack).setOnClickListener {
-            findNavController().popBackStack()
         }
     }
 

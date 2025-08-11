@@ -17,12 +17,17 @@
     <string name="medication_name_hint">paracetamol</string>
     <string name="medication_name_label">Medication:</string>
     <string name="intake_quantity_label">Intake Quantity:</string>
+    <string name="intake_quantity_label_with_unit">Intake Quantity: tablet(s) </string>
     <string name="tablets_label">/tablet(s)</string>
     <string name="frequency_label">Frequency:</string>
+    <string name="frequency_label_with_unit">Frequency: time(s) /day </string>
     <string name="times_day_label">time(s) /day</string>
     <string name="instruction_label">Instruction:</string>
     <string name="note_label">Note:</string>
     <string name="time_h_label">Time(h):</string>
+    <string name="edit_medication">Edit Medication</string>
+    <string name="image_details">Image Details</string>
+    <string name="add_manually">Add Manually</string>
     <string name="close">Close</string>
     <string name="add_new_med">Add New Med</string>
 

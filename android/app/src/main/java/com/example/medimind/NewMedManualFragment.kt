@@ -19,6 +19,8 @@ import com.example.medimind.network.newMedicationRequest
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import androidx.core.content.edit
+import androidx.navigation.fragment.findNavController
+import com.google.android.material.appbar.MaterialToolbar
 
 
 class NewMedManualFragment : Fragment() {
@@ -39,10 +41,11 @@ class NewMedManualFragment : Fragment() {
     override fun onViewCreated(view:View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val backBtnFromManual = view.findViewById<Button>(R.id.btnBackFromManual)
-        backBtnFromManual.setOnClickListener {
-            parentFragmentManager.popBackStack()
+        // Back arrow
+        view.findViewById<MaterialToolbar>(R.id.topAppBar).setNavigationOnClickListener {
+            findNavController().navigateUp()
         }
+
         val sharedPreferences =
             requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val patientId = sharedPreferences.getString("patientId", null)
