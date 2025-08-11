@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -9,84 +10,88 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-<LinearLayout
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:elevation="4dp">
-
-<ImageView
-    android:layout_width="310dp"
-    android:layout_height="262dp"
-    android:layout_gravity="center"
-    android:layout_marginBottom="8dp"
-    android:contentDescription="@string/app_name"
-    android:src="@drawable/medimind_login_ic" />
-
-<TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="MediMind"
-    android:textSize="24sp"
-    android:textStyle="bold"
-    android:textColor="#111111"
-    android:layout_gravity="center" />
-
-<!-- Login Field -->
-<com.google.android.material.textfield.TextInputLayout
-    android:id="@+id/usernameInputLayout"
-    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="24dp"
-    app:boxBackgroundColor="#FFFFFF">
-
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/usernameInput"
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="24dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email"
-        android:inputType="textEmailAddress" />
-</com.google.android.material.textfield.TextInputLayout>
+        android:elevation="4dp">
 
-<!-- Password Field -->
-<com.google.android.material.textfield.TextInputLayout
-    android:id="@+id/passwordInputLayout"
-    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="16dp"
-    app:endIconMode="password_toggle"
-    app:boxBackgroundColor="#FFFFFF">
+        <ImageView
+            android:layout_width="310dp"
+            android:layout_height="262dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/medimind_splash_logo" />
 
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/passwordInput"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Password"
-        android:inputType="textPassword" />
-</com.google.android.material.textfield.TextInputLayout>
+        <!-- Email -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/usernameInputLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:boxBackgroundColor="#FFFFFF">
 
-<com.google.android.material.button.MaterialButton
-    android:id="@+id/loginButton"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="Sign in"
-    android:textColor="@android:color/white"
-    app:cornerRadius="28dp"
-    app:backgroundTint="#1976D2"
-    android:layout_marginTop="24dp" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/usernameInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                android:imeOptions="actionNext" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-<TextView
-    android:id="@+id/registerText"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textSize="14sp"
-    android:layout_gravity="center"
-    android:layout_marginTop="16dp"
-    android:textColor="#000000"
-    android:text="" /> <!-- Leave empty; set text in Kotlin -->
+        <!-- Password -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/passwordInputLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:endIconMode="password_toggle"
+            app:boxBackgroundColor="#FFFFFF">
 
-</LinearLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/passwordInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:imeOptions="actionDone" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Sign in Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/loginButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sign in"
+            android:textColor="@android:color/white"
+            app:cornerRadius="28dp"
+            app:backgroundTint="#1976D2"
+            android:layout_marginTop="24dp" />
+
+        <!-- Small inline progress indicator for loading state -->
+        <ProgressBar
+            android:id="@+id/loginProgress"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:visibility="gone" />
+
+        <!-- Register link (text set in Kotlin with a ClickableSpan) -->
+        <TextView
+            android:id="@+id/registerText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:textColor="#000000"
+            android:text="" />
     </LinearLayout>
+</LinearLayout>

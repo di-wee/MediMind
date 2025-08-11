@@ -1,148 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ImageDetailsFragment"
+    android:fitsSystemWindows="true"
     android:background="#F5F5F5"
-    android:padding="24dp"
-    android:layout_marginBottom="10dp">
+    tools:context=".ImageDetailsFragment">
 
-    <Button
-        android:id="@+id/btnBackFromImageDetails"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:layout_marginBottom="8dp"
-        android:text="@string/back" />
-
-    <ImageView
-        android:id="@+id/imagePreview"
+    <!-- Top App Bar (same structure as Profile) -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:layout_marginTop="8dp"
-        android:scaleType="fitCenter"/>
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:navigationIcon="@drawable/ic_arrow_back_24"
+        app:navigationIconTint="@android:color/white"
+        app:title="@string/image_details"
+        app:titleTextAppearance="@style/ToolbarTitleBold"
+        app:titleCentered="true"
+        app:titleTextColor="@android:color/white"
+        app:contentInsetStartWithNavigation="0dp" />
 
-    <LinearLayout
+    <!-- Scrollable content (matches the pattern that works in Profile) -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="20dp">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="96dp">
 
-        <TextView
-            android:id="@+id/medicationNameLabel"
-            android:layout_width="125dp"
-            android:layout_height="wrap_content"
-            android:text = "@string/medication_name_label"
-            android:textSize="18sp"/>
-        <EditText
-            android:id="@+id/medicationNameInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="@string/medication_name_hint"
-            android:layout_marginStart="8dp"/>
-    </LinearLayout>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+            <ImageView
+                android:id="@+id/imagePreview"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:scaleType="fitCenter"/>
 
-        <TextView
-            android:id="@+id/intakeQuantityLabel"
-            android:layout_width="125dp"
-            android:layout_height="wrap_content"
-            android:text = "@string/intake_quantity_label"
-            android:textSize="18sp"/>
-        <EditText
-            android:id="@+id/intakeQuantityInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="@string/hint_2"
-            android:layout_marginStart="8dp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text ="@string/tablets_label"/>
-    </LinearLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:id="@+id/medicationNameLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                android:hint="@string/medication_name_label"
+                app:placeholderText="@string/medication_name_hint"
+                app:placeholderTextColor="#BDBDBD"
+                app:hintEnabled="true"
+                app:hintAnimationEnabled="false">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/medicationNameInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:id="@+id/frequencyLabel"
-            android:layout_width="125dp"
-            android:layout_height="wrap_content"
-            android:text = "@string/frequency_label"
-            android:textSize="18sp"/>
-        <EditText
-            android:id="@+id/frequencyInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="@string/hint_2"
-            android:layout_marginStart="8dp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text ="@string/times_day_label"/>
-    </LinearLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:id="@+id/intakeQuantityLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                android:hint="@string/intake_quantity_label_with_unit"
+                app:placeholderText="@string/hint_2"
+                app:placeholderTextColor="#BDBDBD"
+                app:hintEnabled="true"
+                app:hintAnimationEnabled="false">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/intakeQuantityInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:id="@+id/instructionLabel"
-            android:layout_width="125dp"
-            android:layout_height="wrap_content"
-            android:text = "@string/instruction_label"
-            android:textSize="18sp"/>
-        <EditText
-            android:id="@+id/instructionInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="@string/before_or_after_meal"
-            android:layout_marginStart="8dp"/>
-    </LinearLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:id="@+id/frequencyLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                android:hint="@string/frequency_label_with_unit"
+                app:placeholderText="@string/hint_2"
+                app:placeholderTextColor="#BDBDBD"
+                app:hintEnabled="true"
+                app:hintAnimationEnabled="false">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/frequencyInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:id="@+id/noteLabel"
-            android:layout_width="125dp"
-            android:layout_height="wrap_content"
-            android:text = "@string/note_label"
-            android:textSize="18sp"/>
-        <EditText
-            android:id="@+id/noteInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="@string/for_fever_pain_may_cause_drowsiness"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:layout_marginStart="8dp"/>
-    </LinearLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:id="@+id/instructionLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                android:hint="@string/instruction_label"
+                app:placeholderText="@string/before_or_after_meal"
+                app:placeholderTextColor="#BDBDBD"
+                app:hintEnabled="true"
+                app:hintAnimationEnabled="false">
 
-    <Button
-        android:id="@+id/btnSaveFromImageDetails"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="80dp"
-        android:text="@string/save"
-        android:textSize="16sp" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/instructionInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:id="@+id/noteLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                android:hint="@string/note_label"
+                app:placeholderText="@string/for_fever_pain_may_cause_drowsiness"
+                app:placeholderTextColor="#BDBDBD"
+                app:hintEnabled="true"
+                app:hintAnimationEnabled="false"
+                android:singleLine="true"
+                android:ellipsize="end">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/noteInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    tools:text="@string/for_fever_pain_may_cause_drowsiness"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Save button INSIDE the scroll view, so it's always reachable -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSaveFromImageDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/save"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                app:cornerRadius="28dp"
+                app:backgroundTint="@color/md_theme_light_primary"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>

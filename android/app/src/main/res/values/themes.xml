@@ -20,4 +20,20 @@
     </style>
 
     <style name="Theme.Medimind" parent="Base.Theme.Medimind" />
+    
+    <!-- splash screen theme -->
+    <style name="Theme.Medimind.Splash" parent="Base.Theme.Medimind">
+        <item name="android:windowBackground">@color/splash_background_color</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@color/splash_background_color</item>
+        <item name="android:navigationBarColor">@color/splash_background_color</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
 </resources>

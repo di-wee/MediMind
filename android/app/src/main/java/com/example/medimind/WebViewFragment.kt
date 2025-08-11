@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.medimind.databinding.FragmentWebviewBinding
 import android.util.Log
 import android.widget.Toast
+import com.google.android.material.appbar.MaterialToolbar
 
 class WebViewFragment : Fragment() {
 
@@ -29,6 +30,11 @@ class WebViewFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Back arrow
+        view.findViewById<MaterialToolbar>(R.id.topAppBar).setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
 
         // Use literal string "EXTERNAL_URL" here to get the URL argument
         url = arguments?.getString("EXTERNAL_URL")
@@ -52,10 +58,6 @@ class WebViewFragment : Fragment() {
             binding.webview.loadUrl(url!!)
         } else {
             binding.webview.loadData("No URL provided", "text/html", "UTF-8")
-        }
-
-        binding.btnBackWebView.setOnClickListener {
-            findNavController().popBackStack()
         }
     }
 

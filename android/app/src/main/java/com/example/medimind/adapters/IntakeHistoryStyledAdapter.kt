@@ -121,15 +121,20 @@ class IntakeHistoryStyledAdapter(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply {
-                setMargins(dp(ctx, 16), dp(ctx, 4), dp(ctx, 16), dp(ctx, 4))
+                // slightly more start margin so icons don't touch the edge
+                setMargins(dp(ctx, 20), dp(ctx, 6), dp(ctx, 16), dp(ctx, 6))
             }
         }
 
         val icon = ImageView(ctx).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(ctx, 28), dp(ctx, 28)).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(ctx, 30), dp(ctx, 30)).apply {
                 marginEnd = dp(ctx, 12)
             }
-            scaleType = ImageView.ScaleType.CENTER_CROP
+            // Prevent cropping
+            adjustViewBounds = true
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+            // tiny padding avoids circular edges from touching bounds
+            setPadding(dp(ctx, 2), dp(ctx, 2), dp(ctx, 2), dp(ctx, 2))
         }
 
         val text = TextView(ctx).apply {
