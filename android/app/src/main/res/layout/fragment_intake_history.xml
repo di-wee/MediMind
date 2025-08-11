@@ -18,6 +18,7 @@
         android:background="?attr/colorPrimary"
         app:title="Intake History"
         app:titleCentered="true"
+        app:titleTextAppearance="@style/ToolbarTitleBold"
         app:titleTextColor="@android:color/white"
         app:contentInsetStartWithNavigation="0dp"
         app:navigationIcon="@null" />
