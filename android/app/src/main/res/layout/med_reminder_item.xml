@@ -1,30 +1,68 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/itemCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="14dp"
+    app:cardUseCompatPadding="true"
+    app:cardBackgroundColor="@color/med_item_bg_unchecked"
+    app:strokeWidth="0dp">
 
-    <CheckBox
-        android:id="@+id/checkbox"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Medication Name"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="top">
 
-    <TextView
-        android:id="@+id/instructionText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Instruction: "
-        android:textSize="14sp"
-        android:layout_marginTop="2dp"/>
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleX="1.6"
+            android:scaleY="1.6"
+            android:minWidth="56dp"
+            android:minHeight="56dp"
+            android:layout_marginEnd="12dp"
+            app:useMaterialThemeColors="true"
+            app:buttonTint="?attr/colorPrimary"/>
 
-    <TextView
-        android:id="@+id/noteText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Note: "
-        android:textSize="14sp"
-        android:layout_marginTop="2dp"/>
-</LinearLayout>
+        <!-- 右：文字列（标题 + 说明 + 备注），三者左缘对齐 -->
+        <LinearLayout
+            android:id="@+id/contentColumn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/titleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Medication： dosage"
+                android:textStyle="bold"
+                android:textSize="22sp"
+                android:lineSpacingExtra="4dp"
+                android:breakStrategy="balanced"
+                android:hyphenationFrequency="full"/>
+
+            <TextView
+                android:id="@+id/instructionText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Instructions: …"
+                android:textSize="20sp"
+                android:layout_marginTop="2dp"/>
+
+            <TextView
+                android:id="@+id/noteText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Notes: …"
+                android:textSize="20sp"
+                android:layout_marginTop="2dp"/>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
