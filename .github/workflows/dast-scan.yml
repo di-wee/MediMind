@@ -71,6 +71,16 @@ jobs:
       - name: Build and start Frontend
         run: |
           cd frontend
+          echo "Current directory: $(pwd)"
+          echo "Files in frontend directory:"
+          ls -la
+          echo "Checking if package-lock.json exists:"
+          if [ -f "package-lock.json" ]; then
+            echo "✅ package-lock.json exists"
+            ls -la package-lock.json
+          else
+            echo "❌ package-lock.json not found"
+          fi
           npm ci
           npm run build
           echo "Starting frontend application..."
