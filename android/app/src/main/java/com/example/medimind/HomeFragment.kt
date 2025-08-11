@@ -1,6 +1,7 @@
 package com.example.medimind
 
 import android.Manifest
+import android.app.Dialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -23,7 +24,7 @@ import com.example.medimind.adapters.GroupedScheduleAdapter
 import com.example.medimind.adapters.ScheduleListItem
 import com.example.medimind.network.ApiClient
 import com.example.medimind.network.ScheduleItem
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
@@ -33,27 +34,8 @@ import android.view.Gravity
 
 class HomeFragment : Fragment() {
 
-    // Buttons under add new Med FAB
-    private lateinit var addMedButton: FloatingActionButton
-    private lateinit var cameraButton: FloatingActionButton
-    private lateinit var galleryButton: FloatingActionButton
-    private lateinit var manualButton: FloatingActionButton
-    private lateinit var cameraBtnText: TextView
-    private lateinit var galleryBtnText: TextView
-    private lateinit var manualBtnText: TextView
-
-    // Camera image box
-    private lateinit var cameraBox: ImageView
-
     // Empty state view
     private lateinit var emptyStateContainer: LinearLayout
-
-    // Animations for FAB
-    private val rotateOpen by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_open_anim) }
-    private val rotateClose by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_close_anim) }
-    private val fromBottom by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.from_bottom_anim) }
-    private val toBottom by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.to_bottom_anim) }
-    private var clicked = false
 
     // Camera permission code and launcher
     private val CAMERA_PERMISSION_CODE = 1
@@ -97,6 +79,10 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val greetingTextView = view.findViewById<TextView>(R.id.topGreetingText)
+        
+        // Setup the new Add New Med button with popup menu
+        val addNewMedButton = view.findViewById<Button>(R.id.addNewMedButton)
+        addNewMedButton.setOnClickListener { showAddMedPopupMenu(it) }
 
         val sharedPref = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val patientId = sharedPref.getString("patientId", null)
@@ -134,31 +120,6 @@ class HomeFragment : Fragment() {
         val calendarStrip = view.findViewById<LinearLayout>(R.id.calendarStrip)
         populateCalendarStrip(calendarStrip)
 
-        // FAB setup
-        addMedButton = view.findViewById(R.id.addMedButton)
-        cameraButton = view.findViewById(R.id.cameraButton)
-        galleryButton = view.findViewById(R.id.galleryButton)
-        manualButton = view.findViewById(R.id.manualButton)
-        cameraBtnText = view.findViewById(R.id.cameraBtnText)
-        galleryBtnText = view.findViewById(R.id.galleryBtnText)
-        manualBtnText = view.findViewById(R.id.manualBtnText)
-        addMedButton.setOnClickListener { onAddMedButtonClicked() }
-
-        cameraButton.setOnClickListener {
-            checkCameraPermissionAndOpenCamera()
-            Toast.makeText(requireContext(), "Camera button clicked", Toast.LENGTH_SHORT).show()
-        }
-
-        galleryButton.setOnClickListener {
-            pickImageLauncher.launch("image/*")
-            Toast.makeText(requireContext(), "Gallery button clicked", Toast.LENGTH_SHORT).show()
-        }
-
-        manualButton.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_newMedManualFragment)
-        }
-
-        cameraBox = view.findViewById(R.id.cameraBox)
         emptyStateContainer = view.findViewById(R.id.emptyStateContainer)
 
         val scheduleRecyclerView = view.findViewById<RecyclerView>(R.id.scheduleRecyclerView)
@@ -297,50 +258,6 @@ class HomeFragment : Fragment() {
         cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
 
-    private fun onAddMedButtonClicked() {
-        setVisibility(clicked)
-        setAnimation(clicked)
-        clicked = !clicked
-    }
-
-    private fun setVisibility(clicked: Boolean) {
-        if (!clicked) {
-            cameraButton.visibility = View.VISIBLE
-            galleryButton.visibility = View.VISIBLE
-            manualButton.visibility = View.VISIBLE
-            cameraBtnText.visibility = View.VISIBLE
-            galleryBtnText.visibility = View.VISIBLE
-            manualBtnText.visibility = View.VISIBLE
-        } else {
-            cameraButton.visibility = View.INVISIBLE
-            galleryButton.visibility = View.INVISIBLE
-            manualButton.visibility = View.INVISIBLE
-            cameraBtnText.visibility = View.INVISIBLE
-            galleryBtnText.visibility = View.INVISIBLE
-            manualBtnText.visibility = View.INVISIBLE
-        }
-    }
-
-    private fun setAnimation(clicked: Boolean) {
-        if (!clicked) {
-            cameraButton.startAnimation(fromBottom)
-            galleryButton.startAnimation(fromBottom)
-            manualButton.startAnimation(fromBottom)
-            galleryBtnText.startAnimation(fromBottom)
-            cameraBtnText.startAnimation(fromBottom)
-            manualBtnText.startAnimation(fromBottom)
-            addMedButton.startAnimation(rotateOpen)
-        } else {
-            cameraButton.startAnimation(toBottom)
-            galleryButton.startAnimation(toBottom)
-            manualButton.startAnimation(toBottom)
-            cameraBtnText.startAnimation(toBottom)
-            galleryBtnText.startAnimation(toBottom)
-            manualBtnText.startAnimation(toBottom)
-            addMedButton.startAnimation(rotateClose)
-        }
-    }
-
     override fun onResume() {
         super.onResume()
 
@@ -352,6 +269,52 @@ class HomeFragment : Fragment() {
 
             shouldNavigateToImageDetails = false
             pendingImageUri = null
+        }
+    }
+
+    private fun showAddMedPopupMenu(anchorView: View) {
+        // Create custom popup dialog
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(R.layout.add_med_popup)
+        dialog.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        dialog.window?.setGravity(Gravity.BOTTOM)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        
+        // Set up click listeners
+        dialog.findViewById<View>(R.id.cameraOption).setOnClickListener {
+            dialog.dismiss()
+            checkCameraPermissionAndOpenCamera()
+        }
+        
+        dialog.findViewById<View>(R.id.galleryOption).setOnClickListener {
+            dialog.dismiss()
+            pickImageLauncher.launch("image/*")
+        }
+        
+        dialog.findViewById<View>(R.id.manualOption).setOnClickListener {
+            dialog.dismiss()
+            findNavController().navigate(R.id.action_homeFragment_to_newMedManualFragment)
+        }
+        
+        dialog.findViewById<View>(R.id.cancelOption).setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        // Show dialog with slide up animation
+        dialog.show()
+        
+        // Apply slide up animation
+        val popupView = dialog.findViewById<View>(R.id.popupContainer)
+        val slideUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_up_anim)
+        popupView?.startAnimation(slideUpAnimation)
+        
+        // Handle dialog dismissal with slide down animation
+        dialog.setOnDismissListener {
+            val slideDownAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_down_anim)
+            popupView?.startAnimation(slideDownAnimation)
         }
     }
 }

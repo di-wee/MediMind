@@ -4,17 +4,17 @@ on:
   push:
     branches:
       - main
-      - frontend-(react)
+      - frontend-*
       - backend-(java-springboot)
-      - android
+      - android-*
       - machine-learning
-
+      
   pull_request:
     branches:
       - main
-      - frontend-(react)
+      - frontend-*
       - backend-(java-springboot)
-      - android
+      - android-*
       - machine-learning
       - demo/*
 
