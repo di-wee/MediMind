@@ -1,5 +1,6 @@
 package nus.iss.backend.repository;
 
+import nus.iss.backend.model.Doctor;
 import nus.iss.backend.model.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -30,5 +31,5 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
     List<Patient> findByClinic_IdAndDoctorIsNull(UUID clinicId);
 
 
-
+    List<Patient> findByDoctor(Doctor doctor);
 }

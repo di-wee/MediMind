@@ -10,6 +10,7 @@ import nus.iss.backend.model.Doctor;
 import nus.iss.backend.repository.ClinicRepository;
 import nus.iss.backend.repository.DoctorRepository;
 import nus.iss.backend.service.DoctorService;
+import nus.iss.backend.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ public class DoctorImpl implements DoctorService {
 
     @Autowired
     private ClinicRepository clinicRepository;
+    @Autowired
+    private PatientService patientService;
 
     public Doctor login (String mcrNo, String password) {
         Doctor doctor = doctorRepo.findDoctorByMcrNoAndPassword(mcrNo, password);
@@ -72,17 +75,23 @@ public class DoctorImpl implements DoctorService {
         if (doctor == null) {
             throw new ItemNotFound("Doctor not found!");
         }
+        // update clinic logic
         if(request.getClinic() != null){
             Clinic clinic = request.getClinic();
-            if (clinic == null) {
-                logger.error("Clinic uuid: " + request.getClinic());
-                throw new ItemNotFound("Clinic not found!");
+            // check if the clinic is different from the current one
+            if (clinic != doctor.getClinic()) {
+                patientService.unassignAllPatientsFromDoctor(doctor.getMcrNo());
+                doctor.setClinic(clinic);
             }
-            doctor.setClinic(clinic);
+
         }
+
+        //update password logic
         if (request.getPassword() != null) {
             doctor.setPassword(request.getPassword());
         }
+
+        //update email logic
         if (request.getEmail() != null) {
             doctor.setEmail(request.getEmail());
         }

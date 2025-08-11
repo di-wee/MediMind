@@ -157,6 +157,7 @@ public class PatientServiceImpl implements PatientService {
         }
     }
 
+
     @Override
     public void assignPatientToDoctor(UUID patientId, String doctorMcr) {
         Optional<Patient> optionalPatient = patientRepo.findById(patientId);
@@ -189,6 +190,21 @@ public class PatientServiceImpl implements PatientService {
         return patientRepo.findByClinic_IdAndDoctorIsNull(clinicUuid);
     }
 
+    @Override
+    public void unassignAllPatientsFromDoctor(String mcrNo) {
+        Doctor doctor = doctorRepo.findDoctorByMcrNo(mcrNo);
+        if (doctor == null) {
+            throw new ItemNotFound("Doctor not found!");
+        }
+        // find all patients assigned to this doctor
+        List<Patient> patients = patientRepo.findByDoctor(doctor);
+        for (Patient patient : patients) {
+            patient.setDoctor(null);
+            patientRepo.save(patient);
+        }
+        logger.info("Unassigned all patients from doctor {}", mcrNo);
+
+    }
 
 
 }
