@@ -6,7 +6,7 @@
 set -e
 
 # Configuration
-ZAP_VERSION="2.14.0"
+ZAP_VERSION="2.13.0"
 ZAP_DIR="/tmp/zap"
 SCAN_REPORT_DIR="./security-reports"
 FRONTEND_URL="${FRONTEND_URL:-http://localhost:3000}"
@@ -54,7 +54,7 @@ setup_zap() {
             # macOS
             ZAP_URL="https://github.com/zaproxy/zaproxy/releases/download/v${ZAP_VERSION}/ZAP_${ZAP_VERSION}_macos.tar.gz"
         elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            # Linux - Fixed URL format
+            # Linux
             ZAP_URL="https://github.com/zaproxy/zaproxy/releases/download/v${ZAP_VERSION}/ZAP_${ZAP_VERSION}_Linux.tar.gz"
         else
             echo -e "${RED}Unsupported OS: $OSTYPE${NC}"
@@ -62,30 +62,68 @@ setup_zap() {
         fi
         
         echo "Downloading ZAP from: $ZAP_URL"
-        curl -L "$ZAP_URL" -o "$ZAP_DIR/zap.tar.gz"
         
-        # Check if download was successful
-        if [ ! -f "$ZAP_DIR/zap.tar.gz" ] || [ ! -s "$ZAP_DIR/zap.tar.gz" ]; then
-            echo -e "${RED}❌ Failed to download ZAP from $ZAP_URL${NC}"
+        # Try to download with curl and check if successful
+        if curl -L -f "$ZAP_URL" -o "$ZAP_DIR/zap.tar.gz"; then
+            echo "Download successful, extracting..."
+            tar -xzf "$ZAP_DIR/zap.tar.gz" -C "$ZAP_DIR" --strip-components=1
+            rm "$ZAP_DIR/zap.tar.gz"
+            echo -e "${GREEN}✅ ZAP setup complete${NC}"
+        else
+            echo -e "${RED}Failed to download ZAP from $ZAP_URL${NC}"
             echo "Trying alternative download method..."
+            
             # Try alternative URL format
-            if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-                ALT_URL="https://github.com/zaproxy/zaproxy/releases/download/v${ZAP_VERSION}/ZAP_${ZAP_VERSION}_Linux.tar.gz"
-                curl -L "$ALT_URL" -o "$ZAP_DIR/zap.tar.gz"
+            ALT_URL="https://github.com/zaproxy/zaproxy/releases/download/${ZAP_VERSION}/ZAP_${ZAP_VERSION}_Linux.tar.gz"
+            echo "Trying alternative URL: $ALT_URL"
+            
+            if curl -L -f "$ALT_URL" -o "$ZAP_DIR/zap.tar.gz"; then
+                echo "Alternative download successful, extracting..."
+                tar -xzf "$ZAP_DIR/zap.tar.gz" -C "$ZAP_DIR" --strip-components=1
+                rm "$ZAP_DIR/zap.tar.gz"
+                echo -e "${GREEN}✅ ZAP setup complete${NC}"
+            else
+                echo -e "${YELLOW}Direct download failed. Trying Docker-based ZAP...${NC}"
+                
+                # Check if Docker is available
+                if command -v docker &> /dev/null; then
+                    echo "Using Docker-based ZAP"
+                    # Create a wrapper script for Docker-based ZAP
+                    cat > "$ZAP_DIR/zap.sh" << 'EOF'
+#!/bin/bash
+docker run --rm -v $(pwd):/zap/wrk -p 8080:8080 owasp/zap2docker-stable:latest "$@"
+EOF
+                    chmod +x "$ZAP_DIR/zap.sh"
+                    
+                    # Create wrapper for zap-baseline.py
+                    cat > "$ZAP_DIR/zap-baseline.py" << 'EOF'
+#!/bin/bash
+docker run --rm -v $(pwd):/zap/wrk owasp/zap2docker-stable:latest zap-baseline.py "$@"
+EOF
+                    chmod +x "$ZAP_DIR/zap-baseline.py"
+                    
+                    # Create wrapper for zap-full-scan.py
+                    cat > "$ZAP_DIR/zap-full-scan.py" << 'EOF'
+#!/bin/bash
+docker run --rm -v $(pwd):/zap/wrk owasp/zap2docker-stable:latest zap-full-scan.py "$@"
+EOF
+                    chmod +x "$ZAP_DIR/zap-full-scan.py"
+                    
+                    # Create wrapper for zap-api-scan.py
+                    cat > "$ZAP_DIR/zap-api-scan.py" << 'EOF'
+#!/bin/bash
+docker run --rm -v $(pwd):/zap/wrk owasp/zap2docker-stable:latest zap-api-scan.py "$@"
+EOF
+                    chmod +x "$ZAP_DIR/zap-api-scan.py"
+                    
+                    echo -e "${GREEN}✅ Docker-based ZAP setup complete${NC}"
+                else
+                    echo -e "${RED}Failed to download ZAP and Docker is not available. Please check the version and URL.${NC}"
+                    echo "Available versions can be found at: https://github.com/zaproxy/zaproxy/releases"
+                    exit 1
+                fi
             fi
         fi
-        
-        # Verify the downloaded file
-        if [ ! -f "$ZAP_DIR/zap.tar.gz" ] || [ ! -s "$ZAP_DIR/zap.tar.gz" ]; then
-            echo -e "${RED}❌ ZAP download failed. Please check the URL and try again.${NC}"
-            exit 1
-        fi
-        
-        echo "Extracting ZAP..."
-        tar -xzf "$ZAP_DIR/zap.tar.gz" -C "$ZAP_DIR" --strip-components=1
-        rm "$ZAP_DIR/zap.tar.gz"
-        
-        echo -e "${GREEN}✅ ZAP setup complete${NC}"
     else
         echo -e "${GREEN}✅ ZAP already exists${NC}"
     fi
