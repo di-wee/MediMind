@@ -35,8 +35,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Cache Maven packages
         uses: actions/cache@v4
@@ -49,18 +47,52 @@ jobs:
         run: |
           cd backend
           mvn clean compile
+          echo "Starting backend application..."
           mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=8080" &
           echo "Waiting for backend to start..."
           sleep 30
 
+          # Verify backend is running
+          for i in {1..10}; do
+            if curl -s http://localhost:8080/api/doctor/test > /dev/null 2>&1; then
+              echo "✅ Backend is running on port 8080"
+              break
+            fi
+            echo "Waiting for backend to start... attempt $i/10"
+            sleep 10
+          done
+
+          # Show running processes for debugging
+          echo "Running processes:"
+          ps aux | grep java || true
+          echo "Port 8080 status:"
+          netstat -tlnp | grep 8080 || true
+
       - name: Build and start Frontend
         run: |
           cd frontend
-          npm ci --cache .npm --prefer-offline
+          npm ci
           npm run build
+          echo "Starting frontend application..."
           npm run preview -- --port 3000 &
           echo "Waiting for frontend to start..."
           sleep 15
+
+          # Verify frontend is running
+          for i in {1..10}; do
+            if curl -s http://localhost:3000 > /dev/null 2>&1; then
+              echo "✅ Frontend is running on port 3000"
+              break
+            fi
+            echo "Waiting for frontend to start... attempt $i/10"
+            sleep 5
+          done
+
+          # Show running processes for debugging
+          echo "Running processes:"
+          ps aux | grep node || true
+          echo "Port 3000 status:"
+          netstat -tlnp | grep 3000 || true
 
       - name: Run DAST Scan
         env:
@@ -68,6 +100,7 @@ jobs:
           BACKEND_URL: http://localhost:8080
           SCAN_TIMEOUT: 600
         run: |
+          mkdir -p security-reports
           chmod +x scripts/dast-scan.sh
           ./scripts/dast-scan.sh
 
