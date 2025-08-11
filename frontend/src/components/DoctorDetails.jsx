@@ -51,7 +51,7 @@ function DoctorDetails({ mcrNo }) {
 
 				if (!response.ok) {
 					const errMsg = await response.text();
-					alert('Failed to update doctor info: ' + errMsg);
+					console.error('Update error: ', errMsg);
 					setIsEditing(false); // Exit editing mode for other errors
 					return;
 				}
