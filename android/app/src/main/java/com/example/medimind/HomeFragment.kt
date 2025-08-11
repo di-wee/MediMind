@@ -24,13 +24,15 @@ import com.example.medimind.adapters.GroupedScheduleAdapter
 import com.example.medimind.adapters.ScheduleListItem
 import com.example.medimind.network.ApiClient
 import com.example.medimind.network.ScheduleItem
-
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import android.graphics.Color
 import android.view.Gravity
+import com.google.android.material.appbar.MaterialToolbar
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class HomeFragment : Fragment() {
 
@@ -47,7 +49,7 @@ class HomeFragment : Fragment() {
     private var pendingImageUri: Uri? = null
     private var shouldNavigateToImageDetails = false
 
-    // Calendar formats and state
+    // Calendar formats and state (for the calendar strip + mid "Today, 11 Aug" label)
     private val dayFormat = SimpleDateFormat("EEE", Locale.getDefault())
     private val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
     private val fullDateFormat = SimpleDateFormat("dd MMM", Locale.getDefault())
@@ -78,52 +80,55 @@ class HomeFragment : Fragment() {
     ): View? = inflater.inflate(R.layout.fragment_home, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val greetingTextView = view.findViewById<TextView>(R.id.topGreetingText)
-        
-        // Setup the new Add New Med button with popup menu
-        val addNewMedButton = view.findViewById<Button>(R.id.addNewMedButton)
-        addNewMedButton.setOnClickListener { showAddMedPopupMenu(it) }
+        // ===== Top App Bar (replace old greeting/logout UI) =====
+        val toolbar = view.findViewById<MaterialToolbar>(R.id.topAppBar)
+        toolbar?.navigationIcon = null // no back arrow
 
         val sharedPref = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val patientId = sharedPref.getString("patientId", null)
 
+        // Left-side greeting (toolbar title)
         if (patientId != null) {
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     val profile = ApiClient.retrofitService.getPatient(patientId)
-                    greetingTextView.text = "Hello, ${profile.firstName}"
+                    toolbar?.title = "Hello, ${profile.firstName ?: "User"}"
                 } catch (e: Exception) {
-                    greetingTextView.text = "Hello"
+                    toolbar?.title = "Hello, User"
                     Toast.makeText(requireContext(), "Failed to load profile: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         } else {
-            greetingTextView.text = "Hello"
+            toolbar?.title = "Hello, User"
         }
 
-        val logoutButton = view.findViewById<Button>(R.id.logoutButton)
-        logoutButton.setOnClickListener {
-            val editor = sharedPref.edit()
-            editor.clear()
-            editor.apply()
-            Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
-            val navController = requireActivity().findNavController(R.id.nav_host_fragment)
-            val navOptions = androidx.navigation.NavOptions.Builder()
-                .setPopUpTo(R.id.mainFragment, true)
-                .build()
-            navController.navigate(R.id.loginFragment, null, navOptions)
+        // Right-side date in toolbar action view (menu item)
+        toolbar?.let {
+            val item = it.menu.findItem(R.id.action_today)
+            val tv = item?.actionView?.findViewById<TextView>(R.id.tvToday)
+            val today = LocalDate.now()
+            val fmt = DateTimeFormatter.ofPattern("EEE, d MMM", Locale.getDefault())
+            tv?.text = today.format(fmt)
         }
 
+        // ===== Rest of your existing UI =====
+
+        // Add New Med sheet
+        val addNewMedButton = view.findViewById<Button>(R.id.addNewMedButton)
+        addNewMedButton?.setOnClickListener { showAddMedPopupMenu(it) }
+
+        // Mid-page "Today, 11 Aug" label (keep or remove if redundant with toolbar date)
         val todayLabel = view.findViewById<TextView>(R.id.todayLabel)
-        todayLabel.text = "Today, ${fullDateFormat.format(Date())}"
+        todayLabel?.text = "Today, ${fullDateFormat.format(Date())}"
 
+        // Calendar strip
         val calendarStrip = view.findViewById<LinearLayout>(R.id.calendarStrip)
-        populateCalendarStrip(calendarStrip)
+        calendarStrip?.let { populateCalendarStrip(it) }
 
+        // Empty state + schedule list
         emptyStateContainer = view.findViewById(R.id.emptyStateContainer)
-
         val scheduleRecyclerView = view.findViewById<RecyclerView>(R.id.scheduleRecyclerView)
-        scheduleRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        scheduleRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         if (patientId != null) {
             viewLifecycleOwner.lifecycleScope.launch {
@@ -131,13 +136,8 @@ class HomeFragment : Fragment() {
                     val rawSchedule = ApiClient.retrofitService.getDailySchedule(patientId)
                     val groupedList = groupScheduleItems(rawSchedule)
 
-                    if (rawSchedule.isEmpty()) {
-                        emptyStateContainer.visibility = View.VISIBLE
-                    } else {
-                        emptyStateContainer.visibility = View.GONE
-                    }
-
-                    scheduleRecyclerView.adapter = GroupedScheduleAdapter(groupedList)
+                    emptyStateContainer.visibility = if (rawSchedule.isEmpty()) View.VISIBLE else View.GONE
+                    scheduleRecyclerView?.adapter = GroupedScheduleAdapter(groupedList)
                 } catch (e: Exception) {
                     emptyStateContainer.visibility = View.VISIBLE
                     Toast.makeText(requireContext(), "Failed to load schedule: ${e.message}", Toast.LENGTH_LONG).show()
@@ -273,45 +273,29 @@ class HomeFragment : Fragment() {
     }
 
     private fun showAddMedPopupMenu(anchorView: View) {
-        // Create custom popup dialog
         val dialog = Dialog(requireContext())
         dialog.setContentView(R.layout.add_med_popup)
-        dialog.window?.setLayout(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         dialog.window?.setGravity(Gravity.BOTTOM)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        
-        // Set up click listeners
+
         dialog.findViewById<View>(R.id.cameraOption).setOnClickListener {
-            dialog.dismiss()
-            checkCameraPermissionAndOpenCamera()
+            dialog.dismiss(); checkCameraPermissionAndOpenCamera()
         }
-        
         dialog.findViewById<View>(R.id.galleryOption).setOnClickListener {
-            dialog.dismiss()
-            pickImageLauncher.launch("image/*")
+            dialog.dismiss(); pickImageLauncher.launch("image/*")
         }
-        
         dialog.findViewById<View>(R.id.manualOption).setOnClickListener {
-            dialog.dismiss()
-            findNavController().navigate(R.id.action_homeFragment_to_newMedManualFragment)
+            dialog.dismiss(); findNavController().navigate(R.id.action_homeFragment_to_newMedManualFragment)
         }
-        
-        dialog.findViewById<View>(R.id.cancelOption).setOnClickListener {
-            dialog.dismiss()
-        }
-        
-        // Show dialog with slide up animation
+        dialog.findViewById<View>(R.id.cancelOption).setOnClickListener { dialog.dismiss() }
+
         dialog.show()
-        
-        // Apply slide up animation
+
         val popupView = dialog.findViewById<View>(R.id.popupContainer)
         val slideUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_up_anim)
         popupView?.startAnimation(slideUpAnimation)
-        
-        // Handle dialog dismissal with slide down animation
+
         dialog.setOnDismissListener {
             val slideDownAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_down_anim)
             popupView?.startAnimation(slideDownAnimation)
