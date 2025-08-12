@@ -1,6 +1,7 @@
 package com.example.medimind.adapters
 
-import android.graphics.drawable.GradientDrawable
+import android.graphics.Typeface
+import android.os.Build
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -8,8 +9,11 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.medimind.R
+import com.google.android.material.shape.MaterialShapeDrawable
+import com.google.android.material.shape.ShapeAppearanceModel
 
 class IntakeHistoryStyledAdapter(
     private val rows: List<HistoryRow>
@@ -74,10 +78,7 @@ class IntakeHistoryStyledAdapter(
         }
     }
 
-    private fun isSectionSingleItem(pos: Int): Boolean {
-        // A status header with no content after it before the next header/end
-        return isLastInSection(pos)
-    }
+    private fun isSectionSingleItem(pos: Int): Boolean = isLastInSection(pos)
 
     // ---------- ViewHolders ----------
 
@@ -89,6 +90,7 @@ class IntakeHistoryStyledAdapter(
             }
             tv.background = null
             tv.setPadding(0, 0, 0, 0)
+            ViewCompat.setElevation(tv, 0f)
         }
     }
 
@@ -109,7 +111,6 @@ class IntakeHistoryStyledAdapter(
     private inner class MedGroupVH(private val tv: TextView) : RecyclerView.ViewHolder(tv) {
         fun bind(row: HistoryRow.MedGroupHeader, position: Int) {
             tv.text = row.name
-
             if (isWithinStatusSection(position)) {
                 val last = isLastInSection(position)
                 applyCardBackground(
@@ -145,23 +146,45 @@ class IntakeHistoryStyledAdapter(
         }
     }
 
-    // ---------- Card styling (simulate one big card across rows) ----------
+    // ---------- Card styling (Material shadow/rounded corners) ----------
 
     private enum class CardRole { TOP, MIDDLE, BOTTOM, SINGLE }
 
     private fun applyCardBackground(view: View, role: CardRole) {
         val ctx = view.context
         val radius = dp(ctx, 16).toFloat()
-        val shape = GradientDrawable().apply {
-            setColor(ContextCompat.getColor(ctx, android.R.color.white))
-            cornerRadii = when (role) {
-                CardRole.TOP -> floatArrayOf(radius, radius, radius, radius, 0f, 0f, 0f, 0f)
-                CardRole.MIDDLE -> floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f)
-                CardRole.BOTTOM -> floatArrayOf(0f, 0f, 0f, 0f, radius, radius, radius, radius)
-                CardRole.SINGLE -> floatArrayOf(radius, radius, radius, radius, radius, radius, radius, radius)
+
+        val shape = ShapeAppearanceModel.Builder().apply {
+            when (role) {
+                CardRole.TOP -> {
+                    setTopLeftCornerSize(radius)
+                    setTopRightCornerSize(radius)
+                    setBottomLeftCornerSize(0f)
+                    setBottomRightCornerSize(0f)
+                }
+                CardRole.MIDDLE -> {
+                    setTopLeftCornerSize(0f); setTopRightCornerSize(0f)
+                    setBottomLeftCornerSize(0f); setBottomRightCornerSize(0f)
+                }
+                CardRole.BOTTOM -> {
+                    setTopLeftCornerSize(0f); setTopRightCornerSize(0f)
+                    setBottomLeftCornerSize(radius); setBottomRightCornerSize(radius)
+                }
+                CardRole.SINGLE -> {
+                    setTopLeftCornerSize(radius); setTopRightCornerSize(radius)
+                    setBottomLeftCornerSize(radius); setBottomRightCornerSize(radius)
+                }
             }
+        }.build()
+
+        val bg = MaterialShapeDrawable(shape).apply {
+            setTint(ContextCompat.getColor(ctx, android.R.color.white))
         }
-        view.background = shape
+
+        view.background = bg
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            view.clipToOutline = true
+        }
 
         val padH = dp(ctx, 16)
         val padV = dp(ctx, 12)
@@ -175,6 +198,9 @@ class IntakeHistoryStyledAdapter(
         val bottomM = if (role == CardRole.BOTTOM || role == CardRole.SINGLE) dp(ctx, 8) else 0
         lp.setMargins(mH, topM, mH, bottomM)
         view.layoutParams = lp
+
+        // Real shadow:
+        ViewCompat.setElevation(view, dp(ctx, 6).toFloat())
     }
 
     private fun clearCardBackground(view: View, top: Int, bottom: Int) {
@@ -184,6 +210,7 @@ class IntakeHistoryStyledAdapter(
         (view.layoutParams as ViewGroup.MarginLayoutParams).apply {
             setMargins(dp(ctx, 16), dp(ctx, top), dp(ctx, 16), dp(ctx, bottom))
         }
+        ViewCompat.setElevation(view, 0f)
     }
 
     // ---------- Row builders ----------
@@ -206,7 +233,7 @@ class IntakeHistoryStyledAdapter(
                 setMargins(dp(ctx, left), dp(ctx, top), dp(ctx, right), dp(ctx, bottom))
             }
             textSize = sizeSp
-            if (bold) setTypeface(typeface, android.graphics.Typeface.BOLD)
+            if (bold) setTypeface(typeface, Typeface.BOLD)
             setTextColor(ContextCompat.getColor(ctx, R.color.md_theme_light_onBackground))
         }
     }
