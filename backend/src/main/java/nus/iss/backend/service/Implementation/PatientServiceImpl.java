@@ -170,7 +170,7 @@ public class PatientServiceImpl implements PatientService {
             if (patient.getClinic().getId().equals(doctor.getClinic().getId())) {
                 patient.setDoctor(doctor);
                 patientRepo.save(patient);
-                logger.info("Assigned doctor {} to patient {}", doctorMcr, patientId);
+                logger.info("Assigned doctor {} to patient {}", sanitizeForLog(doctorMcr), patientId);
             } else {
                 throw new IllegalArgumentException("Doctor and patient are not from the same clinic.");
             }
@@ -207,6 +207,15 @@ public class PatientServiceImpl implements PatientService {
     }
 
 
+    /**
+     * Sanitize input for logging to prevent log injection.
+     * Removes CR and LF characters and marks user input.
+     */
+    private static String sanitizeForLog(String input) {
+        if (input == null) return null;
+        // Remove CR and LF, and optionally other control characters
+        return input.replaceAll("[\\r\\n]", "_");
+    }
 }
 
 
