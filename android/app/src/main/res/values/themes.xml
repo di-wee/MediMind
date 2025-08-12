@@ -1,27 +1,26 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Base.Theme.Medimind" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Primary brand color -->
+        <!-- Brand colors (yours) -->
         <item name="colorPrimary">@color/md_theme_light_primary</item>
         <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
-
-        <!-- Secondary -->
         <item name="colorSecondary">@color/md_theme_light_secondary</item>
         <item name="colorOnSecondary">@color/md_theme_light_onSecondary</item>
-
-        <!-- Background and surfaces -->
         <item name="android:colorBackground">@color/md_theme_light_background</item>
         <item name="colorSurface">@color/md_theme_light_surface</item>
         <item name="colorOnSurface">@color/md_theme_light_onSurface</item>
         <item name="colorOnBackground">@color/md_theme_light_onBackground</item>
-
-        <!-- Error -->
         <item name="colorError">@color/md_theme_light_error</item>
         <item name="colorOnError">@color/md_theme_light_onError</item>
+
+        <!-- Status bar: light background + dark icons -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@color/md_theme_light_background</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="Theme.Medimind" parent="Base.Theme.Medimind" />
-    
-    <!-- splash screen theme -->
+
+    <!-- Splash keeps white icons on its (darker) background -->
     <style name="Theme.Medimind.Splash" parent="Base.Theme.Medimind">
         <item name="android:windowBackground">@color/splash_background_color</item>
         <item name="android:windowNoTitle">true</item>
@@ -35,5 +34,7 @@
         <item name="android:navigationBarColor">@color/splash_background_color</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
         <item name="android:windowTranslucentNavigation">true</item>
+        <!-- Force light (white) icons on splash if its color is dark -->
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

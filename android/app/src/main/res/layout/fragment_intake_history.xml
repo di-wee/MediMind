@@ -104,7 +104,6 @@
                 android:layout_height="240dp"
                 android:src="@drawable/med_intake_placeholder"
                 android:contentDescription="@string/app_name"
-
                 android:alpha="0.9" />
 
             <TextView
