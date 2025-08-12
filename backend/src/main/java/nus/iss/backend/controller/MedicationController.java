@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import nus.iss.backend.util.LogSanitizer;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -122,7 +123,7 @@ public class MedicationController {
             return new ResponseEntity<>(response, HttpStatus.OK);
 
         } catch (RuntimeException e) {
-            logger.error("Error in retrieving logs for medication(" + medicationId + ").");
+            logger.error("Error in retrieving logs for medication({}).", LogSanitizer.sanitizeForLog(medicationId.toString()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
         }
@@ -130,9 +131,9 @@ public class MedicationController {
 
     @PostMapping("/save")
     public ResponseEntity<?> saveMedication(@RequestBody newMedicationReq req) {
-        logger.info(">>> /save API hit, request received: " + req.toString());
+        logger.info(">>> /save API hit, request received: {}", LogSanitizer.sanitizeForLog(req.toString()));
         try{
-            logger.info("📦 received notes: " + req.getNotes());
+            logger.info("📦 received notes: {}", LogSanitizer.sanitizeForLog(req.getNotes()));
 
             Patient patient =  patientService.findPatientById(req.getPatientId()).orElse(null);
             if(patient==null) {
@@ -140,7 +141,7 @@ public class MedicationController {
             }
             //save new medication
             Medication med = medicationService.createMedication(req);
-            logger.info("Note from request: " + med.getNotes());
+            logger.info("Note from request: {}", LogSanitizer.sanitizeForLog(med.getNotes()));
             //save new schedules
             List<Schedule> schedules = new ArrayList<>();
             for (String timeStr : req.getTimes()) {

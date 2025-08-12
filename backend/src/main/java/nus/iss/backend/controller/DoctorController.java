@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import nus.iss.backend.exceptions.ItemNotFound;
+import nus.iss.backend.util.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,19 +53,19 @@ public class DoctorController {
 
     @PutMapping("/update")
     public ResponseEntity<Doctor> updateDoctor(@RequestBody DoctorUpdateReqWeb update) {
-        logger.info("Update doctor endpoint called for MCR: " + update.getMcrNo());
+        logger.info("Update doctor endpoint called for MCR: {}", LogSanitizer.sanitizeForLog(update.getMcrNo()));
         try{
             Doctor doctor = doctorService.updateDoctor(update);
-            logger.info("Doctor updated successfully: " + doctor.getMcrNo());
+            logger.info("Doctor updated successfully: {}", LogSanitizer.sanitizeForLog(doctor.getMcrNo()));
             return new ResponseEntity<>(doctor, HttpStatus.OK);
         }catch (ItemNotFound e) {
-            logger.error("Doctor not found (Status Code: " + HttpStatus.NOT_FOUND + "): " + e);
+            logger.error("Doctor not found (Status Code: {}): {}", HttpStatus.NOT_FOUND, LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (InvalidEmailDomainException e) {
-            logger.error("Email domain validation failed for doctor {}: {}", update.getMcrNo(), e.getMessage());
+            logger.error("Email domain validation failed for doctor {}: {}", LogSanitizer.sanitizeForLog(update.getMcrNo()), LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }catch (Exception e) {
-            logger.error("Unexpected error updating doctor {}: {}", update.getMcrNo(), e.getMessage());
+            logger.error("Unexpected error updating doctor {}: {}", LogSanitizer.sanitizeForLog(update.getMcrNo()), LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
         }

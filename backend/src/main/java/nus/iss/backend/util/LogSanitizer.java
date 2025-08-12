@@ -23,7 +23,12 @@ public class LogSanitizer {
         }
         
         // Remove CR, LF, and other control characters that could be used for log injection
-        return input.replaceAll("[\\r\\n\\t\\f\\b]", "_");
+        // Using a safer approach to avoid regex issues
+        return input.replace("\r", "_")
+                   .replace("\n", "_")
+                   .replace("\t", "_")
+                   .replace("\f", "_")
+                   .replace("\b", "_");
     }
 
     /**
