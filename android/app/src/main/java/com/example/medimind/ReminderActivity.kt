@@ -1,24 +1,24 @@
 package com.example.medimind
 
+
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
+
 import androidx.lifecycle.lifecycleScope
-import com.example.medimind.ReminderUtils.scheduleAlarm
-import com.example.medimind.data.*
+
 import com.example.medimind.network.ApiClient
-import com.example.medimind.network.IntakeMedRequest
+
 import com.example.medimind.network.MedicationIdListRequest
 import com.example.medimind.network.ScheduleListRequest
-import com.example.medimind.network.newMedicationRequest
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.ZoneId
+
 
 class ReminderActivity : AppCompatActivity() {
 

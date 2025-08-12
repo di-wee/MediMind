@@ -36,25 +36,21 @@ class ProfileFragment : Fragment() {
                     // Fetch the patient details from backend
                     val profile = ApiClient.retrofitService.getPatient(patientId)
 
-                    // Update greeting text dynamically
-                    view.findViewById<TextView>(R.id.topGreetingText).text =
-                        "Hello, ${profile.firstName}"
-
                     // Populate UI with actual patient details
                     view.findViewById<TextView>(R.id.txtUsername).text =
-                        "Email/Username: ${profile.email}"
+                        profile.email
                     view.findViewById<TextView>(R.id.txtNRIC).text =
-                        "NRIC: ${profile.nric}"
+                        profile.nric
                     view.findViewById<TextView>(R.id.txtFullName).text =
-                        "Name: ${profile.firstName} ${profile.lastName}"
+                        "${profile.firstName} ${profile.lastName}"
                     view.findViewById<TextView>(R.id.txtGender).text =
-                        "Gender: ${profile.gender}"
+                        profile.gender
                     view.findViewById<TextView>(R.id.txtDOB).text =
-                        "DOB: ${profile.dob}"
+                        profile.dob
 
                     // Display clinic name if returned by backend
                     val clinicName = profile.clinic?.clinicName ?: "Unknown clinic"
-                    view.findViewById<TextView>(R.id.txtClinic).text = "Clinic: $clinicName"
+                    view.findViewById<TextView>(R.id.txtClinic).text = "$clinicName"
 
                 } catch (e: Exception) {
                     // Handle error: show a message if fetch fails
@@ -73,7 +69,7 @@ class ProfileFragment : Fragment() {
             ).show()
         }
 
-        // Edit profile button (placeholder for future implementation)
+        // Edit profile button
         val editButton = view.findViewById<Button>(R.id.editProfileButton)
         editButton.setOnClickListener {
             findNavController().navigate(R.id.action_profileFragment_to_editProfileFragment)

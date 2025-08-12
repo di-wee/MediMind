@@ -1,27 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp">
+    android:background="#F5F5F5"
+    android:fitsSystemWindows="true">
 
-    <TextView
+    <!-- Top App Bar -->
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/YourMedicationListTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/your_medication_list"
-        android:layout_marginTop="100dp"
-        android:layout_marginBottom="20dp"
-        android:textSize="24sp"
-        android:textAlignment="center"
-        android:textStyle="bold"/>
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:navigationIconTint="@android:color/white"
+        app:title="@string/your_medication_list"
+        app:titleTextAppearance="@style/ToolbarTitleBold"
+        app:titleCentered="true"
+        app:titleTextColor="@android:color/white"
+        app:contentInsetStartWithNavigation="0dp" />
 
+    <!-- RecyclerView for active meds -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/medicineListRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:paddingBottom="130dp"/>
+        android:paddingBottom="130dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Empty State (hidden by default) -->
+    <LinearLayout
+        android:id="@+id/emptyState"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="24dp">
+
+        <ImageView
+            android:layout_width="240dp"
+            android:layout_height="240dp"
+            android:src="@drawable/med_active_placeholder"
+            android:contentDescription="@string/app_name"
+
+            android:alpha="0.9" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_active_medications_yet"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="#333333"
+            android:layout_marginTop="12dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_a_medication_to_see_it_here"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:gravity="center"
+            android:layout_marginTop="6dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp" />
+    </LinearLayout>
+
+    <!-- Optional Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
 </LinearLayout>

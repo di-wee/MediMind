@@ -9,7 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
+
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -18,10 +18,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.medimind.ReminderUtils.scheduleAlarm
 import androidx.navigation.fragment.findNavController
-import com.example.medimind.data.ImageOutput
+
 import com.example.medimind.network.ApiClient
 import com.example.medimind.network.MLApiClient
 import com.example.medimind.network.newMedicationRequest
+import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -49,6 +50,12 @@ class ImageDetailsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
+        // Back arrow
+        view.findViewById<MaterialToolbar>(R.id.topAppBar).setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
+
         val imageUriString = arguments?.getString("imageUri")
         val imageUri = imageUriString?.let { Uri.parse(it) }
 
@@ -56,11 +63,18 @@ class ImageDetailsFragment : Fragment() {
         val patientId = sharedPreference.getString("patientId", null)
 
         val imagePreview = view.findViewById<ImageView>(R.id.imagePreview)
-        val nameInput = view.findViewById<EditText>(R.id.medicationNameInput)
-        val intakeQuantityInput = view.findViewById<EditText>(R.id.intakeQuantityInput)
-        val frequencyInput = view.findViewById<EditText>(R.id.frequencyInput)
-        val instructionInput = view.findViewById<EditText>(R.id.instructionInput)
-        val noteInput = view.findViewById<EditText>(R.id.noteInput)
+
+        val nameInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.medicationNameInput)
+        val intakeQuantityInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.intakeQuantityInput)
+        val frequencyInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.frequencyInput)
+        val instructionInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.instructionInput)
+        val noteInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.noteInput)
+
+//        val nameInput = view.findViewById<EditText>(R.id.medicationNameInput)
+//        val intakeQuantityInput = view.findViewById<EditText>(R.id.intakeQuantityInput)
+//        val frequencyInput = view.findViewById<EditText>(R.id.frequencyInput)
+//        val instructionInput = view.findViewById<EditText>(R.id.instructionInput)
+//        val noteInput = view.findViewById<EditText>(R.id.noteInput)
 
         if (imageUri != null) {
             imagePreview.setImageURI(imageUri)
@@ -105,11 +119,6 @@ class ImageDetailsFragment : Fragment() {
                 }
             }
 
-            // Use NavController to navigate back
-            val backBtnFromImageDetails = view.findViewById<Button>(R.id.btnBackFromImageDetails)
-            backBtnFromImageDetails.setOnClickListener {
-                findNavController().popBackStack()
-            }
 
             val saveBtnFromImageDetails = view.findViewById<Button>(R.id.btnSaveFromImageDetails)
             saveBtnFromImageDetails.setOnClickListener {

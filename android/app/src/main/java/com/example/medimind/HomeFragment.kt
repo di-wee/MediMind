@@ -1,21 +1,24 @@
 package com.example.medimind
 
 import android.Manifest
+
 import android.content.Context
 import android.content.pm.PackageManager
+
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
-import android.view.animation.AnimationUtils
+
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.doOnLayout
+import androidx.core.view.updateLayoutParams
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,54 +26,40 @@ import com.example.medimind.adapters.GroupedScheduleAdapter
 import com.example.medimind.adapters.ScheduleListItem
 import com.example.medimind.network.ApiClient
 import com.example.medimind.network.ScheduleItem
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.bottomnavigation.BottomNavigationView
+
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import kotlinx.coroutines.launch
+
 import java.io.File
-import java.text.SimpleDateFormat
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
-import android.graphics.Color
-import android.view.Gravity
 
 class HomeFragment : Fragment() {
 
-    // Buttons under add new Med FAB
-    private lateinit var addMedButton: FloatingActionButton
-    private lateinit var cameraButton: FloatingActionButton
-    private lateinit var galleryButton: FloatingActionButton
-    private lateinit var manualButton: FloatingActionButton
-    private lateinit var cameraBtnText: TextView
-    private lateinit var galleryBtnText: TextView
-    private lateinit var manualBtnText: TextView
-
-    // Camera image box
-    private lateinit var cameraBox: ImageView
-
-    // Empty state view
+    // --- Views (late init) ---
     private lateinit var emptyStateContainer: LinearLayout
+    private lateinit var scheduleRecyclerView: RecyclerView
 
-    // Animations for FAB
-    private val rotateOpen by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_open_anim) }
-    private val rotateClose by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_close_anim) }
-    private val fromBottom by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.from_bottom_anim) }
-    private val toBottom by lazy { AnimationUtils.loadAnimation(requireContext(), R.anim.to_bottom_anim) }
-    private var clicked = false
+    // FAB speed dial
+    private lateinit var fabMain: ExtendedFloatingActionButton
+    private lateinit var fabCluster: LinearLayout
+    private lateinit var fabScrim: View
+    private lateinit var fabCamera: View
+    private lateinit var fabGallery: View
+    private lateinit var fabManual: View
+    private var dialOpen = false
 
-    // Camera permission code and launcher
+    // Camera permission + launchers
     private val CAMERA_PERMISSION_CODE = 1
     private lateinit var takePictureLauncher: ActivityResultLauncher<Uri>
-    private var imageUri: Uri? = null
-
-    // Gallery launcher
     private lateinit var pickImageLauncher: ActivityResultLauncher<String>
+    private var imageUri: Uri? = null
     private var pendingImageUri: Uri? = null
     private var shouldNavigateToImageDetails = false
-
-    // Calendar formats and state
-    private val dayFormat = SimpleDateFormat("EEE", Locale.getDefault())
-    private val dateFormat = SimpleDateFormat("dd", Locale.getDefault())
-    private val fullDateFormat = SimpleDateFormat("dd MMM", Locale.getDefault())
-    private var selectedDateView: View? = null
-    private var selectedCalendar: Calendar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,7 +85,9 @@ class HomeFragment : Fragment() {
     ): View? = inflater.inflate(R.layout.fragment_home, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val greetingTextView = view.findViewById<TextView>(R.id.topGreetingText)
+        // ---- Toolbar (left: Hello {user}, right: date) ----
+        val toolbar = view.findViewById<MaterialToolbar>(R.id.topAppBar)
+        toolbar.navigationIcon = null
 
         val sharedPref = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val patientId = sharedPref.getString("patientId", null)
@@ -105,85 +96,153 @@ class HomeFragment : Fragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     val profile = ApiClient.retrofitService.getPatient(patientId)
-                    greetingTextView.text = "Hello, ${profile.firstName}"
+                    toolbar.title = "Hello, ${profile.firstName ?: "User"}"
                 } catch (e: Exception) {
-                    greetingTextView.text = "Hello"
+                    toolbar.title = "Hello, User"
                     Toast.makeText(requireContext(), "Failed to load profile: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         } else {
-            greetingTextView.text = "Hello"
+            toolbar.title = "Hello, User"
         }
 
-        val logoutButton = view.findViewById<Button>(R.id.logoutButton)
-        logoutButton.setOnClickListener {
-            val editor = sharedPref.edit()
-            editor.clear()
-            editor.apply()
-            Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
-            val navController = requireActivity().findNavController(R.id.nav_host_fragment)
-            val navOptions = androidx.navigation.NavOptions.Builder()
-                .setPopUpTo(R.id.mainFragment, true)
-                .build()
-            navController.navigate(R.id.loginFragment, null, navOptions)
-        }
+        // Right-side date as action view
+        toolbar.menu.findItem(R.id.action_today)?.actionView
+            ?.findViewById<TextView>(R.id.tvToday)?.apply {
+                val today = LocalDate.now()
+                val fmt = DateTimeFormatter.ofPattern("EEE, d MMM", Locale.getDefault())
+                text = today.format(fmt)
+            }
 
-        val todayLabel = view.findViewById<TextView>(R.id.todayLabel)
-        todayLabel.text = "Today, ${fullDateFormat.format(Date())}"
-
-        val calendarStrip = view.findViewById<LinearLayout>(R.id.calendarStrip)
-        populateCalendarStrip(calendarStrip)
-
-        // FAB setup
-        addMedButton = view.findViewById(R.id.addMedButton)
-        cameraButton = view.findViewById(R.id.cameraButton)
-        galleryButton = view.findViewById(R.id.galleryButton)
-        manualButton = view.findViewById(R.id.manualButton)
-        cameraBtnText = view.findViewById(R.id.cameraBtnText)
-        galleryBtnText = view.findViewById(R.id.galleryBtnText)
-        manualBtnText = view.findViewById(R.id.manualBtnText)
-        addMedButton.setOnClickListener { onAddMedButtonClicked() }
-
-        cameraButton.setOnClickListener {
-            checkCameraPermissionAndOpenCamera()
-            Toast.makeText(requireContext(), "Camera button clicked", Toast.LENGTH_SHORT).show()
-        }
-
-        galleryButton.setOnClickListener {
-            pickImageLauncher.launch("image/*")
-            Toast.makeText(requireContext(), "Gallery button clicked", Toast.LENGTH_SHORT).show()
-        }
-
-        manualButton.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_newMedManualFragment)
-        }
-
-        cameraBox = view.findViewById(R.id.cameraBox)
+        // ---- Content views ----
         emptyStateContainer = view.findViewById(R.id.emptyStateContainer)
-
-        val scheduleRecyclerView = view.findViewById<RecyclerView>(R.id.scheduleRecyclerView)
+        scheduleRecyclerView = view.findViewById(R.id.scheduleRecyclerView)
         scheduleRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        // Load schedule
         if (patientId != null) {
+            val prefs = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            val hasScheduleKey = "hasScheduleData"
+
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
-                    val rawSchedule = ApiClient.retrofitService.getDailySchedule(patientId)
-                    val groupedList = groupScheduleItems(rawSchedule)
+                    val raw = ApiClient.retrofitService.getDailySchedule(patientId)
+                    val grouped = groupScheduleItems(raw)
 
-                    if (rawSchedule.isEmpty()) {
-                        emptyStateContainer.visibility = View.VISIBLE
-                    } else {
-                        emptyStateContainer.visibility = View.GONE
+                    // Persist that this user has have schedule data once code sees any
+                    if (raw.isNotEmpty()) {
+                        prefs.edit().putBoolean(hasScheduleKey, true).apply()
                     }
 
-                    scheduleRecyclerView.adapter = GroupedScheduleAdapter(groupedList)
+                    emptyStateContainer.visibility = if (raw.isEmpty()) View.VISIBLE else View.GONE
+                    scheduleRecyclerView.adapter = GroupedScheduleAdapter(grouped)
                 } catch (e: Exception) {
+                    // If code has not seen data before, treat as "no meds yet" and don't toast
+                    val hasEverHadData = prefs.getBoolean(hasScheduleKey, false)
+
                     emptyStateContainer.visibility = View.VISIBLE
-                    Toast.makeText(requireContext(), "Failed to load schedule: ${e.message}", Toast.LENGTH_LONG).show()
+                    scheduleRecyclerView.adapter = GroupedScheduleAdapter(emptyList())
+
+                    if (hasEverHadData) {
+                        Toast.makeText(
+                            requireContext(),
+                            "Failed to load schedule. Please try again.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             }
         }
+
+
+
+        // ---- FAB Speed Dial ----
+        fabMain = view.findViewById(R.id.fabMain)
+        fabCluster = view.findViewById(R.id.fabCluster)
+        fabScrim = view.findViewById(R.id.fabScrim)
+        fabCamera = view.findViewById(R.id.fabCamera)
+        fabGallery = view.findViewById(R.id.fabGallery)
+        fabManual = view.findViewById(R.id.fabManual)
+
+        fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
+
+        // Find the bottom nav that lives in MainFragment's layout
+        val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
+
+        // Wait for both bottomNav and fabMain to be laid out, then compute real heights
+        bottomNav?.doOnLayout {
+            fabMain.doOnLayout {
+                val bottomNavH   = bottomNav.height
+                val mainFabH     = fabMain.height.takeIf { it > 0 } ?: dp(56)
+                val extraCushion = dp(32)
+
+                // 1) Keep main FAB above the bar
+                fabMain.updateLayoutParams<FrameLayout.LayoutParams> {
+                    // slight cushion so it never touches the bar
+                    bottomMargin = bottomNavH + extraCushion
+                    marginEnd = dp(16)
+                }
+
+                // 2) Push the mini‑FAB cluster high enough so the lowest item clears the bar
+                //    We add the mainFab height because your lowest mini‑FAB aligns near the main FAB.
+                val clusterClearance = bottomNavH + mainFabH + extraCushion
+                fabCluster.setPadding(
+                    fabCluster.paddingLeft,
+                    fabCluster.paddingTop,
+                    fabCluster.paddingRight,
+                    clusterClearance
+                )
+            }
+        }
+
+        // Keep some extra space so the list bottom card isn't covered
+        scheduleRecyclerView.setPadding(
+            scheduleRecyclerView.paddingLeft,
+            scheduleRecyclerView.paddingTop,
+            scheduleRecyclerView.paddingRight,
+            scheduleRecyclerView.paddingBottom + dp(96)
+        )
+
+        fun showSpeedDial() {
+            fabScrim.visibility = View.VISIBLE
+            fabCluster.visibility = View.VISIBLE
+            fabCluster.alpha = 0f
+            fabCluster.translationY = 24f
+            fabCluster.animate().alpha(1f).translationY(0f).setDuration(150).start()
+            fabMain.text = getString(R.string.close) // add "Close" in strings or keep "Add New Med"
+        }
+
+        fun hideSpeedDial() {
+            fabCluster.animate().alpha(0f).translationY(24f).setDuration(120).withEndAction {
+                fabCluster.visibility = View.GONE
+            }.start()
+            fabScrim.visibility = View.GONE
+            fabMain.text = getString(R.string.add_new_med) // define in strings.xml -> "Add New Med"
+        }
+
+        fun toggleDial() {
+            if (dialOpen) hideSpeedDial() else showSpeedDial()
+            dialOpen = !dialOpen
+        }
+
+        fabMain.setOnClickListener { toggleDial() }
+        fabScrim.setOnClickListener { if (dialOpen) toggleDial() }
+
+        fabCamera.setOnClickListener {
+            if (dialOpen) toggleDial()
+            checkCameraPermissionAndOpenCamera()
+        }
+        fabGallery.setOnClickListener {
+            if (dialOpen) toggleDial()
+            pickImageLauncher.launch("image/*")
+        }
+        fabManual.setOnClickListener {
+            if (dialOpen) toggleDial()
+            findNavController().navigate(R.id.action_homeFragment_to_newMedManualFragment)
+        }
     }
+
+    // -------- Helpers --------
 
     private fun groupScheduleItems(scheduleList: List<ScheduleItem>): List<ScheduleListItem> {
         val grouped = mutableListOf<ScheduleListItem>()
@@ -208,7 +267,8 @@ class HomeFragment : Fragment() {
 
     private fun checkCameraPermissionAndOpenCamera() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED) {
+            != PackageManager.PERMISSION_GRANTED
+        ) {
             ActivityCompat.requestPermissions(
                 requireActivity(),
                 arrayOf(Manifest.permission.CAMERA),
@@ -226,7 +286,8 @@ class HomeFragment : Fragment() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == CAMERA_PERMISSION_CODE &&
-            grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
             val uri = createUri()
             imageUri = uri
             takePictureLauncher.launch(uri)
@@ -235,121 +296,11 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun populateCalendarStrip(calendarLayout: LinearLayout) {
-        val today = Calendar.getInstance()
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
-        }
-
-        for (i in 0..6) {
-            val dayCopy = calendar.clone() as Calendar
-
-            val container = LinearLayout(requireContext()).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER_HORIZONTAL
-                setPadding(16, 8, 16, 8)
-            }
-
-            val dayText = TextView(requireContext()).apply {
-                text = dayFormat.format(dayCopy.time)
-                textSize = 14f
-                setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
-                gravity = Gravity.CENTER
-            }
-
-            val dateText = TextView(requireContext()).apply {
-                text = dateFormat.format(dayCopy.time)
-                textSize = 14f
-                setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
-                gravity = Gravity.CENTER
-            }
-
-            container.addView(dayText)
-            container.addView(dateText)
-
-            container.setOnClickListener {
-                (selectedDateView as? LinearLayout)?.let { prev ->
-                    val prevDate = prev.getChildAt(1) as TextView
-                    prevDate.background = null
-                    prevDate.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
-                    val prevDay = prev.getChildAt(0) as TextView
-                    prevDay.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
-                }
-
-                dateText.background = ContextCompat.getDrawable(requireContext(), R.drawable.circle_blue_bg)
-                dateText.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
-                dayText.setTextColor(Color.parseColor("#1E88E5"))
-
-                selectedDateView = container
-                selectedCalendar = dayCopy
-            }
-
-            if (isSameDay(dayCopy, today)) {
-                container.post { container.performClick() }
-            }
-
-            calendarLayout.addView(container)
-            calendar.add(Calendar.DAY_OF_MONTH, 1)
-        }
-    }
-
-    private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean =
-        cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
-
-    private fun onAddMedButtonClicked() {
-        setVisibility(clicked)
-        setAnimation(clicked)
-        clicked = !clicked
-    }
-
-    private fun setVisibility(clicked: Boolean) {
-        if (!clicked) {
-            cameraButton.visibility = View.VISIBLE
-            galleryButton.visibility = View.VISIBLE
-            manualButton.visibility = View.VISIBLE
-            cameraBtnText.visibility = View.VISIBLE
-            galleryBtnText.visibility = View.VISIBLE
-            manualBtnText.visibility = View.VISIBLE
-        } else {
-            cameraButton.visibility = View.INVISIBLE
-            galleryButton.visibility = View.INVISIBLE
-            manualButton.visibility = View.INVISIBLE
-            cameraBtnText.visibility = View.INVISIBLE
-            galleryBtnText.visibility = View.INVISIBLE
-            manualBtnText.visibility = View.INVISIBLE
-        }
-    }
-
-    private fun setAnimation(clicked: Boolean) {
-        if (!clicked) {
-            cameraButton.startAnimation(fromBottom)
-            galleryButton.startAnimation(fromBottom)
-            manualButton.startAnimation(fromBottom)
-            galleryBtnText.startAnimation(fromBottom)
-            cameraBtnText.startAnimation(fromBottom)
-            manualBtnText.startAnimation(fromBottom)
-            addMedButton.startAnimation(rotateOpen)
-        } else {
-            cameraButton.startAnimation(toBottom)
-            galleryButton.startAnimation(toBottom)
-            manualButton.startAnimation(toBottom)
-            cameraBtnText.startAnimation(toBottom)
-            galleryBtnText.startAnimation(toBottom)
-            manualBtnText.startAnimation(toBottom)
-            addMedButton.startAnimation(rotateClose)
-        }
-    }
-
     override fun onResume() {
         super.onResume()
-
         if (shouldNavigateToImageDetails && pendingImageUri != null) {
-            val bundle = Bundle().apply {
-                putString("imageUri", pendingImageUri.toString())
-            }
+            val bundle = Bundle().apply { putString("imageUri", pendingImageUri.toString()) }
             findNavController().navigate(R.id.action_homeFragment_to_imageDetailsFragment, bundle)
-
             shouldNavigateToImageDetails = false
             pendingImageUri = null
         }

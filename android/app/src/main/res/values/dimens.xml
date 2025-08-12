@@ -1,0 +1,5 @@
+<resources>
+    <dimen name="med_item_stroke_width">2dp</dimen>
+    <dimen name="reminder_list_max_height">420dp</dimen>
+    <dimen name="med_text_indent">50dp</dimen>
+</resources>

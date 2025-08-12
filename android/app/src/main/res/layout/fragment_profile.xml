@@ -1,88 +1,213 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:padding="24dp">
+    android:background="#F5F5F5">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <!-- Top App Bar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:title="My Profile"
+        app:titleTextAppearance="@style/ToolbarTitleBold"
+        app:titleTextColor="@android:color/white"
+        app:titleCentered="true"
+        app:navigationIcon="@null"
+        app:menu="@menu/menu_home_topbar" />
 
-        <!-- Top NavBar (same as HomeFragment) -->
-        <include
-            layout="@layout/top_nav_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+    <!-- Scrollable content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="96dp">
 
-        <!-- Profile Heading -->
-        <TextView
-            android:id="@+id/profileText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Profile"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp"
-            android:layout_gravity="center_horizontal" />
-
-        <!-- User Info -->
-        <TextView
-            android:id="@+id/txtUsername"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginStart="24dp"
-            android:textSize="18sp" />
-
-        <TextView
-            android:id="@+id/txtNRIC"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="24dp"
-            android:textSize="18sp" />
-
-        <TextView
-            android:id="@+id/txtFullName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="24dp"
-            android:textSize="18sp" />
-
-        <TextView
-            android:id="@+id/txtGender"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="24dp"
-            android:textSize="18sp" />
-
-        <TextView
-            android:id="@+id/txtDOB"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="24dp"
-            android:textSize="18sp" />
-
-        <TextView
-            android:id="@+id/txtClinic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="24dp"
-            android:textSize="18sp" />
-
-        <!-- Edit Profile Button -->
-        <Button
-            android:id="@+id/editProfileButton"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="24dp"
-            android:text="Edit Profile" />
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="24dp">
 
-    </LinearLayout>
-</ScrollView>
+            <!-- Heading -->
+            <ImageView
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="8dp"
+                android:src="@drawable/medimind_profile_ic"
+                android:contentDescription="@string/app_name" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/editProfileButton"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="0dp"
+                android:text="@string/edit_profile"
+                style="?attr/materialButtonStyle" />
+
+            <!-- Username (read-only, editable-looking) -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                app:hintTextColor="#BDBDBD"
+                android:hint="@string/email_username">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/txtUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="false"
+                    android:longClickable="false"
+                    android:textColor="#111111"
+                    tools:text="user@example.com"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- NRIC -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                app:hintTextColor="#BDBDBD"
+                android:hint="@string/nric">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/txtNRIC"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="false"
+                    android:longClickable="false"
+                    android:textColor="#111111"
+                    tools:text="S1234567A"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Full Name -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                app:hintTextColor="#BDBDBD"
+                android:hint="@string/name">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/txtFullName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="false"
+                    android:longClickable="false"
+                    android:textColor="#111111"
+                    tools:text="John Tan"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Gender -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                app:hintTextColor="#BDBDBD"
+                android:hint="@string/gender">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/txtGender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="false"
+                    android:longClickable="false"
+                    android:textColor="#111111"
+                    tools:text="Male"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- DOB -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                app:hintTextColor="#BDBDBD"
+                android:hint="@string/dob">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/txtDOB"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="false"
+                    android:longClickable="false"
+                    android:textColor="#111111"
+                    tools:text="1990-01-01"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Clinic -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="#B4B4B4"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                app:hintTextColor="#BDBDBD"
+                android:hint="@string/clinic">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/txtClinic"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="false"
+                    android:longClickable="false"
+                    android:textColor="#111111"
+                    tools:text="Tampines Polyclinic"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Logout Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/logoutButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/logout"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#ff4444"
+                style="?attr/materialButtonStyle" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

@@ -1,68 +1,189 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:fitsSystemWindows="true"
+    android:background="#F5F5F5">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <!-- Top App Bar: back arrow + centered title (built-in) -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:navigationIcon="@drawable/ic_arrow_back_24"
+        app:titleTextAppearance="@style/ToolbarTitleBold"
+        app:navigationIconTint="@android:color/white"
+        android:textSize="20sp"
+        app:title="Edit Profile"
+        app:titleCentered="true"
+        app:titleTextColor="@android:color/white"
+        app:contentInsetStartWithNavigation="0dp" />
 
-        <EditText
-            android:id="@+id/editEmail"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/editProfileScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="96dp">
+
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Email" />
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="24dp">
 
-        <EditText
-            android:id="@+id/editNRIC"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="NRIC" />
+            <!-- Profile Icon -->
+            <LinearLayout
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center">
 
-        <EditText
-            android:id="@+id/editFirstName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="First Name" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginBottom="8dp"
+                    android:src="@drawable/medimind_profile_ic"
+                    android:contentDescription="@string/app_name" />
+            </LinearLayout>
 
-        <EditText
-            android:id="@+id/editLastName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Last Name" />
+            <!-- Save button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/saveProfileButton"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/save_changes"
+                style="?attr/materialButtonStyle" />
 
-        <EditText
-            android:id="@+id/editGender"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Gender" />
+            <!-- Email -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                android:hint="@string/email_username">
 
-        <EditText
-            android:id="@+id/editDob"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Date of Birth" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
+                    tools:text="user@example.com"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <EditText
-            android:id="@+id/editPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="New Password (optional)"
-            android:inputType="textPassword"/>
+            <!-- First Name -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                android:hint="@string/first_name">
 
-        <EditText
-            android:id="@+id/editConfirmPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Confirm New Password"
-            android:inputType="textPassword"/>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editFirstName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="Lewis"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <Button
-            android:id="@+id/saveProfileButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Save Changes"/>
+            <!-- Last Name -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                android:hint="@string/last_name">
 
-    </LinearLayout>
-</ScrollView>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editLastName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="Huang"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Gender -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                android:hint="@string/gender">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editGender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="Male"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- New Password (Optional) -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:endIconMode="password_toggle"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
+                app:helperText=" "
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                android:hint="@string/new_password_optional">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Confirm New Password -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                app:endIconMode="password_toggle"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
+                app:helperText=" "
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxStrokeColor="#BDBDBD"
+                app:boxStrokeWidth="1dp"
+                android:hint="@string/confirm_new_password">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editConfirmPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>
