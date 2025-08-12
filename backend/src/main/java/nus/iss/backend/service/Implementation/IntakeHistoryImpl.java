@@ -12,6 +12,7 @@ import nus.iss.backend.repository.IntakeRepository;
 import nus.iss.backend.repository.PatientRepository;
 import nus.iss.backend.repository.ScheduleRepository;
 import nus.iss.backend.service.IntakeHistoryService;
+import nus.iss.backend.util.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class IntakeHistoryImpl implements IntakeHistoryService {
         List<IntakeHistory> historyList = intakeRepo.findBySchedule_Medication_Id(medicationId);
 
         if (historyList.isEmpty()) {
-            logger.warn("No intake history for medication(" + medicationId + ").");
+            logger.warn("No intake history for medication({}).", LogSanitizer.sanitizeForLog(medicationId.toString()));
             return Collections.emptyList();
         }
 
