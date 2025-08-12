@@ -99,7 +99,7 @@ class HomeFragment : Fragment() {
                     toolbar.title = "Hello, ${profile.firstName ?: "User"}"
                 } catch (e: Exception) {
                     toolbar.title = "Hello, User"
-                    Toast.makeText(requireContext(), "Failed to load profile: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), "Failed to load profile: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         } else {
@@ -147,7 +147,7 @@ class HomeFragment : Fragment() {
                         Toast.makeText(
                             requireContext(),
                             "Failed to load schedule. Please try again.",
-                            Toast.LENGTH_LONG
+                            Toast.LENGTH_SHORT
                         ).show()
                     }
                 }
