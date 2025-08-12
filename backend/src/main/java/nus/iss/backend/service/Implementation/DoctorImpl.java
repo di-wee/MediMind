@@ -12,6 +12,7 @@ import nus.iss.backend.repository.ClinicRepository;
 import nus.iss.backend.repository.DoctorRepository;
 import nus.iss.backend.service.DoctorService;
 import nus.iss.backend.service.PatientService;
+import nus.iss.backend.util.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ public class DoctorImpl implements DoctorService {
 
     private void validateEmailDomain(String email, Clinic clinic) {
         if (clinic.getEmailDomain() == null || clinic.getEmailDomain().trim().isEmpty()) {
-            logger.warn("No email domain configured for clinic: {}", clinic.getClinicName());
+            logger.warn("No email domain configured for clinic: {}", LogSanitizer.sanitizeForLog(clinic.getClinicName()));
             return; // Skip validation if no domain is configured
         }
 
@@ -53,7 +54,8 @@ public class DoctorImpl implements DoctorService {
         String clinicDomain = clinic.getEmailDomain().toLowerCase();
 
         if (!emailDomain.equals(clinicDomain)) {
-            logger.error("Email domain mismatch. Expected: {}, Got: {}", clinicDomain, emailDomain);
+            logger.error("Email domain mismatch. Expected: {}, Got: {}", 
+                LogSanitizer.sanitizeForLog(clinicDomain), LogSanitizer.sanitizeForLog(emailDomain));
             throw new InvalidEmailDomainException(
                     String.format("Email domain '%s' does not match clinic domain '%s'. " +
                                     "Please use an email address from your clinic's domain.",
@@ -61,7 +63,7 @@ public class DoctorImpl implements DoctorService {
             );
         }
 
-        logger.info("Email domain validation passed for clinic: {}", clinic.getClinicName());
+        logger.info("Email domain validation passed for clinic: {}", LogSanitizer.sanitizeForLog(clinic.getClinicName()));
     }
 
     public Doctor findDoctorByMcrNo (String mcrNo) {
@@ -80,7 +82,7 @@ public class DoctorImpl implements DoctorService {
         Clinic clinic = clinicRepository.findClinicByClinicName(request.getClinicName());
 
         if (clinic == null) {
-            logger.error("Clinic name: " + request.getClinicName());
+            logger.error("Clinic name: {}", LogSanitizer.sanitizeForLog(request.getClinicName()));
             throw new ItemNotFound("Clinic not found!");
         }
         // validate email domain
@@ -113,7 +115,9 @@ public class DoctorImpl implements DoctorService {
             // check if the clinic is different from the current one
             if (!newClinic.getId().equals(doctor.getClinic().getId())) {
                 logger.info("Doctor {} changing clinic from {} to {}",
-                        request.getMcrNo(), doctor.getClinic().getClinicName(), newClinic.getClinicName());
+                        LogSanitizer.sanitizeForLog(request.getMcrNo()), 
+                        LogSanitizer.sanitizeForLog(doctor.getClinic().getClinicName()), 
+                        LogSanitizer.sanitizeForLog(newClinic.getClinicName()));
 
                 patientService.unassignAllPatientsFromDoctor(doctor.getMcrNo());
                 doctor.setClinic(newClinic);
@@ -134,12 +138,13 @@ public class DoctorImpl implements DoctorService {
 
             validateEmailDomain(newEmail, targetClinic);
             doctor.setEmail(newEmail);
-            logger.info("Doctor {} email updated to: {}", request.getMcrNo(), newEmail);
+            logger.info("Doctor {} email updated to: {}", 
+                LogSanitizer.sanitizeForLog(request.getMcrNo()), LogSanitizer.sanitizeForLog(newEmail));
 
         } else if (clinicChanged) {
             validateEmailDomain(doctor.getEmail(), targetClinic);
             logger.info("Doctor {} clinic changed, current email validated against new clinic: {}",
-                    request.getMcrNo(), targetClinic.getClinicName());
+                    request.getMcrNo(), LogSanitizer.sanitizeForLog(targetClinic.getClinicName()));
         }
         doctorRepo.saveAndFlush(doctor);
         return doctor;

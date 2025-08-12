@@ -12,6 +12,7 @@ import nus.iss.backend.repository.IntakeRepository;
 import nus.iss.backend.repository.PatientRepository;
 import nus.iss.backend.service.PatientService;
 import nus.iss.backend.service.ScheduleService;
+import nus.iss.backend.util.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,7 +147,9 @@ public class PatientServiceImpl implements PatientService {
 
         if (patientOpt.isPresent()) {
             Patient patient = patientOpt.get();
-            logger.info("Found patient: {} {}", patient.getFirstName(), patient.getLastName());
+            logger.info("Found patient: {} {}", 
+                LogSanitizer.sanitizeForLog(patient.getFirstName()), 
+                LogSanitizer.sanitizeForLog(patient.getLastName()));
             patient.setDoctor(null);
             patientRepo.saveAndFlush(patient); // ensure immediate DB update
             logger.info("Successfully unassigned doctor for patient {}", patientId);
@@ -170,7 +173,8 @@ public class PatientServiceImpl implements PatientService {
             if (patient.getClinic().getId().equals(doctor.getClinic().getId())) {
                 patient.setDoctor(doctor);
                 patientRepo.save(patient);
-                logger.info("Assigned doctor {} to patient {}", doctorMcr, patientId);
+                logger.info("Assigned doctor {} to patient {}", 
+                    LogSanitizer.sanitizeForLog(doctorMcr), patientId);
             } else {
                 throw new IllegalArgumentException("Doctor and patient are not from the same clinic.");
             }
@@ -202,7 +206,7 @@ public class PatientServiceImpl implements PatientService {
             patient.setDoctor(null);
             patientRepo.save(patient);
         }
-        logger.info("Unassigned all patients from doctor {}", mcrNo);
+        logger.info("Unassigned all patients from doctor {}", LogSanitizer.sanitizeForLog(mcrNo));
 
     }
 

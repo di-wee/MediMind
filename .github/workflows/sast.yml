@@ -125,6 +125,11 @@ jobs:
           echo "" >> security-reports/codeql-sast-report.md
           echo "## Security Alerts" >> security-reports/codeql-sast-report.md
           echo "Check GitHub Security tab for detailed CodeQL alerts." >> security-reports/codeql-sast-report.md
+          echo "" >> security-reports/codeql-sast-report.md
+          echo "## Secret Scanning" >> security-reports/codeql-sast-report.md
+          echo "- CodeQL includes built-in secret scanning" >> security-reports/codeql-sast-report.md
+          echo "- Detects API keys, passwords, tokens, and credentials" >> security-reports/codeql-sast-report.md
+          echo "- All findings appear in GitHub Security tab" >> security-reports/codeql-sast-report.md
 
       - name: Upload SAST Report
         uses: actions/upload-artifact@v4

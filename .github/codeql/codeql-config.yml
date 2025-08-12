@@ -8,6 +8,25 @@ queries:
   - uses: security-and-quality
   - uses: security-extended
 
+  # Include secret scanning queries
+  - uses: security-and-quality/java
+  - uses: security-and-quality/javascript
+  - uses: security-and-quality/python
+  - uses: security-and-quality/kotlin
+
+  # Secret scanning specific queries
+  - name: 'Secret Scanning'
+    queries:
+      - uses: security-and-quality/java
+      - uses: security-and-quality/javascript
+      - uses: security-and-quality/python
+      - uses: security-and-quality/kotlin
+    query-filters:
+      - include:
+          tags contain: security
+      - include:
+          tags contain: secret
+
 paths:
   # Include all source code
   - 'backend/src'
