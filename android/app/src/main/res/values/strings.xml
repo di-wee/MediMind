@@ -35,7 +35,7 @@
     <string name="no_active_medications_yet">No active medications yet</string>
     <string name="add_a_medication_to_see_it_here">Add a medication to see it here.</string>
     <string name="save_changes">Save Changes</string>
-    <string name="email_username">Email(Username)</string>
+    <string name="email_username">Email (Username)</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
     <string name="gender">Gender</string>
