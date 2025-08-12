@@ -1,5 +1,5 @@
 import { CheckIcon, FunnelIcon } from '@heroicons/react/20/solid';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import MedicationLog from './MedicationLog';
 import FilterContainer from './FilterContainer';
 import { getDynamicFilterOptions, applyFilter } from '../utils/filterUtil';
@@ -24,10 +24,10 @@ function MedicationList({ patientId, medicationList }) {
 	//to create a more dynamic filter for easily scalable filtering later
 	// desired format is [ { label: 'Active', field: 'isActive', value: true },]
 	// provides available filter options for the filter component
-	const dynamicFilterOptions = getDynamicFilterOptions(
-		medicationList || [],
-		filteredFields,
-		labelMap
+	const dynamicFilterOptions = useMemo(
+		() =>
+			getDynamicFilterOptions(medicationList || [], filteredFields, labelMap),
+		[medicationList]
 	);
 
 	const handleMedicationClick = (meds) => {
@@ -93,6 +93,7 @@ function MedicationList({ patientId, medicationList }) {
 		setDisplayedList(filtered);
 	}, [selectedFilters, medicationList, dynamicFilterOptions]);
 
+	// closing of filter container on clicking outside of the event.target
 	useEffect(() => {
 		const handleClickOutside = (event) => {
 			//if filter-grid is open and whatever is being clicked is not the filter-grid, to close it

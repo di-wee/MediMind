@@ -4,7 +4,7 @@ import {
 	FunnelIcon,
 	XMarkIcon,
 } from '@heroicons/react/20/solid';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { getDynamicFilterOptions, applyFilter } from '../utils/filterUtil';
 import FilterContainer from './FilterContainer';
 import { API_BASE_URL } from '../utils/config';
@@ -29,17 +29,19 @@ function MedicationLog({ medication }) {
 	const filterRef = useRef();
 
 	const filteredFields = ['taken'];
-	const labelMap = {
-		taken: { true: 'Taken', false: 'Not Taken' },
-	};
+	const labelMap = useMemo(
+		() => ({
+			taken: { true: 'Taken', false: 'Not Taken' },
+		}),
+		[]
+	);
 
 	//to create a more dynamic filter for easily scalable filtering later
 	// desired format is [ { label: 'Active', field: 'isActive', value: true },]
 	// provides available filter options for the filter component
-	const dynamicFilterOptions = getDynamicFilterOptions(
-		logList,
-		filteredFields,
-		labelMap
+	const dynamicFilterOptions = useMemo(
+		() => getDynamicFilterOptions(logList, filteredFields, labelMap),
+		[logList, filteredFields, labelMap]
 	);
 
 	const parseDateTime = (date, time) => {
