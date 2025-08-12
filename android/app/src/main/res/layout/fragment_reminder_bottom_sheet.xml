@@ -26,7 +26,7 @@
                 android:id="@+id/titleText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Medication Reminder"
+                android:text="@string/medication_reminder"
                 android:textStyle="bold"
                 android:textSize="26sp" />
 
@@ -39,7 +39,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Scheduled for:"
+                    android:text="@string/scheduled_for"
                     android:textSize="15sp"/>
 
                 <TextView
@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="end"
-                    android:text="--:--"
+                    android:text="@string/_time_"
                     android:textStyle="bold"
                     android:textSize="18sp"/>
             </LinearLayout>
@@ -73,7 +73,7 @@
         style="@style/Widget.Material3.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Snooze All"
+        android:text="@string/snooze_all"
         android:textSize="16sp"
         app:cornerRadius="28dp"/>
 </LinearLayout>

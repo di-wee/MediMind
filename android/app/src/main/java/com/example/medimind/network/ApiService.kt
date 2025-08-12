@@ -5,7 +5,7 @@ import com.example.medimind.data.ImageOutput
 import com.example.medimind.service.EditMedResponse
 import com.example.medimind.service.MedicationResponse
 import com.example.medimind.service.IntakeHistoryResponse
-import okhttp3.Call
+
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -16,8 +16,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
-import java.time.LocalDate
-import retrofit2.http.*
+
 
 
 // Request body for registration

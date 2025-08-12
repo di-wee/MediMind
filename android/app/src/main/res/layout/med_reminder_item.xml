@@ -29,7 +29,7 @@
             app:useMaterialThemeColors="true"
             app:buttonTint="?attr/colorPrimary"/>
 
-        <!-- 右：文字列（标题 + 说明 + 备注），三者左缘对齐 -->
+
         <LinearLayout
             android:id="@+id/contentColumn"
             android:layout_width="0dp"
@@ -41,7 +41,7 @@
                 android:id="@+id/titleText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Medication： dosage"
+                android:text="@string/medication_dosage"
                 android:textStyle="bold"
                 android:textSize="22sp"
                 android:lineSpacingExtra="4dp"
@@ -52,7 +52,7 @@
                 android:id="@+id/instructionText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Instructions: …"
+                android:text="@string/instructions"
                 android:textSize="20sp"
                 android:layout_marginTop="2dp"/>
 
@@ -60,7 +60,7 @@
                 android:id="@+id/noteText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Notes: …"
+                android:text="@string/notes"
                 android:textSize="20sp"
                 android:layout_marginTop="2dp"/>
         </LinearLayout>

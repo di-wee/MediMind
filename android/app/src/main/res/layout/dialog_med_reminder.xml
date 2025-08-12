@@ -37,7 +37,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Medication Reminder"
+                        android:text="@string/medication_reminder"
                         android:textAppearance="?attr/textAppearanceTitleLarge"
                         android:textStyle="bold"
                         android:layout_gravity="center"
@@ -54,7 +54,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Scheduled for:"
+                            android:text="@string/scheduled_for"
                             android:textAppearance="?attr/textAppearanceBodyMedium"
                             android:textColor="?attr/colorOnSurfaceVariant"
                             android:gravity="center" />

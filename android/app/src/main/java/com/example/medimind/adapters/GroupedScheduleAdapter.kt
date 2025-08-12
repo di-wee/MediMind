@@ -65,7 +65,7 @@ class GroupedScheduleAdapter(private val items: List<ScheduleListItem>) :
         private val quantityText: TextView = itemView.findViewById(R.id.quantityText)
         fun bind(item: ScheduleItem) {
             nameText.text = item.medicationName
-            quantityText.text = "take ${item.quantity} each time."
+            quantityText.text = "Take ${item.quantity} each time."
         }
     }
 }

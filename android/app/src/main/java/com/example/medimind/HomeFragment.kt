@@ -1,14 +1,14 @@
 package com.example.medimind
 
 import android.Manifest
-import android.app.Dialog
+
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Color
+
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
-import android.view.animation.AnimationUtils
+
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,14 +27,13 @@ import com.example.medimind.adapters.ScheduleListItem
 import com.example.medimind.network.ApiClient
 import com.example.medimind.network.ScheduleItem
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import androidx.core.view.updateLayoutParams
+
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
+
 import java.io.File
-import java.io.IOException
-import java.text.SimpleDateFormat
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -100,7 +99,7 @@ class HomeFragment : Fragment() {
                     toolbar.title = "Hello, ${profile.firstName ?: "User"}"
                 } catch (e: Exception) {
                     toolbar.title = "Hello, User"
-                    Toast.makeText(requireContext(), "Failed to load profile: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), "Failed to load profile: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         } else {
@@ -148,7 +147,7 @@ class HomeFragment : Fragment() {
                         Toast.makeText(
                             requireContext(),
                             "Failed to load schedule. Please try again.",
-                            Toast.LENGTH_LONG
+                            Toast.LENGTH_SHORT
                         ).show()
                     }
                 }
