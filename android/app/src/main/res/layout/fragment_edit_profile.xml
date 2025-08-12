@@ -16,7 +16,9 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         app:navigationIcon="@drawable/ic_arrow_back_24"
+        app:titleTextAppearance="@style/ToolbarTitleBold"
         app:navigationIconTint="@android:color/white"
+        android:textSize="20sp"
         app:title="Edit Profile"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
@@ -37,7 +39,7 @@
             android:layout_height="wrap_content"
             android:paddingStart="24dp"
             android:paddingEnd="24dp"
-            android:paddingTop="16dp"
+            android:paddingTop="8dp"
             android:paddingBottom="24dp">
 
             <!-- Profile Icon -->
@@ -61,7 +63,7 @@
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="Save Changes"
+                android:text="@string/save_changes"
                 style="?attr/materialButtonStyle" />
 
             <!-- Email -->
@@ -73,8 +75,7 @@
                 app:boxBackgroundColor="#FFFFFF"
                 app:boxStrokeColor="#BDBDBD"
                 app:boxStrokeWidth="1dp"
-                app:hintTextColor="#BDBDBD"
-                android:hint="Email">
+                android:hint="@string/email_username">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editEmail"
@@ -93,8 +94,7 @@
                 app:boxBackgroundColor="#FFFFFF"
                 app:boxStrokeColor="#BDBDBD"
                 app:boxStrokeWidth="1dp"
-                app:hintTextColor="#BDBDBD"
-                android:hint="First Name">
+                android:hint="@string/first_name">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editFirstName"
@@ -112,8 +112,7 @@
                 app:boxBackgroundColor="#FFFFFF"
                 app:boxStrokeColor="#BDBDBD"
                 app:boxStrokeWidth="1dp"
-                app:hintTextColor="#BDBDBD"
-                android:hint="Last Name">
+                android:hint="@string/last_name">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editLastName"
@@ -131,8 +130,7 @@
                 app:boxBackgroundColor="#FFFFFF"
                 app:boxStrokeColor="#BDBDBD"
                 app:boxStrokeWidth="1dp"
-                app:hintTextColor="#BDBDBD"
-                android:hint="Gender">
+                android:hint="@string/gender">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editGender"
@@ -154,8 +152,7 @@
                 app:boxBackgroundColor="#FFFFFF"
                 app:boxStrokeColor="#BDBDBD"
                 app:boxStrokeWidth="1dp"
-                app:hintTextColor="#BDBDBD"
-                android:hint="New Password (Optional)">
+                android:hint="@string/new_password_optional">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editPassword"
@@ -177,8 +174,7 @@
                 app:boxBackgroundColor="#FFFFFF"
                 app:boxStrokeColor="#BDBDBD"
                 app:boxStrokeWidth="1dp"
-                app:hintTextColor="#BDBDBD"
-                android:hint="Confirm New Password">
+                android:hint="@string/confirm_new_password">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editConfirmPassword"

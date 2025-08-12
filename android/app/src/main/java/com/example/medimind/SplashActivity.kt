@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 class SplashActivity : AppCompatActivity() {
     
     companion object {
-        private const val SPLASH_DELAY = 10000L // 10 seconds (for testing)
+        private const val SPLASH_DELAY = 3000L // LST:change to 3s
     }
     
     override fun onCreate(savedInstanceState: Bundle?) {

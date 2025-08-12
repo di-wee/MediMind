@@ -26,6 +26,10 @@
 
     <!-- New app background -->
     <color name="app_background_light">#F3F3F7</color>
+
+    <color name="med_item_bg_unchecked">#FFFFFFFF</color>
+    <color name="med_item_bg_checked">#90CAF9</color>
+    <color name="med_item_stroke">#90CAF9</color>
     
     <!-- splash screen colors -->
     <color name="splash_background_color">@color/white</color>

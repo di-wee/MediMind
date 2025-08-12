@@ -140,7 +140,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                tools:text="@string/for_fever_pain_may_cause_drowsiness"
                 android:singleLine="true"
                 android:ellipsize="end"/>
         </com.google.android.material.textfield.TextInputLayout>
