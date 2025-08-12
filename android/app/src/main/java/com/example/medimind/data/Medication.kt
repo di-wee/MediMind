@@ -2,8 +2,6 @@ package com.example.medimind.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.work.Data
-import java.sql.Date
 
 @Entity(tableName = "medications")
 data class Medication(

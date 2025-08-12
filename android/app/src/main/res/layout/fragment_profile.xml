@@ -55,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="0dp"
-                android:text="Edit Profile"
+                android:text="@string/edit_profile"
                 style="?attr/materialButtonStyle" />
 
             <!-- Username (read-only, editable-looking) -->
@@ -68,7 +68,7 @@
                 app:boxStrokeColor="#BDBDBD"
                 app:boxStrokeWidth="1dp"
                 app:hintTextColor="#BDBDBD"
-                android:hint="Email/Username">
+                android:hint="@string/email_username">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/txtUsername"
@@ -91,7 +91,7 @@
                 app:boxStrokeColor="#BDBDBD"
                 app:boxStrokeWidth="1dp"
                 app:hintTextColor="#BDBDBD"
-                android:hint="NRIC">
+                android:hint="@string/nric">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/txtNRIC"
@@ -114,7 +114,7 @@
                 app:boxStrokeColor="#BDBDBD"
                 app:boxStrokeWidth="1dp"
                 app:hintTextColor="#BDBDBD"
-                android:hint="Name">
+                android:hint="@string/name">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/txtFullName"
@@ -137,7 +137,7 @@
                 app:boxStrokeColor="#BDBDBD"
                 app:boxStrokeWidth="1dp"
                 app:hintTextColor="#BDBDBD"
-                android:hint="Gender">
+                android:hint="@string/gender">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/txtGender"
@@ -160,7 +160,7 @@
                 app:boxStrokeColor="#BDBDBD"
                 app:boxStrokeWidth="1dp"
                 app:hintTextColor="#BDBDBD"
-                android:hint="DOB">
+                android:hint="@string/dob">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/txtDOB"
@@ -183,7 +183,7 @@
                 app:boxStrokeColor="#BDBDBD"
                 app:boxStrokeWidth="1dp"
                 app:hintTextColor="#BDBDBD"
-                android:hint="Clinic">
+                android:hint="@string/clinic">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/txtClinic"
@@ -202,7 +202,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Logout"
+                android:text="@string/logout"
                 android:textColor="@android:color/white"
                 android:backgroundTint="#ff4444"
                 style="?attr/materialButtonStyle" />

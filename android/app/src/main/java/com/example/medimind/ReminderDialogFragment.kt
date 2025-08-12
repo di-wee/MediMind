@@ -6,10 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.CheckBox
+
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
+
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.example.medimind.network.ApiClient
@@ -18,16 +18,10 @@ import com.example.medimind.network.MedResponse
 import com.example.medimind.network.ScheduleResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+
 import java.time.LocalDate
 import java.util.UUID
-import android.graphics.Typeface
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.SpannableStringBuilder
-import android.text.style.StyleSpan
-import android.text.style.RelativeSizeSpan
-import android.text.style.ForegroundColorSpan
+
 import android.widget.ScrollView
 import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
