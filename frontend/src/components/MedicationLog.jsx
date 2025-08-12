@@ -7,6 +7,7 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import { getDynamicFilterOptions, applyFilter } from '../utils/filterUtil';
 import FilterContainer from './FilterContainer';
+import { API_BASE_URL } from '../utils/config';
 
 function MedicationLog({ medication }) {
 	//state management
@@ -66,7 +67,7 @@ function MedicationLog({ medication }) {
 
 		try {
 			const response = await fetch(
-				import.meta.env.VITE_SERVER + `api/logs/save/doctor-notes`,
+				API_BASE_URL + `api/logs/save/doctor-notes`,
 				{
 					method: 'PUT',
 					headers: {
@@ -175,7 +176,7 @@ function MedicationLog({ medication }) {
 		const fetchMedicationLog = async () => {
 			try {
 				const response = await fetch(
-					import.meta.env.VITE_SERVER + `api/medication/${medication.id}/logs`,
+					API_BASE_URL + `api/medication/${medication.id}/logs`,
 					{
 						method: 'GET',
 						headers: {
