@@ -1,0 +1,27 @@
+name: 'MediMind CodeQL Config'
+
+# CodeQL configuration for MediMind project
+# Supports Java (Backend), JavaScript (Frontend), Python (ML), and Kotlin (Android)
+
+queries:
+  # Include security queries for all supported languages
+  - uses: security-and-quality
+  - uses: security-extended
+
+paths:
+  # Include all source code
+  - 'backend/src'
+  - 'frontend/src'
+  - 'ml'
+  - 'android/app/src'
+
+paths-ignore:
+  # Exclude build artifacts and dependencies
+  - '**/node_modules'
+  - '**/target'
+  - '**/build'
+  - '**/dist'
+  - '**/.gradle'
+  - '**/__pycache__'
+  - '**/*.pyc'
+  - '**/generated'

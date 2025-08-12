@@ -59,6 +59,12 @@ function MedicationLog({ medication }) {
 	};
 
 	const handleSaveClick = async () => {
+		//this is to keep the state most up to date when being edited
+		//
+		//logic: using the prev state of the medication log, and mapping (rebasing it into a new
+		// array) if the log.id matches the id of the row being edited, we will replace
+		// the note key value with editedNote, else we will just show the existing log
+
 		try {
 			const response = await fetch(
 				API_BASE_URL + `api/logs/save/doctor-notes`,
@@ -69,43 +75,36 @@ function MedicationLog({ medication }) {
 					},
 					body: JSON.stringify({
 						intakeHistoryId: editingRowId,
-						doctorNotes: editedNote,
+						editedNote,
 					}),
 				}
 			);
 
 			if (response.ok) {
-				// Update the log list with the new note
-				setLogList((prevLogs) =>
-					prevLogs.map((log) =>
+				setLogList((prev) =>
+					prev.map((log) =>
 						log.id === editingRowId ? { ...log, doctorNotes: editedNote } : log
 					)
 				);
-				setDisplayList((prevLogs) =>
-					prevLogs.map((log) =>
+				setDisplayList((prev) =>
+					prev.map((log) =>
 						log.id === editingRowId ? { ...log, doctorNotes: editedNote } : log
 					)
 				);
+				//re-initialising state
 				setEditingRowId(null);
 				setEditedNote('');
 			}
 		} catch (err) {
-			console.error('Error saving doctor notes: ', err);
+			console.error('Error in saving doctor notes: ', err);
 		}
-	};
 
-	const handleSort = (column) => {
-		setSortConfig((prevConfig) => ({
-			column,
-			order:
-				prevConfig.column === column && prevConfig.order === 'asc'
-					? 'desc'
-					: 'asc',
-		}));
+		alert('Doctor note have been saved!');
 	};
 
 	const handleFunnelClick = (col) => {
 		let newKey;
+		//using switch here for scalability
 		switch (col) {
 			case 'Taken':
 				newKey = filterKey === 'taken' ? null : 'taken';
@@ -113,19 +112,65 @@ function MedicationLog({ medication }) {
 		}
 
 		setFilterKey(newKey);
+
+		//setting the filter options to the appropriate column
 		if (newKey) {
 			const updatedOptions = dynamicFilterOptions.filter(
 				(op) => op.field === newKey
 			);
+			//just want the label eg. 'Taken', 'Not Taken'
 			setUniqueOptions(updatedOptions.map((op) => op.label));
 		}
 	};
-
-	const handleFilterChange = (selectedValues) => {
-		setSelectedFilters(selectedValues);
-		const filteredData = applyFilter(logList, filterKey, selectedValues);
-		setDisplayList(filteredData);
+	//to be passed down to filter component
+	const handleFilterChange = (option) => {
+		setSelectedFilters(
+			(prevFilter) =>
+				prevFilter.includes(option)
+					? prevFilter.filter((o) => o !== option) //to remove from array if already exist
+					: [...prevFilter, option] // to add if not in array
+		);
 	};
+
+	const processDisplayList = () => {
+		let filtered = applyFilter(logList, dynamicFilterOptions, selectedFilters);
+
+		filtered = [...filtered].sort((a, b) => {
+			let aVal, bVal;
+			if (sortConfig.column === 'date') {
+				aVal = parseDateTime(a.loggedDate, a.scheduledTime);
+				bVal = parseDateTime(b.loggedDate, b.scheduledTime);
+			} else if (sortConfig.column === 'time') {
+				const parseTime = (time) => {
+					if (!time) return 0; // prevent undefined error
+					const rawTime = time.replace(' HRs', ''); // 0800
+					const hours = parseInt(rawTime.slice(0, 2), 10); //8
+					const minutes = parseInt(rawTime.slice(2), 10); //0
+					const totalMinutes = hours * 60 + minutes;
+					return totalMinutes;
+				};
+				aVal = parseTime(a.scheduledTime);
+				bVal = parseTime(b.scheduledTime);
+			}
+			return sortConfig.order === 'asc' ? aVal - bVal : bVal - aVal;
+		});
+
+		setDisplayList(filtered);
+	};
+
+	useEffect(() => {
+		processDisplayList();
+	}, [selectedFilters, logList, sortConfig]);
+
+	const handleSort = (column) => {
+		setSortConfig((prev) => ({
+			column: column,
+			order: prev.column === column && prev.order === 'asc' ? 'desc' : 'asc',
+		}));
+	};
+
+	//GET call here to extract medicationLog using medication.id and patientId, useState to store
+	//medicationlog into logList
 
 	useEffect(() => {
 		const fetchMedicationLog = async () => {

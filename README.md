@@ -15,6 +15,7 @@ As Singapore moves towards a super-aged society, chronic illnesses such as diabe
 ## 📱 Features
 
 ### For Patients (Android Mobile App)
+
 - Register/Login with Firebase Authentication
 - Upload medication photo for automatic recognition (CNN + OCR/NER)
 - Receive contextual education about medications
@@ -27,10 +28,11 @@ As Singapore moves towards a super-aged society, chronic illnesses such as diabe
 - Feedback system (stretch goal)
 
 ### For Doctors (Web App)
+
 - Register/Login with Firebase Authentication
 - Manage assigned patients
 - View patient profiles and diagnosis
-- Manage patients’ medication lists
+- Manage patients' medication lists
 - Monitor medication adherence history
 - Flagged alerts for non-compliance (ML-based)
 
@@ -38,54 +40,87 @@ As Singapore moves towards a super-aged society, chronic illnesses such as diabe
 
 ## 🧠 Machine Learning Models
 
-| Model Type         | Purpose                                | Technology              |
-|--------------------|----------------------------------------|--------------------------|
-| CNN Classifier     | Medication image recognition           | PyTorch (MobileNet/ResNet18) |
-| NER + OCR Parser   | Extract dosage/frequency/timing        | EasyOCR/Tesseract + spaCy |
-
+| Model Type       | Purpose                                      | Technology                   |
+| ---------------- | -------------------------------------------- | ---------------------------- |
+| CNN Classifier   | Medication image recognition                 | PyTorch (MobileNet/ResNet18) |
+| NER + OCR Parser | Extract dosage/frequency/timing              | EasyOCR/Tesseract + spaCy    |
+| BERT-based NER   | Named Entity Recognition for medication info | Transformers (HuggingFace)   |
 
 ---
 
 ## 💻 Tech Stack
 
-**Frontend**:  
-- Mobile: Android (Kotlin)  
-- Web: React.js (HTML, CSS, JS)
+**Frontend**:
 
-**Backend**:  
-- Java Spring Boot  
-- Embedded Tomcat (Dockerized)  
+- Mobile: Android (Kotlin) with Jetpack Compose, Navigation Component, Room Database, WorkManager
+- Web: React.js 19 with Vite, Tailwind CSS, React Router DOM, Axios
 
-**Authentication**:  
-- Firebase Authentication
+**Backend**:
 
-**Database**:  
-- PostgreSQL (AWS RDS)
+- Java 21 with Spring Boot 3.5.3
+- Spring Data JPA, Spring Integration, Spring Batch
+- MySQL Database (not PostgreSQL as originally planned)
+- Embedded Tomcat (Dockerized)
 
-**Machine Learning**:  
-- PyTorch, EasyOCR, spaCy
+**Authentication**:
 
-**Other Services**:  
-- AWS S3 (Image storage)  
-- Firebase Cloud Messaging (Push notifications)
+- Firebase Authentication (planned but not yet implemented)
+
+**Database**:
+
+- MySQL (AWS RDS) - using MySQL 8 dialect
+
+**Machine Learning**:
+
+- PyTorch, Transformers (HuggingFace), OpenCV, scikit-learn
+- FastAPI for ML service endpoints
+- Tesseract OCR for text extraction
+
+**Other Services**:
+
+- AWS S3 (Image storage) - planned
+- Firebase Cloud Messaging (Push notifications) - planned
+
+**Development Tools**:
+
+- Gradle (Android)
+- Maven (Backend)
+- Vite (Frontend)
+- Docker & Docker Compose
+- Ansible for deployment automation
 
 ---
 
 ## ☁️ Deployment
 
-- **Backend/API/ML**: AWS EC2  
-- **Database**: AWS RDS (PostgreSQL)  
-- **Image Uploads**: AWS S3  
-- **Push Notifications**: Firebase Cloud Messaging
+- **Backend/API/ML**: AWS EC2
+- **Database**: AWS RDS (MySQL)
+- **Image Uploads**: AWS S3 (planned)
+- **Push Notifications**: Firebase Cloud Messaging (planned)
+- **Load Balancer**: AWS Application Load Balancer
+- **CDN**: CloudFront (planned)
 
+---
+
+## 🏗️ Architecture
+
+The system follows a microservices architecture with:
+
+- **Android App**: Native Kotlin with MVVM pattern, Room database, WorkManager for background tasks
+- **Web Dashboard**: React SPA with component-based architecture
+- **Backend API**: RESTful Spring Boot services with JPA/Hibernate
+- **ML Service**: FastAPI-based inference service with PyTorch models
+- **Database**: MySQL with JPA/Hibernate ORM
 
 ---
 
 ## 👩‍⚕️ Future Enhancements
+
 - Voice-based reminders using CosyVoice API
 - Caregiver alerts for non-response
 - Personalized ML-based schedule adjustment
-
+- Firebase Authentication integration
+- Push notification implementation
 
 ---
 

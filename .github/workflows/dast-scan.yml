@@ -1,0 +1,244 @@
+name: DAST Security Scan
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to scan'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  dast-scan:
+    name: Dynamic Application Security Testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build and start Backend
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          CORS_ALLOWED_ORIGIN: http://localhost:3000
+        run: |
+          cd backend
+          mvn clean compile
+          echo "Starting backend application..."
+
+          # Start backend with explicit port configuration
+          mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dserver.port=8080 -Dserver.address=0.0.0.0" &
+          BACKEND_PID=$!
+          echo "Backend PID: $BACKEND_PID"
+
+          echo "Waiting for backend to start..."
+          sleep 30
+
+          # Verify backend is running with multiple endpoints
+          for i in {1..15}; do
+            echo "Checking backend... attempt $i/15"
+            
+            # Try multiple endpoints
+            if curl -s http://localhost:8080/actuator/health > /dev/null 2>&1; then
+              echo "✅ Backend health endpoint is accessible"
+              break
+            elif curl -s http://localhost:8080/api/doctor/test > /dev/null 2>&1; then
+              echo "✅ Backend API endpoint is accessible"
+              break
+            elif curl -s http://localhost:8080/ > /dev/null 2>&1; then
+              echo "✅ Backend root endpoint is accessible"
+              break
+            fi
+            
+            echo "Backend not ready yet... waiting 10 seconds"
+            sleep 10
+          done
+
+          # Show running processes for debugging
+          echo "Running processes:"
+          ps aux | grep java || true
+          echo "Port 8080 status:"
+          netstat -tlnp | grep 8080 || true
+          echo "Backend logs (last 20 lines):"
+          tail -20 backend.log 2>/dev/null || echo "No backend log file found"
+
+      - name: Build and start Frontend
+        run: |
+          cd frontend
+          echo "Current directory: $(pwd)"
+          echo "Files in frontend directory:"
+          ls -la
+          echo "Checking if package-lock.json exists:"
+          if [ -f "package-lock.json" ]; then
+            echo "✅ package-lock.json exists"
+            ls -la package-lock.json
+          else
+            echo "❌ package-lock.json not found"
+          fi
+          npm ci
+          npm run build
+          echo "Starting frontend application..."
+          npm run preview -- --port 3000 &
+          echo "Waiting for frontend to start..."
+          sleep 15
+
+          # Verify frontend is running
+          for i in {1..10}; do
+            if curl -s http://localhost:3000 > /dev/null 2>&1; then
+              echo "✅ Frontend is running on port 3000"
+              break
+            fi
+            echo "Waiting for frontend to start... attempt $i/10"
+            sleep 5
+          done
+
+          # Show running processes for debugging
+          echo "Running processes:"
+          ps aux | grep node || true
+          echo "Port 3000 status:"
+          netstat -tlnp | grep 3000 || true
+
+      - name: Run DAST Scan
+        env:
+          FRONTEND_URL: http://localhost:3000
+          BACKEND_URL: http://localhost:8080
+          SCAN_TIMEOUT: 600
+        run: |
+          mkdir -p security-reports
+          chmod +x scripts/dast-scan.sh
+          ./scripts/dast-scan.sh
+
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dast-security-reports
+          path: security-reports/
+          retention-days: 30
+
+      - name: Check for Critical Issues
+        run: |
+          if [ -f "security-reports/security_summary.md" ]; then
+            echo "Security scan completed. Review the reports for any issues."
+            cat security-reports/security_summary.md
+          else
+            echo "No security summary found. Scan may have failed."
+            exit 1
+          fi
+
+      - name: Comment PR with Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            let summary = '## 🔒 DAST Security Scan Results\n\n';
+
+            try {
+              const summaryPath = path.join('security-reports', 'security_summary.md');
+              if (fs.existsSync(summaryPath)) {
+                const content = fs.readFileSync(summaryPath, 'utf8');
+                summary += content;
+              } else {
+                summary += '❌ Security scan failed or no summary generated.\n';
+              }
+            } catch (error) {
+              summary += `❌ Error reading security report: ${error.message}\n`;
+            }
+
+            summary += '\n\n---\n*This comment was automatically generated by the DAST security scan.*';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+  security-gates:
+    name: Security Gates
+    runs-on: ubuntu-latest
+    needs: dast-scan
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Download Security Reports
+        uses: actions/download-artifact@v4
+        with:
+          name: dast-security-reports
+          path: security-reports/
+
+      - name: Check Security Compliance
+        run: |
+          echo "🔍 Checking security compliance..."
+
+          # Check if any critical or high severity issues exist
+          critical_issues=0
+          high_issues=0
+
+          for json_file in security-reports/*.json; do
+            if [ -f "$json_file" ]; then
+              # Count critical and high severity issues
+              critical=$(jq -r '.alerts[] | select(.risk == "Critical") | .name' "$json_file" 2>/dev/null | wc -l)
+              high=$(jq -r '.alerts[] | select(.risk == "High") | .name' "$json_file" 2>/dev/null | wc -l)
+              
+              critical_issues=$((critical_issues + critical))
+              high_issues=$((high_issues + high))
+            fi
+          done
+
+          echo "Found $critical_issues critical and $high_issues high severity issues"
+
+          # Fail if critical issues found
+          if [ "$critical_issues" -gt 0 ]; then
+            echo "❌ CRITICAL: $critical_issues critical security issues found. Deployment blocked."
+            echo "Please review and fix these issues before merging."
+            exit 1
+          fi
+
+          # Warn if high issues found but don't block
+          if [ "$high_issues" -gt 0 ]; then
+            echo "⚠️  WARNING: $high_issues high severity issues found."
+            echo "Consider addressing these issues before deployment."
+          else
+            echo "✅ No critical or high severity issues found. Security gates passed."
+          fi

@@ -9,12 +9,14 @@ function Register() {
 	const [validation, setValidation] = useState({
 		MCRNo: false,
 		ConfirmPass: false,
+		EmailDomain: false,
+		DupeMCRNo: false,
 	});
 	const [passVisibility, setPassVisibility] = useState(false);
 	const [confirmPassVisibility, setConfirmPassVisibility] = useState(false);
 	const [clinicList, setClinicList] = useState([]);
 	const mediMindCtx = useContext(MediMindContext);
-	const { completedSignUp, setCompletedSignUp } = mediMindCtx;
+	const { setCompletedSignUp } = mediMindCtx;
 
 	const navigate = useNavigate();
 
@@ -72,14 +74,72 @@ function Register() {
 				}),
 			});
 
+			if (response.status === 400) {
+				// parse the JSON error response to determine the specific error type
+				try {
+					const errorData = await response.json();
+					if (errorData.error === 'duplicate_mcr') {
+						setValidation((prev) => ({ ...prev, DupeMCRNo: true }));
+					} else if (errorData.error === 'invalid_email_domain') {
+						setValidation((prev) => ({ ...prev, EmailDomain: true }));
+					} else {
+						// default to email domain error for unknown 400 errors
+						setValidation((prev) => ({ ...prev, EmailDomain: true }));
+					}
+				} catch {
+					//// if we cannot parse the JSON, default to email domain error
+					setValidation((prev) => ({ ...prev, EmailDomain: true }));
+				}
+				return;
+			}
+
 			if (response.ok) {
 				setCompletedSignUp(true);
 				navigate('/login', { replace: true });
+			} else if (response.status === 404) {
+				// handle clinic not found error
+				try {
+					const errorData = await response.json();
+					if (errorData.error === 'clinic_not_found') {
+						setValidation((prev) => ({ ...prev, EmailDomain: true }));
+					}
+				} catch {
+					// if we cannot parse the JSON, default to email domain error
+					setValidation((prev) => ({ ...prev, EmailDomain: true }));
+				}
+			} else {
+				const errMsg = await response.text();
+				console.error('Registration failed: ' + errMsg);
 			}
 		} catch (err) {
 			console.error('Error with registration: ', err);
 		}
 		console.log('clinic: ', clinicName);
+	};
+
+	const handleSignIn = () => {
+		navigate('/login', { replace: true });
+	};
+
+	const handleEmailChange = () => {
+		// clear email domain validation when user types in email field
+		if (validation.EmailDomain) {
+			setValidation((prev) => ({ ...prev, EmailDomain: false }));
+		}
+	};
+
+	const handleClinicChange = () => {
+		// clear email domain validation when user changes clinic
+		if (validation.EmailDomain) {
+			setValidation((prev) => ({ ...prev, EmailDomain: false }));
+		}
+	};
+
+	const handleMCRChange = () => {
+		// clear duplicate MCR validation when user types in MCR field
+		if (validation.DupeMCRNo) {
+			setValidation((prev) => ({ ...prev, DupeMCRNo: false }));
+		}
 	};
 
 	useEffect(() => {
@@ -112,6 +172,9 @@ function Register() {
 		<>
 			<section>
 				<div className='flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0 mt-20 '>
+					<img
+						src='/medimind_app_logo.png'
+						className='size-20'></img>
 					<h2 className='flex items-center  text-2xl font-semibold text-gray-800'>
 						MediMind
 					</h2>
@@ -169,11 +232,17 @@ function Register() {
 										className='form-input'
 										placeholder='M12345A'
 										ref={mcrRef}
+										onChange={handleMCRChange}
 										required
 									/>
 									{validation['MCRNo'] && (
 										<p className='inline-val-msg'>
 											Please enter a valid MCR Number.
+										</p>
+									)}
+									{validation['DupeMCRNo'] && (
+										<p className='inline-val-msg'>
+											An account has already been created with this MCR Number.
 										</p>
 									)}
 								</div>
@@ -190,8 +259,14 @@ function Register() {
 										className='form-input'
 										placeholder='name@company.com'
 										ref={emailRef}
+										onChange={handleEmailChange}
 										required
 									/>
+									{validation['EmailDomain'] && (
+										<p className='inline-val-msg'>
+											Email is not verified for the specified clinic.
+										</p>
+									)}
 								</div>
 								<div>
 									<label
@@ -204,6 +279,7 @@ function Register() {
 										id='clinic'
 										className='form-input'
 										ref={clinicRef}
+										onChange={handleClinicChange}
 										required>
 										<option
 											value=''
@@ -298,7 +374,7 @@ function Register() {
 									<a
 										href='#'
 										className='link'
-										onClick={(e) => handleSignUp(e)}>
+										onClick={handleSignIn}>
 										Sign in
 									</a>
 								</p>
