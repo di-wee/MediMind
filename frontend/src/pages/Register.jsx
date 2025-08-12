@@ -10,6 +10,7 @@ function Register() {
 		MCRNo: false,
 		ConfirmPass: false,
 		EmailDomain: false,
+		DupeMCRNo: false,
 	});
 	const [passVisibility, setPassVisibility] = useState(false);
 	const [confirmPassVisibility, setConfirmPassVisibility] = useState(false);
@@ -74,14 +75,38 @@ function Register() {
 			});
 
 			if (response.status === 400) {
-				// email domain validation failed or other validation error
-				setValidation((prev) => ({ ...prev, EmailDomain: true }));
+				// parse the JSON error response to determine the specific error type
+				try {
+					const errorData = await response.json();
+					if (errorData.error === 'duplicate_mcr') {
+						setValidation((prev) => ({ ...prev, DupeMCRNo: true }));
+					} else if (errorData.error === 'invalid_email_domain') {
+						setValidation((prev) => ({ ...prev, EmailDomain: true }));
+					} else {
+						// default to email domain error for unknown 400 errors
+						setValidation((prev) => ({ ...prev, EmailDomain: true }));
+					}
+				} catch {
+					//// if we cannot parse the JSON, default to email domain error
+					setValidation((prev) => ({ ...prev, EmailDomain: true }));
+				}
 				return;
 			}
 
 			if (response.ok) {
 				setCompletedSignUp(true);
 				navigate('/login', { replace: true });
+			} else if (response.status === 404) {
+				// handle clinic not found error
+				try {
+					const errorData = await response.json();
+					if (errorData.error === 'clinic_not_found') {
+						setValidation((prev) => ({ ...prev, EmailDomain: true }));
+					}
+				} catch {
+					// if we cannot parse the JSON, default to email domain error
+					setValidation((prev) => ({ ...prev, EmailDomain: true }));
+				}
 			} else {
 				const errMsg = await response.text();
 				console.error('Registration failed: ' + errMsg);
@@ -107,6 +132,13 @@ function Register() {
 		// clear email domain validation when user changes clinic
 		if (validation.EmailDomain) {
 			setValidation((prev) => ({ ...prev, EmailDomain: false }));
+		}
+	};
+
+	const handleMCRChange = () => {
+		// clear duplicate MCR validation when user types in MCR field
+		if (validation.DupeMCRNo) {
+			setValidation((prev) => ({ ...prev, DupeMCRNo: false }));
 		}
 	};
 
@@ -200,11 +232,17 @@ function Register() {
 										className='form-input'
 										placeholder='M12345A'
 										ref={mcrRef}
+										onChange={handleMCRChange}
 										required
 									/>
 									{validation['MCRNo'] && (
 										<p className='inline-val-msg'>
 											Please enter a valid MCR Number.
+										</p>
+									)}
+									{validation['DupeMCRNo'] && (
+										<p className='inline-val-msg'>
+											An account has already been created with this MCR Number.
 										</p>
 									)}
 								</div>
