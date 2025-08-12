@@ -4,7 +4,7 @@ import {
 	FunnelIcon,
 	XMarkIcon,
 } from '@heroicons/react/20/solid';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { getDynamicFilterOptions, applyFilter } from '../utils/filterUtil';
 import FilterContainer from './FilterContainer';
 import { API_BASE_URL } from '../utils/config';
@@ -29,16 +29,19 @@ function MedicationLog({ medication }) {
 	const filterRef = useRef();
 
 	const filteredFields = ['taken'];
-	const labelMap = {
-		taken: { true: 'Taken', false: 'Not Taken' },
-	};
+	const labelMap = useMemo(
+		() => ({
+			taken: { true: 'Taken', false: 'Not Taken' },
+		}),
+		[]
+	);
 
 	//to create a more dynamic filter for easily scalable filtering later
 	// desired format is [ { label: 'Active', field: 'isActive', value: true },]
-	const dynamicFilterOptions = getDynamicFilterOptions(
-		logList,
-		filteredFields,
-		labelMap
+	// provides available filter options for the filter component
+	const dynamicFilterOptions = useMemo(
+		() => getDynamicFilterOptions(logList, filteredFields, labelMap),
+		[logList, filteredFields, labelMap]
 	);
 
 	const parseDateTime = (date, time) => {
@@ -69,43 +72,37 @@ function MedicationLog({ medication }) {
 					},
 					body: JSON.stringify({
 						intakeHistoryId: editingRowId,
-						doctorNotes: editedNote,
+						editedNote,
 					}),
 				}
 			);
 
 			if (response.ok) {
-				// Update the log list with the new note
-				setLogList((prevLogs) =>
-					prevLogs.map((log) =>
+				setLogList((prev) =>
+					prev.map((log) =>
 						log.id === editingRowId ? { ...log, doctorNotes: editedNote } : log
 					)
 				);
-				setDisplayList((prevLogs) =>
-					prevLogs.map((log) =>
+				setDisplayList((prev) =>
+					prev.map((log) =>
 						log.id === editingRowId ? { ...log, doctorNotes: editedNote } : log
 					)
 				);
+				//re-initialising state
 				setEditingRowId(null);
 				setEditedNote('');
 			}
 		} catch (err) {
-			console.error('Error saving doctor notes: ', err);
+			console.error('Error in saving doctor notes: ', err);
 		}
+
+		alert('Doctor note have been saved!');
 	};
 
-	const handleSort = (column) => {
-		setSortConfig((prevConfig) => ({
-			column,
-			order:
-				prevConfig.column === column && prevConfig.order === 'asc'
-					? 'desc'
-					: 'asc',
-		}));
-	};
-
+	//toggles the filter dropdown for a specific column
 	const handleFunnelClick = (col) => {
 		let newKey;
+		//using switch here for scalability
 		switch (col) {
 			case 'Taken':
 				newKey = filterKey === 'taken' ? null : 'taken';
@@ -113,19 +110,68 @@ function MedicationLog({ medication }) {
 		}
 
 		setFilterKey(newKey);
+
+		//setting the filter options to the appropriate column
 		if (newKey) {
 			const updatedOptions = dynamicFilterOptions.filter(
 				(op) => op.field === newKey
 			);
+
+			//to show  available filter choices eg. 'Taken', 'Not Taken'
 			setUniqueOptions(updatedOptions.map((op) => op.label));
 		}
 	};
-
-	const handleFilterChange = (selectedValues) => {
-		setSelectedFilters(selectedValues);
-		const filteredData = applyFilter(logList, filterKey, selectedValues);
-		setDisplayList(filteredData);
+	//to be passed down to filter component
+	// manage which filter options are currently selected
+	const handleFilterChange = (option) => {
+		//if the option is already in the array, remove it, else add it
+		// multiple filters can be active
+		setSelectedFilters(
+			(prevFilter) =>
+				prevFilter.includes(option)
+					? prevFilter.filter((o) => o !== option) //to remove from array if already exist
+					: [...prevFilter, option] // to add if not in array
+		);
 	};
+
+	useEffect(() => {
+		let filtered = applyFilter(logList, dynamicFilterOptions, selectedFilters);
+
+		filtered = [...filtered].sort((a, b) => {
+			let aVal, bVal;
+			if (sortConfig.column === 'date') {
+				aVal = parseDateTime(a.loggedDate, a.scheduledTime);
+				bVal = parseDateTime(b.loggedDate, b.scheduledTime);
+			} else if (sortConfig.column === 'time') {
+				const parseTime = (time) => {
+					if (!time) return 0; // prevent undefined error
+					const rawTime = time.replace(' HRs', ''); // 0800
+					const hours = parseInt(rawTime.slice(0, 2), 10); //8
+					const minutes = parseInt(rawTime.slice(2), 10); //0
+					const totalMinutes = hours * 60 + minutes;
+					return totalMinutes;
+				};
+				aVal = parseTime(a.scheduledTime);
+				bVal = parseTime(b.scheduledTime);
+			}
+			return sortConfig.order === 'asc' ? aVal - bVal : bVal - aVal;
+		});
+
+		setDisplayList(filtered);
+	}, [selectedFilters, logList, sortConfig, dynamicFilterOptions]);
+
+	//handle column sorting
+	//if the column is the same as the previous column, toggle the order
+	//if the column is different, set the column to the new column and set the order to asc
+	const handleSort = (column) => {
+		setSortConfig((prev) => ({
+			column: column,
+			order: prev.column === column && prev.order === 'asc' ? 'desc' : 'asc',
+		}));
+	};
+
+	//GET call here to extract medicationLog using medication.id and patientId, useState to store
+	//medicationlog into logList
 
 	useEffect(() => {
 		const fetchMedicationLog = async () => {
@@ -158,7 +204,7 @@ function MedicationLog({ medication }) {
 							scheduleId: log.scheduleId,
 						};
 					});
-
+					//sorting the log by date
 					const sortedLog = [...transformedLog].sort(
 						(a, b) =>
 							parseDateTime(b.loggedDate, b.scheduledTime) -
@@ -175,6 +221,7 @@ function MedicationLog({ medication }) {
 		fetchMedicationLog();
 	}, [medication]);
 
+	// closing of filter container on clicking outside of the event.target
 	useEffect(() => {
 		const handleClickOutside = (event) => {
 			if (filterRef.current && !filterRef.current.contains(event.target)) {

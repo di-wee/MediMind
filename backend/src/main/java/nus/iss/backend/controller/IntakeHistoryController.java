@@ -8,6 +8,7 @@ import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.service.IntakeHistoryService;
 import nus.iss.backend.service.PatientService;
+import nus.iss.backend.util.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +41,11 @@ public class IntakeHistoryController {
             return new ResponseEntity<>(log, HttpStatus.OK);
 
         } catch (ItemNotFound e) {
-            logger.error("Error in retrieving log to save doctor notes: " + e.getMessage());
+            logger.error("Error in retrieving log to save doctor notes: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         } catch (RuntimeException e) {
-            logger.error("Error in retrieving log to save doctor notes: " + e.getMessage());
+            logger.error("Error in retrieving log to save doctor notes: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -62,11 +63,11 @@ public class IntakeHistoryController {
             return ResponseEntity.ok(history);
 
         } catch (ItemNotFound e) {
-            logger.error("Patient not found: " + e.getMessage());
+            logger.error("Patient not found: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         } catch (Exception e) {
-            logger.error("Error retrieving intake history: " + e.getMessage());
+            logger.error("Error retrieving intake history: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -78,7 +79,7 @@ public class IntakeHistoryController {
             intakeHistoryService.createIntakeHistory(medLogReqMobile);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (RuntimeException e){
-            logger.error(e.getMessage());
+            logger.error("Error: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

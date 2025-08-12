@@ -63,6 +63,7 @@ public interface PatientService {
 
     List<Patient> findUnassignedPatientsByDoctorClinic(String mcr);
 
+    void unassignAllPatientsFromDoctor(String mcrNo);
 
 
 }

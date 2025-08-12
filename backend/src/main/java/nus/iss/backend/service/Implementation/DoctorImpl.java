@@ -3,6 +3,7 @@ package nus.iss.backend.service.Implementation;
 import nus.iss.backend.dao.DoctorUpdateReqWeb;
 import nus.iss.backend.dao.RegistrationRequestWeb;
 import nus.iss.backend.exceptions.InvalidCredentialsException;
+import nus.iss.backend.exceptions.InvalidEmailDomainException;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.exceptions.UserAlreadyExist;
 import nus.iss.backend.model.Clinic;
@@ -10,6 +11,8 @@ import nus.iss.backend.model.Doctor;
 import nus.iss.backend.repository.ClinicRepository;
 import nus.iss.backend.repository.DoctorRepository;
 import nus.iss.backend.service.DoctorService;
+import nus.iss.backend.service.PatientService;
+import nus.iss.backend.util.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,8 @@ public class DoctorImpl implements DoctorService {
 
     @Autowired
     private ClinicRepository clinicRepository;
+    @Autowired
+    private PatientService patientService;
 
     public Doctor login (String mcrNo, String password) {
         Doctor doctor = doctorRepo.findDoctorByMcrNoAndPassword(mcrNo, password);
@@ -33,6 +38,32 @@ public class DoctorImpl implements DoctorService {
             throw new InvalidCredentialsException("Invalid Credentials!");
         }
         return doctor;
+    }
+
+    private void validateEmailDomain(String email, Clinic clinic) {
+        if (clinic.getEmailDomain() == null || clinic.getEmailDomain().trim().isEmpty()) {
+            logger.warn("No email domain configured for clinic: {}", LogSanitizer.sanitizeForLog(clinic.getClinicName()));
+            return; // Skip validation if no domain is configured
+        }
+
+        if (!email.contains("@")) {
+            throw new InvalidEmailDomainException("Invalid email format: missing @ symbol");
+        }
+
+        String emailDomain = email.substring(email.indexOf("@") + 1).toLowerCase();
+        String clinicDomain = clinic.getEmailDomain().toLowerCase();
+
+        if (!emailDomain.equals(clinicDomain)) {
+            logger.error("Email domain mismatch. Expected: {}, Got: {}", 
+                LogSanitizer.sanitizeForLog(clinicDomain), LogSanitizer.sanitizeForLog(emailDomain));
+            throw new InvalidEmailDomainException(
+                    String.format("Email domain '%s' does not match clinic domain '%s'. " +
+                                    "Please use an email address from your clinic's domain.",
+                            emailDomain, clinicDomain)
+            );
+        }
+
+        logger.info("Email domain validation passed for clinic: {}", LogSanitizer.sanitizeForLog(clinic.getClinicName()));
     }
 
     public Doctor findDoctorByMcrNo (String mcrNo) {
@@ -51,9 +82,12 @@ public class DoctorImpl implements DoctorService {
         Clinic clinic = clinicRepository.findClinicByClinicName(request.getClinicName());
 
         if (clinic == null) {
-            logger.error("Clinic name: " + request.getClinicName());
+            logger.error("Clinic name: {}", LogSanitizer.sanitizeForLog(request.getClinicName()));
             throw new ItemNotFound("Clinic not found!");
         }
+        // validate email domain
+        validateEmailDomain(request.getEmail(), clinic);
+
         Doctor newDoctor = new Doctor();
         newDoctor.setMcrNo(request.getMcrNo());
         newDoctor.setFirstName(request.getFirstName());
@@ -72,22 +106,51 @@ public class DoctorImpl implements DoctorService {
         if (doctor == null) {
             throw new ItemNotFound("Doctor not found!");
         }
+        Clinic targetClinic = doctor.getClinic(); // default is current clinic
+        boolean clinicChanged = false;
+
+        // update clinic logic
         if(request.getClinic() != null){
-            Clinic clinic = request.getClinic();
-            if (clinic == null) {
-                logger.error("Clinic uuid: " + request.getClinic());
-                throw new ItemNotFound("Clinic not found!");
+            Clinic newClinic = request.getClinic();
+            // check if the clinic is different from the current one
+            if (!newClinic.getId().equals(doctor.getClinic().getId())) {
+                logger.info("Doctor {} changing clinic from {} to {}",
+                        LogSanitizer.sanitizeForLog(request.getMcrNo()), 
+                        LogSanitizer.sanitizeForLog(doctor.getClinic().getClinicName()), 
+                        LogSanitizer.sanitizeForLog(newClinic.getClinicName()));
+
+                patientService.unassignAllPatientsFromDoctor(doctor.getMcrNo());
+                doctor.setClinic(newClinic);
+                targetClinic = newClinic; // update target clinic to new clinic
+                clinicChanged = true; // mark that the clinic has changed
             }
-            doctor.setClinic(clinic);
+
         }
+
+        //update password logic
         if (request.getPassword() != null) {
             doctor.setPassword(request.getPassword());
         }
+
+        //update email logic
         if (request.getEmail() != null) {
-            doctor.setEmail(request.getEmail());
+            String newEmail = request.getEmail();
+
+            validateEmailDomain(newEmail, targetClinic);
+            doctor.setEmail(newEmail);
+            logger.info("Doctor {} email updated to: {}", 
+                LogSanitizer.sanitizeForLog(request.getMcrNo()), LogSanitizer.sanitizeForLog(newEmail));
+
+        } else if (clinicChanged) {
+            validateEmailDomain(doctor.getEmail(), targetClinic);
+            logger.info("Doctor {} clinic changed, current email validated against new clinzwic: {}",
+                    request.getMcrNo(), LogSanitizer.sanitizeForLog(targetClinic.getClinicName()));
         }
         doctorRepo.saveAndFlush(doctor);
         return doctor;
     }
+
+
+
 
 }

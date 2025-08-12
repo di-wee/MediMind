@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession;
 import nus.iss.backend.dao.LoginReqWeb;
 import nus.iss.backend.dao.RegistrationRequestWeb;
 import nus.iss.backend.exceptions.InvalidCredentialsException;
+import nus.iss.backend.exceptions.InvalidEmailDomainException;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.exceptions.UserAlreadyExist;
 import nus.iss.backend.model.Clinic;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.integration.http.dsl.Http;
 import org.springframework.web.bind.annotation.*;
+import nus.iss.backend.util.LogSanitizer;
 
 import java.util.List;
 
@@ -47,7 +49,7 @@ public class WebAuthenticationController {
 
 
         }catch (InvalidCredentialsException e) {
-            logger.error("Error authenticating doctor (Status Code: " + HttpStatus.NOT_FOUND + "): " + e);
+            logger.error("Error authenticating doctor (Status Code: {}): {}", HttpStatus.NOT_FOUND, LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
@@ -65,7 +67,7 @@ public class WebAuthenticationController {
             return new ResponseEntity<>(doc, HttpStatus.OK);
 
         } catch (RuntimeException e) {
-            logger.error("Error retrieving session info: " + e.getMessage());
+            logger.error("Error retrieving session info: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -83,23 +85,28 @@ public class WebAuthenticationController {
             session.invalidate();
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (RuntimeException e) {
-            logger.error("Logout error: " + e.getMessage());
+            logger.error("Logout error: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
 }
 
 @PostMapping("/register")
-public ResponseEntity<Doctor> register(@RequestBody RegistrationRequestWeb request) {
+public ResponseEntity<?> register(@RequestBody RegistrationRequestWeb request) {
         try {
             Doctor saveDoctor = doctorService.registerDoctor(request);
             return new ResponseEntity<>(saveDoctor, HttpStatus.OK);
         } catch (UserAlreadyExist e) {
-            logger.error("Error when registering Doctor: " + e.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            logger.error("Error when registering Doctor: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"duplicate_mcr\", \"message\": \"An account with this MCR number already exists\"}");
         } catch (ItemNotFound e) {
-            logger.error("Error when registering Doctor: " + e.getMessage());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            logger.error("Error when registering Doctor: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("{\"error\": \"clinic_not_found\", \"message\": \"Selected clinic not found\"}");
+        } catch (InvalidEmailDomainException e) {
+            logger.error("Email domain validation failed: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("{\"error\": \"invalid_email_domain\", \"message\": \"Email domain is not verified for the specified clinic\"}");
         }
 
 }
@@ -114,7 +121,7 @@ public ResponseEntity<Doctor> register(@RequestBody RegistrationRequestWeb reque
             return new ResponseEntity<>(clinics, HttpStatus.OK);
 
         } catch (RuntimeException e){
-            logger.error("Error retrieving all clinics: " + e.getMessage());
+            logger.error("Error retrieving all clinics: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -1,21 +1,57 @@
 import React, { useContext, useEffect, useState } from 'react';
-import MediMindContext from '../context/MediMindContext';
+
+import MediMindContext from '../context/MediMindContext.jsx';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 import { API_BASE_URL } from '../utils/config';
+import ConfirmationModal from './ConfirmationModal.jsx';
 
 function DoctorDetails({ mcrNo }) {
-	const [doctorInfo, setDoctorInfo] = useState({});
-	const [clinicOptions, setClinicOptions] = useState([]);
-	const [isEditing, setIsEditing] = useState(false);
-	const [editedInfo, setEditedInfo] = useState({});
 	const mediMindCtx = useContext(MediMindContext);
-	const { doctorDetails } = mediMindCtx;
+	const { doctorDetails, setDoctorDetails } = mediMindCtx;
 
-	const handleEdit = () => {
-		setIsEditing(true);
-		setEditedInfo({ ...doctorInfo });
+	const [doctorInfo, setDoctorInfo] = useState(doctorDetails);
+
+	const [isEditing, setIsEditing] = useState(false);
+	const [isChangingPassword, setIsChangingPassword] = useState(false);
+	const [password, setPassword] = useState(doctorInfo.password);
+	const [currentPassVisibility, setCurrentPassVisibility] = useState(false);
+	const [confirmPassVisibility, setConfirmPassVisibility] = useState(false);
+
+	const [validation, setValidation] = useState({
+		newPassValidation: false,
+		currentPassValidation: false,
+		emailDomain: false,
+	});
+
+	const [newPassword, setNewPassword] = useState('');
+	const [clinicOptions, setClinicOptions] = useState([]);
+	const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+	const [originalClinic, setOriginalClinic] = useState(null);
+
+	const handleEditToggle = async () => {
+		//call api to save
+		if (isEditing) {
+			// check if clinic has changed
+			const clinicChanged =
+				originalClinic &&
+				doctorInfo.clinic &&
+				originalClinic.id !== doctorInfo.clinic.id;
+
+			if (clinicChanged) {
+				setShowConfirmationModal(true);
+				return;
+			}
+
+			await performUpdate();
+		} else {
+			setIsEditing(true);
+			setOriginalClinic(doctorInfo.clinic);
+			// clear validation errors when starting to edit
+			setValidation((prev) => ({ ...prev, emailDomain: false }));
+		}
 	};
 
-	const handleSave = async () => {
+	const performUpdate = async () => {
 		try {
 			const response = await fetch(API_BASE_URL + 'api/doctor/update', {
 				method: 'PUT',
@@ -24,56 +60,113 @@ function DoctorDetails({ mcrNo }) {
 				},
 				body: JSON.stringify({
 					mcrNo: doctorInfo.mcrNo,
-					firstName: editedInfo.firstName,
-					lastName: editedInfo.lastName,
-					email: editedInfo.email,
-					clinicId: editedInfo.clinicId,
+					email: doctorInfo.email,
+					clinic: doctorInfo.clinic,
 				}),
 			});
 
-			if (response.ok) {
-				setDoctorInfo(editedInfo);
-				setIsEditing(false);
-				// Update the context
-				mediMindCtx.setDoctorDetails(editedInfo);
+			if (response.status === 400) {
+				// email domain validation failed
+				setValidation((prev) => ({ ...prev, emailDomain: true }));
+				return; // dont exit editing mode, let user fix the email
 			}
+
+			if (!response.ok) {
+				const errMsg = await response.text();
+				console.error('Update error: ', errMsg);
+				setIsEditing(false); // exit editing mode for other errors
+				return;
+			}
+
+			const updateDoctor = await response.json();
+			setDoctorInfo(updateDoctor);
+			setDoctorDetails(updateDoctor);
+			// clear email domain validation error on successful update
+			setValidation((prev) => ({ ...prev, emailDomain: false }));
+			alert('Doctor info updated successfully!');
+			setIsEditing(false); // exit editing mode on success
 		} catch (error) {
-			console.error('Error updating doctor:', error);
+			console.error('Update error:', error);
+			setIsEditing(false); // exit editing mode for unexpected errors
 		}
 	};
 
-	const handleCancel = () => {
-		setIsEditing(false);
-		setEditedInfo({ ...doctorInfo });
+	const handleConfirmClinicChange = () => {
+		setShowConfirmationModal(false);
+		performUpdate();
 	};
 
-	const handleInputChange = (field, value) => {
-		setEditedInfo((prev) => ({
-			...prev,
-			[field]: value,
-		}));
+	const handlePasswordToggle = async () => {
+		if (isChangingPassword) {
+			//if either field is empty don't save just revert
+			if (password.length === 0 || newPassword.length === 0) {
+				setNewPassword('');
+				setPassword(doctorInfo.password);
+				setIsChangingPassword(false);
+				setValidation({
+					currentPassValidation: false,
+					newPassValidation: false,
+				});
+				setConfirmPassVisibility(false);
+				setCurrentPassVisibility(false);
+				return;
+			}
+			const currentPassValidation = password !== doctorInfo.password;
+			const newPassValidation = newPassword.length < 6;
+
+			setValidation({
+				currentPassValidation,
+				newPassValidation,
+			});
+
+			if (!currentPassValidation && !newPassValidation) {
+				//save to db
+				try {
+					const response = await fetch(API_BASE_URL + 'api/doctor/update', {
+						method: 'PUT',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							mcrNo: doctorInfo.mcrNo,
+							password: newPassword,
+						}),
+					});
+					if (!response.ok) {
+						const errMsg = await response.text();
+						alert('Failed to update doctor info: ' + errMsg);
+						return;
+					}
+					const updateDoctor = await response.json();
+					setPassword(newPassword);
+					setDoctorInfo(updateDoctor);
+					setDoctorDetails(updateDoctor);
+					alert('Doctor info updated successfully!');
+				} catch (error) {
+					console.error('Update error:', error);
+					alert('Server error');
+				} finally {
+					// reinitialise validation
+					setValidation({
+						currentPassValidation: false,
+						newPassValidation: false,
+					});
+					setIsChangingPassword(false);
+					setNewPassword('');
+					setConfirmPassVisibility(false);
+					setCurrentPassVisibility(false);
+				}
+			}
+			console.log(password);
+			console.log(doctorInfo.password);
+		} else {
+			setIsChangingPassword(true);
+			setPassword('');
+			console.log('currentpassword: ', doctorInfo.password);
+		}
 	};
 
 	useEffect(() => {
-		const fetchDoctorDetails = async () => {
-			try {
-				const response = await fetch(API_BASE_URL + 'api/doctor/update', {
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				});
-
-				if (response.ok) {
-					const doctor = await response.json();
-					setDoctorInfo(doctor);
-					setEditedInfo(doctor);
-				}
-			} catch (error) {
-				console.error('Error fetching doctor details:', error);
-			}
-		};
-
 		const fetchAllClinic = async () => {
 			try {
 				const response = await fetch(API_BASE_URL + 'api/web/all-clinics', {
@@ -92,15 +185,12 @@ function DoctorDetails({ mcrNo }) {
 				console.error('Error loading clinics:', error);
 			}
 		};
-		fetchDoctorDetails();
 		fetchAllClinic();
 	}, [mcrNo]);
 
 	return (
 		<>
 			<main className='w-full flex-1 bg-gray-50'>
-				{/* shadow-xl bg-white py-8 m-5 rounded-xl this is giving the shadow box effect */}
-
 				<div className='border-1 border-gray-200 shadow-xl bg-white pt-8 m-5 rounded-xl'>
 					<h2 className='font-bold text-lg px-15 '>Account Details</h2>
 					<div className='profile-details'>
@@ -148,6 +238,11 @@ function DoctorDetails({ mcrNo }) {
 								}
 								disabled={!isEditing}
 							/>
+							{validation.emailDomain && (
+								<p className='inline-val-msg'>
+									Email is not verified for the specified clinic.
+								</p>
+							)}
 						</div>
 						<div className='w-xl'>
 							<label className='form-label'>Practicing Clinic</label>
@@ -280,6 +375,15 @@ function DoctorDetails({ mcrNo }) {
 					</button>
 				</div>
 			</main>
+
+			<ConfirmationModal
+				isOpen={showConfirmationModal} //controlling visibility of modal; if isOpen is false then it will return null
+				onClose={() => setShowConfirmationModal(false)}
+				onConfirm={handleConfirmClinicChange}
+				title='Are you sure you want to change your clinic? Changing of clinic will unassign all patients.'
+				confirmText='Yes, change clinic'
+				cancelText='No, cancel'
+			/>
 		</>
 	);
 }

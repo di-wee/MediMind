@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  # OWASP ZAP for DAST scanning
+  zap:
+    image: owasp/zap2docker-stable:latest
+    container_name: medimind-zap-scanner
+    environment:
+      - ZAP_WEBSWING_OPTS=-hsqldb.system.exitonshutdown -port 10000
+    ports:
+      - "10000:10000"  # ZAP Web UI
+      - "8080:8080"    # ZAP API
+    volumes:
+      - ./security-reports:/zap/wrk
+      - ./zap-config:/zap/config
+    command: >
+      zap.sh -daemon -port 8080 -config api.disablekey=true
+      -config api.addrs.addr.name=.*
+      -config api.addrs.addr.regex=true
+    networks:
+      - medimind-network
+
+  # ZAP Baseline Scanner
+  zap-baseline:
+    image: owasp/zap2docker-stable:latest
+    container_name: medimind-zap-baseline
+    volumes:
+      - ./security-reports:/zap/wrk
+    environment:
+      - TARGET_URL=${TARGET_URL:-http://host.docker.internal:3000}
+    command: >
+      zap-baseline.py -t $TARGET_URL
+      -J /zap/wrk/baseline_report.json
+      -r /zap/wrk/baseline_report.html
+      -m 10
+    networks:
+      - medimind-network
+    depends_on:
+      - zap
+
+  # ZAP Full Scan
+  zap-full-scan:
+    image: owasp/zap2docker-stable:latest
+    container_name: medimind-zap-full-scan
+    volumes:
+      - ./security-reports:/zap/wrk
+    environment:
+      - TARGET_URL=${TARGET_URL:-http://host.docker.internal:3000}
+      - SCAN_TIMEOUT=${SCAN_TIMEOUT:-300}
+    command: >
+      zap-full-scan.py -t $TARGET_URL
+      -J /zap/wrk/full_scan_report.json
+      -r /zap/wrk/full_scan_report.html
+      -m $SCAN_TIMEOUT
+    networks:
+      - medimind-network
+    depends_on:
+      - zap
+
+  # ZAP API Scan (for backend APIs)
+  zap-api-scan:
+    image: owasp/zap2docker-stable:latest
+    container_name: medimind-zap-api-scan
+    volumes:
+      - ./security-reports:/zap/wrk
+    environment:
+      - API_URL=${API_URL:-http://host.docker.internal:8080/v3/api-docs}
+    command: >
+      zap-api-scan.py -t $API_URL
+      -f openapi
+      -J /zap/wrk/api_scan_report.json
+      -r /zap/wrk/api_scan_report.html
+    networks:
+      - medimind-network
+    depends_on:
+      - zap
+
+  # Security Report Generator
+  report-generator:
+    image: alpine:latest
+    container_name: medimind-report-generator
+    volumes:
+      - ./security-reports:/reports
+      - ./scripts:/scripts
+    environment:
+      - FRONTEND_URL=${FRONTEND_URL:-http://host.docker.internal:3000}
+      - BACKEND_URL=${BACKEND_URL:-http://host.docker.internal:8080}
+    command: >
+      sh -c "
+        apk add --no-cache jq curl &&
+        chmod +x /scripts/generate-security-report.sh &&
+        /scripts/generate-security-report.sh
+      "
+    networks:
+      - medimind-network
+    depends_on:
+      - zap-baseline
+      - zap-full-scan
+
+networks:
+  medimind-network:
+    driver: bridge

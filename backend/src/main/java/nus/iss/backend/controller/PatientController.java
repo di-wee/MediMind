@@ -9,6 +9,7 @@ import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
 import nus.iss.backend.repository.ClinicRepository;
 import nus.iss.backend.service.PatientService;
+import nus.iss.backend.util.LogSanitizer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public class PatientController {
             return pt.map(patient -> new ResponseEntity<>(patient, HttpStatus.OK))
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
         } catch (RuntimeException e) {
-            logger.error("Error retrieving patient details by id: " + e.getMessage());
+            logger.error("Error retrieving patient details by id: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -62,10 +63,10 @@ public class PatientController {
             return new ResponseEntity<>(response, HttpStatus.OK);
 
         } catch (ItemNotFound e) {
-            logger.error("Error retrieving patient medication: " + e.getMessage());
+            logger.error("Error retrieving patient medication: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {
-            logger.error("Error retrieving patient medication: " + e.getMessage());
+            logger.error("Error retrieving patient medication: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -110,7 +111,7 @@ public class PatientController {
             return new ResponseEntity<>(savedPatient, HttpStatus.CREATED);
 
         } catch (RuntimeException e) {
-            logger.error("Error registering patient: " + e.getMessage(), e);
+            logger.error("Error registering patient: {}", LogSanitizer.sanitizeForLog(e.getMessage()), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -129,7 +130,7 @@ public class PatientController {
             return patientOpt.map(patient -> new ResponseEntity<>(patient, HttpStatus.OK))
                              .orElseGet(() -> new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
         } catch (RuntimeException e) {
-            logger.error("Error during patient login: " + e.getMessage(), e);
+            logger.error("Error during patient login: {}", LogSanitizer.sanitizeForLog(e.getMessage()), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -169,7 +170,7 @@ public class PatientController {
             return new ResponseEntity<>(updatedPatient, HttpStatus.OK);
 
         } catch (RuntimeException e) {
-            logger.error("Error updating patient: " + e.getMessage(), e);
+            logger.error("Error updating patient: {}", LogSanitizer.sanitizeForLog(e.getMessage()), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -179,7 +180,7 @@ public class PatientController {
             List<Patient> patients = patientService.findPatientsByDoctorMcr(mcr);
             return new ResponseEntity<>(patients, HttpStatus.OK);
         } catch (RuntimeException e) {
-            logger.error("Error retrieving patients for doctor MCR {}: {}", mcr, e.getMessage());
+            logger.error("Error retrieving patients for doctor MCR {}: {}", LogSanitizer.sanitizeForLog(mcr), LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -195,7 +196,7 @@ public class PatientController {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (RuntimeException e) {
-            logger.error("Error unassigning doctor from patient {}: {}", id, e.getMessage());
+            logger.error("Error unassigning doctor from patient {}: {}", id, LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -207,10 +208,10 @@ public class PatientController {
             List<Medication> medicationList = patientService.getPatientMedications(patientId);
             return new ResponseEntity<>(medicationList, HttpStatus.OK);
         } catch (ItemNotFound e) {
-            logger.error("Patient not found: " + e.getMessage());
+            logger.error("Patient not found: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (RuntimeException e) {
-            logger.error("Error retrieving patient medication: "+ e.getMessage());
+            logger.error("Error retrieving patient medication: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -225,10 +226,10 @@ public class PatientController {
             logger.info("Assigned doctor {} to patient {}", doctorMcr, patientId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (IllegalArgumentException e) {
-            logger.warn("Assignment failed: " + e.getMessage());
+            logger.warn("Assignment failed: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {
-            logger.error("Error assigning doctor to patient: " + e.getMessage());
+            logger.error("Error assigning doctor to patient: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -239,10 +240,10 @@ public class PatientController {
             List<Patient> unassignedPatients = patientService.findUnassignedPatientsByDoctorClinic(mcr);
             return new ResponseEntity<>(unassignedPatients, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            logger.warn("Invalid request: {}", e.getMessage());
+            logger.warn("Invalid request: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (RuntimeException e) {
-            logger.error("Unexpected error while fetching unassigned patients: {}", e.getMessage());
+            logger.error("Unexpected error while fetching unassigned patients: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
