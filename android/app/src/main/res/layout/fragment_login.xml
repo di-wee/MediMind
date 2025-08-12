@@ -38,7 +38,7 @@
                 android:id="@+id/usernameInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Email"
+                android:hint="@string/email"
                 android:inputType="textEmailAddress"
                 android:imeOptions="actionNext" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -57,7 +57,7 @@
                 android:id="@+id/passwordInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Password"
+                android:hint="@string/password"
                 android:inputType="textPassword"
                 android:imeOptions="actionDone" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -67,7 +67,7 @@
             android:id="@+id/loginButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Sign in"
+            android:text="@string/sign_in"
             android:textColor="@android:color/white"
             app:cornerRadius="28dp"
             app:backgroundTint="#1976D2"
