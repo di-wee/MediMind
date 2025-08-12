@@ -34,13 +34,13 @@ function ConfirmationModal({
 						<div className='flex flex-row justify-between mt-5'>
 							<button
 								type='button'
-								className='text-white bg-green-700 hover:bg-green-950 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center'
+								className='text-white bg-green-700 hover:bg-green-950 focus:ring-4 focus:outline-none focus:ring-green-300 focus:ring-green-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center'
 								onClick={onConfirm}>
 								{confirmText}
 							</button>
 							<button
 								type='button'
-								className='py-2.5 px-5 ms-3 text-sm font-medium text-white focus:outline-none bg-red-600 rounded-lg border border-gray-200 hover:bg-red-950 focus:z-10 focus:ring-4 focus:ring-gray-100 '
+								className='py-2.5 px-5 ms-3 text-sm font-medium text-white focus:outline-none bg-red-600 rounded-lg border border-gray-200 hover:bg-red-950 focus:z-10 focus:ring-4 focus:ring-red-100 '
 								onClick={onClose}>
 								{cancelText}
 							</button>

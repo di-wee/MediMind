@@ -31,7 +31,7 @@ function DoctorDetails({ mcrNo }) {
 	const handleEditToggle = async () => {
 		//call api to save
 		if (isEditing) {
-			// Check if clinic has changed
+			// check if clinic has changed
 			const clinicChanged =
 				originalClinic &&
 				doctorInfo.clinic &&
@@ -66,15 +66,15 @@ function DoctorDetails({ mcrNo }) {
 			});
 
 			if (response.status === 400) {
-				// Email domain validation failed
+				// email domain validation failed
 				setValidation((prev) => ({ ...prev, emailDomain: true }));
-				return; // Don't exit editing mode, let user fix the email
+				return; // dont exit editing mode, let user fix the email
 			}
 
 			if (!response.ok) {
 				const errMsg = await response.text();
 				console.error('Update error: ', errMsg);
-				setIsEditing(false); // Exit editing mode for other errors
+				setIsEditing(false); // exit editing mode for other errors
 				return;
 			}
 
@@ -84,10 +84,10 @@ function DoctorDetails({ mcrNo }) {
 			// clear email domain validation error on successful update
 			setValidation((prev) => ({ ...prev, emailDomain: false }));
 			alert('Doctor info updated successfully!');
-			setIsEditing(false); // Exit editing mode on success
+			setIsEditing(false); // exit editing mode on success
 		} catch (error) {
 			console.error('Update error:', error);
-			setIsEditing(false); // Exit editing mode for unexpected errors
+			setIsEditing(false); // exit editing mode for unexpected errors
 		}
 	};
 
@@ -191,8 +191,6 @@ function DoctorDetails({ mcrNo }) {
 	return (
 		<>
 			<main className='w-full flex-1 bg-gray-50'>
-				{/* shadow-xl bg-white py-8 m-5 rounded-xl this is giving the shadow box effect */}
-
 				<div className='border-1 border-gray-200 shadow-xl bg-white pt-8 m-5 rounded-xl'>
 					<h2 className='font-bold text-lg px-15 '>Account Details</h2>
 					<div className='profile-details'>
@@ -379,7 +377,7 @@ function DoctorDetails({ mcrNo }) {
 			</main>
 
 			<ConfirmationModal
-				isOpen={showConfirmationModal}
+				isOpen={showConfirmationModal} //controlling visibility of modal; if isOpen is false then it will return null
 				onClose={() => setShowConfirmationModal(false)}
 				onConfirm={handleConfirmClinicChange}
 				title='Are you sure you want to change your clinic? Changing of clinic will unassign all patients.'
