@@ -1,35 +1,24 @@
 package com.example.medimind
 
-import android.content.Context
-import android.graphics.Typeface
+
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.medimind.adapters.MedReminderDialogAdapter
+
 import com.example.medimind.network.ApiClient
-import com.example.medimind.network.IntakeMedRequest
+
 import com.example.medimind.network.MedicationIdListRequest
 import com.example.medimind.network.ScheduleListRequest
-import com.google.android.material.card.MaterialCardView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.gson.Gson
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.ZoneId
-import java.util.UUID
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
-import android.view.LayoutInflater
-import android.widget.TextView
+
 
 class ReminderActivity : AppCompatActivity() {
 

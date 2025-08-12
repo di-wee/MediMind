@@ -7,14 +7,14 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
 import android.media.RingtoneManager
-import android.os.Build
+
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.medimind.R
 import com.example.medimind.ReminderActivity
-import com.example.medimind.ReminderReceiver
+
 
 class ReminderWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
     override fun doWork(): Result {
