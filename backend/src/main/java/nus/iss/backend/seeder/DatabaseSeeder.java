@@ -135,7 +135,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .filter(d -> d.getClinic().equals(clinic))
                     .toList();
 
-            for (int i = 0; i < 10; i++) {
+            // Generate 100 patients per clinic
+            for (int i = 0; i < 100; i++) {
                 Patient patient = new Patient();
                 String firstName = faker.name().firstName();
                 String lastName = faker.name().lastName();
@@ -160,8 +161,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                 patient.setNric("S" + faker.number().numberBetween(1000000, 9999999) + faker.letterify("?").toUpperCase());
                 patient.setGender(random.nextBoolean() ? "Male" : "Female");
 
-
-
                 // convert to LocalDate to remove time
                 LocalDate dob = faker.date().birthday(60, 90)// age 60-90
                         .toInstant()
@@ -170,10 +169,10 @@ public class DatabaseSeeder implements CommandLineRunner {
                 patient.setDob(dob);
                 
                 patient.setClinic(clinic);
-                patient.setDoctor(clinicDoctors.get(random.nextInt(clinicDoctors.size())));
-
-                // 70% chance to assign a doctor, 30% chance unassigned
-                if (random.nextInt(100) < 70 && !clinicDoctors.isEmpty()) {
+                
+                // First 50 patients: Assigned to doctors (if doctors exist)
+                // Last 50 patients: Unassigned
+                if (i < 50 && !clinicDoctors.isEmpty()) {
                     patient.setDoctor(clinicDoctors.get(random.nextInt(clinicDoctors.size())));
                 } else {
                     patient.setDoctor(null);
@@ -181,8 +180,10 @@ public class DatabaseSeeder implements CommandLineRunner {
 
                 entityManager.persist(patient);
                 patients.add(patient);
-            
             }
+            
+            System.out.println("Added 100 patients to clinic: " + clinic.getClinicName() + 
+                              " (50 assigned, 50 unassigned)");
         }
         return patients;
     }
