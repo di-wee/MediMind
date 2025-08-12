@@ -91,19 +91,22 @@ public class WebAuthenticationController {
 }
 
 @PostMapping("/register")
-public ResponseEntity<Doctor> register(@RequestBody RegistrationRequestWeb request) {
+public ResponseEntity<?> register(@RequestBody RegistrationRequestWeb request) {
         try {
             Doctor saveDoctor = doctorService.registerDoctor(request);
             return new ResponseEntity<>(saveDoctor, HttpStatus.OK);
         } catch (UserAlreadyExist e) {
             logger.error("Error when registering Doctor: " + e.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("{\"error\": \"duplicate_mcr\", \"message\": \"An account with this MCR number already exists\"}");
         } catch (ItemNotFound e) {
             logger.error("Error when registering Doctor: " + e.getMessage());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("{\"error\": \"clinic_not_found\", \"message\": \"Selected clinic not found\"}");
         } catch (InvalidEmailDomainException e) {
             logger.error("Email domain validation failed: " + e.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("{\"error\": \"invalid_email_domain\", \"message\": \"Email domain is not verified for the specified clinic\"}");
         }
 
 }
