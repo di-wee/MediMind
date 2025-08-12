@@ -6,7 +6,23 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object MLApiClient {
-    private const val BASE_URL = "http://54.255.65.62:8000" // Your EC2 ML endpoint
+    // FastAPI endpoints for ML service
+    private const val EMULATOR_URL = "http://10.0.2.2:8000"
+    private const val DEVICE_URL = "http://192.168.1.3:8000" // Update this to your local IP address
+    
+    // For production/EC2 (commented out)
+    // private const val PRODUCTION_URL = "http://54.255.65.62:8000"
+
+    private fun isEmulator(): Boolean {
+        val fingerprint = android.os.Build.FINGERPRINT
+        return fingerprint.contains("generic") ||
+                fingerprint.contains("sdk_gphone") ||
+                fingerprint.contains("emulator")
+    }
+
+    private fun getBaseUrl(): String {
+        return if (isEmulator()) EMULATOR_URL else DEVICE_URL
+    }
 
     private val retrofit: Retrofit by lazy {
         val logging = HttpLoggingInterceptor().apply {
@@ -18,7 +34,7 @@ object MLApiClient {
             .build()
 
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(getBaseUrl())
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

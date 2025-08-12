@@ -12,3 +12,4 @@ interface MLApiService {
     @POST("/api/medication/predict_image")
     suspend fun predictImage(@Part file: MultipartBody.Part): Response<ImageOutput>
 }
+
