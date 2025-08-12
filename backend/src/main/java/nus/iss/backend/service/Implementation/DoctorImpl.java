@@ -143,7 +143,7 @@ public class DoctorImpl implements DoctorService {
 
         } else if (clinicChanged) {
             validateEmailDomain(doctor.getEmail(), targetClinic);
-            logger.info("Doctor {} clinic changed, current email validated against new clinic: {}",
+            logger.info("Doctor {} clinic changed, current email validated against new clinzwic: {}",
                     request.getMcrNo(), LogSanitizer.sanitizeForLog(targetClinic.getClinicName()));
         }
         doctorRepo.saveAndFlush(doctor);

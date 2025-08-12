@@ -3,27 +3,27 @@ package nus.iss.backend.util;
 import org.springframework.stereotype.Component;
 
 /**
- * Utility class for sanitizing log inputs to prevent log injection attacks.
- * This class provides methods to clean user input before logging to prevent
+ * utility class for sanitizing log inputs to prevent log injection attacks.
+ * provides methods to clean user input before logging to prevent
  * malicious characters from being injected into log files.
  */
 @Component
 public class LogSanitizer {
 
     /**
-     * Sanitize input for logging to prevent log injection.
-     * Removes CR and LF characters and other potentially dangerous characters.
+     * sanitize input for logging to prevent log injection.
+     * removes CR and LF characters and other potentially dangerous characters.
      * 
-     * @param input The input string to sanitize
-     * @return Sanitized string safe for logging, or null if input is null
+     * @param input input string to sanitize
+     * @return sanitized string safe for logging, or null if input is null
      */
     public static String sanitizeForLog(String input) {
         if (input == null) {
             return null;
         }
         
-        // Remove CR, LF, and other control characters that could be used for log injection
-        // Using a safer approach to avoid regex issues
+        
+        // using a safer approach to avoid regex issues
         return input.replace("\r", "_")
                    .replace("\n", "_")
                    .replace("\t", "_")
@@ -35,9 +35,9 @@ public class LogSanitizer {
      * Sanitize input for logging with additional security measures.
      * Removes control characters and limits length to prevent log flooding.
      * 
-     * @param input The input string to sanitize
-     * @param maxLength Maximum length allowed (default 1000 if not specified)
-     * @return Sanitized string safe for logging
+     * @param input input string to sanitize
+     * @param maxLength maximum length allowed (default 1000 if not specified)
+     * @return sanitized string safe for logging
      */
     public static String sanitizeForLog(String input, int maxLength) {
         if (input == null) {
@@ -46,7 +46,7 @@ public class LogSanitizer {
         
         String sanitized = sanitizeForLog(input);
         
-        // Truncate if too long to prevent log flooding
+        // truncate if too long to prevent log flooding
         if (sanitized.length() > maxLength) {
             sanitized = sanitized.substring(0, maxLength) + "...[truncated]";
         }
@@ -55,10 +55,10 @@ public class LogSanitizer {
     }
 
     /**
-     * Sanitize multiple inputs for logging.
+     * sanitize multiple inputs for logging.
      * 
-     * @param inputs Array of input strings to sanitize
-     * @return Array of sanitized strings
+     * @param inputs array of input strings to sanitize
+     * @return array of sanitized strings
      */
     public static String[] sanitizeForLog(String... inputs) {
         if (inputs == null) {
@@ -74,10 +74,10 @@ public class LogSanitizer {
     }
 
     /**
-     * Sanitize object for logging by converting to string first.
+     * sanitize object for logging by converting to string first.
      * 
-     * @param obj The object to sanitize
-     * @return Sanitized string representation
+     * @param obj the object to sanitize
+     * @return sanitized string representation
      */
     public static String sanitizeForLog(Object obj) {
         if (obj == null) {
