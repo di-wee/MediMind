@@ -35,6 +35,7 @@ function MedicationLog({ medication }) {
 
 	//to create a more dynamic filter for easily scalable filtering later
 	// desired format is [ { label: 'Active', field: 'isActive', value: true },]
+	// provides available filter options for the filter component
 	const dynamicFilterOptions = getDynamicFilterOptions(
 		logList,
 		filteredFields,
@@ -59,12 +60,6 @@ function MedicationLog({ medication }) {
 	};
 
 	const handleSaveClick = async () => {
-		//this is to keep the state most up to date when being edited
-		//
-		//logic: using the prev state of the medication log, and mapping (rebasing it into a new
-		// array) if the log.id matches the id of the row being edited, we will replace
-		// the note key value with editedNote, else we will just show the existing log
-
 		try {
 			const response = await fetch(
 				API_BASE_URL + `api/logs/save/doctor-notes`,
@@ -102,6 +97,7 @@ function MedicationLog({ medication }) {
 		alert('Doctor note have been saved!');
 	};
 
+	//toggles the filter dropdown for a specific column
 	const handleFunnelClick = (col) => {
 		let newKey;
 		//using switch here for scalability
@@ -118,12 +114,16 @@ function MedicationLog({ medication }) {
 			const updatedOptions = dynamicFilterOptions.filter(
 				(op) => op.field === newKey
 			);
-			//just want the label eg. 'Taken', 'Not Taken'
+
+			//to show  available filter choices eg. 'Taken', 'Not Taken'
 			setUniqueOptions(updatedOptions.map((op) => op.label));
 		}
 	};
 	//to be passed down to filter component
+	// manage which filter options are currently selected
 	const handleFilterChange = (option) => {
+		//if the option is already in the array, remove it, else add it
+		// multiple filters can be active
 		setSelectedFilters(
 			(prevFilter) =>
 				prevFilter.includes(option)
@@ -132,7 +132,7 @@ function MedicationLog({ medication }) {
 		);
 	};
 
-	const processDisplayList = () => {
+	useEffect(() => {
 		let filtered = applyFilter(logList, dynamicFilterOptions, selectedFilters);
 
 		filtered = [...filtered].sort((a, b) => {
@@ -156,12 +156,11 @@ function MedicationLog({ medication }) {
 		});
 
 		setDisplayList(filtered);
-	};
+	}, [selectedFilters, logList, sortConfig, dynamicFilterOptions]);
 
-	useEffect(() => {
-		processDisplayList();
-	}, [selectedFilters, logList, sortConfig]);
-
+	//handle column sorting
+	//if the column is the same as the previous column, toggle the order
+	//if the column is different, set the column to the new column and set the order to asc
 	const handleSort = (column) => {
 		setSortConfig((prev) => ({
 			column: column,
@@ -203,7 +202,7 @@ function MedicationLog({ medication }) {
 							scheduleId: log.scheduleId,
 						};
 					});
-
+					//sorting the log by date
 					const sortedLog = [...transformedLog].sort(
 						(a, b) =>
 							parseDateTime(b.loggedDate, b.scheduledTime) -
@@ -220,6 +219,7 @@ function MedicationLog({ medication }) {
 		fetchMedicationLog();
 	}, [medication]);
 
+	// closing of filter container on clicking outside of the event.target
 	useEffect(() => {
 		const handleClickOutside = (event) => {
 			if (filterRef.current && !filterRef.current.contains(event.target)) {

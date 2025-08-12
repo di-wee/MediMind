@@ -22,7 +22,8 @@ function MedicationList({ patientId, medicationList }) {
 	};
 
 	//to create a more dynamic filter for easily scalable filtering later
-	// desired format is [ { label: 'Active', field: 'active', value: true },]
+	// desired format is [ { label: 'Active', field: 'isActive', value: true },]
+	// provides available filter options for the filter component
 	const dynamicFilterOptions = getDynamicFilterOptions(
 		medicationList || [],
 		filteredFields,
@@ -41,9 +42,10 @@ function MedicationList({ patientId, medicationList }) {
 		console.log(selectedMedicine);
 		console.log(visible);
 	};
-
+	//toggles the filter dropdown for a specific column
 	const handleFunnelClick = (col) => {
 		let newKey;
+		//using switch here for scalability
 		switch (col) {
 			case 'Status':
 				newKey = filterKey === 'active' ? null : 'active';
@@ -54,15 +56,20 @@ function MedicationList({ patientId, medicationList }) {
 		}
 
 		setFilterKey(newKey);
+		//setting the filter options to the appropriate column
 		if (newKey) {
 			const updatedOptions = dynamicFilterOptions.filter(
 				(op) => op.field === newKey
 			);
+			//to show  available filter choices eg. 'Taken', 'Not Taken'
 			setUniqueOptions(updatedOptions.map((op) => op.label));
 		}
 	};
-
+	//to be passed down to filter component
+	// manage which filter options are currently selected
 	const handleFilterChange = (option) => {
+		//if the option is already in the array, remove it, else add it
+		// multiple filters can be active
 		setSelectedFilters(
 			(prevFilter) =>
 				prevFilter.includes(option)
@@ -84,7 +91,7 @@ function MedicationList({ patientId, medicationList }) {
 			selectedFilters
 		);
 		setDisplayedList(filtered);
-	}, [selectedFilters, medicationList]);
+	}, [selectedFilters, medicationList, dynamicFilterOptions]);
 
 	useEffect(() => {
 		const handleClickOutside = (event) => {
