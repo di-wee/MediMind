@@ -1,7 +1,7 @@
 {
-    "medicationName": "bebrgmine maleate",
+    "medicationName": "fluvoxamine",
     "intakeQuantity": 0.5,
-    "frequency": 0,
-    "instructions": "with or after food",
+    "frequency": 1,
+    "instructions": "every other night with or after food",
     "notes": "avoid alcohol"
 }
