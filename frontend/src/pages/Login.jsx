@@ -55,9 +55,13 @@ function Login() {
 		<>
 			<section>
 				<div className='login-container'>
-					<h2 className='flex items-center text-2xl font-semibold text-gray-800 '>
+					<img
+						src='/medimind_app_logo.png'
+						className='size-20'></img>
+					<h2 className='flex items-center text-2xl font-semibold text-gray-800'>
 						MediMind
 					</h2>
+
 					<div className='w-96 bg-white rounded-lg shadow-xl md:mt-0 sm:max-w-md xl:p-0'>
 						<div className='p-6 space-y-4 md:space-y-6 sm:p-8'>
 							<h2 className='text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl'>

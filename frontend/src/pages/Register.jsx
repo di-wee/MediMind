@@ -140,6 +140,9 @@ function Register() {
 		<>
 			<section>
 				<div className='flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0 mt-20 '>
+					<img
+						src='/medimind_app_logo.png'
+						className='size-20'></img>
 					<h2 className='flex items-center  text-2xl font-semibold text-gray-800'>
 						MediMind
 					</h2>
