@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import MediMindContext from '../context/MediMindContext.jsx';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 import { API_BASE_URL } from '../utils/config';
+import ConfirmationModal from './ConfirmationModal.jsx';
 
 function DoctorDetails({ mcrNo }) {
 	const mediMindCtx = useContext(MediMindContext);
@@ -24,54 +25,75 @@ function DoctorDetails({ mcrNo }) {
 
 	const [newPassword, setNewPassword] = useState('');
 	const [clinicOptions, setClinicOptions] = useState([]);
+	const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+	const [originalClinic, setOriginalClinic] = useState(null);
 
 	const handleEditToggle = async () => {
 		//call api to save
 		if (isEditing) {
-			try {
-				const response = await fetch(API_BASE_URL + 'api/doctor/update', {
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						mcrNo: doctorInfo.mcrNo,
-						email: doctorInfo.email,
-						clinic: doctorInfo.clinic,
-					}),
-				});
+			// Check if clinic has changed
+			const clinicChanged =
+				originalClinic &&
+				doctorInfo.clinic &&
+				originalClinic.id !== doctorInfo.clinic.id;
 
-				if (response.status === 400) {
-					// Email domain validation failed
-
-					setValidation((prev) => ({ ...prev, emailDomain: true }));
-
-					return; // Don't exit editing mode, let user fix the email
-				}
-
-				if (!response.ok) {
-					const errMsg = await response.text();
-					console.error('Update error: ', errMsg);
-					setIsEditing(false); // Exit editing mode for other errors
-					return;
-				}
-
-				const updateDoctor = await response.json();
-				setDoctorInfo(updateDoctor);
-				setDoctorDetails(updateDoctor);
-				// clear email domain validation error on successful update
-				setValidation((prev) => ({ ...prev, emailDomain: false }));
-				alert('Doctor info updated successfully!');
-				setIsEditing(false); // Exit editing mode on success
-			} catch (error) {
-				console.error('Update error:', error);
-				setIsEditing(false); // Exit editing mode for unexpected errors
+			if (clinicChanged) {
+				setShowConfirmationModal(true);
+				return;
 			}
+
+			await performUpdate();
 		} else {
 			setIsEditing(true);
+			setOriginalClinic(doctorInfo.clinic);
 			// clear validation errors when starting to edit
 			setValidation((prev) => ({ ...prev, emailDomain: false }));
 		}
+	};
+
+	const performUpdate = async () => {
+		try {
+			const response = await fetch(API_BASE_URL + 'api/doctor/update', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					mcrNo: doctorInfo.mcrNo,
+					email: doctorInfo.email,
+					clinic: doctorInfo.clinic,
+				}),
+			});
+
+			if (response.status === 400) {
+				// Email domain validation failed
+				setValidation((prev) => ({ ...prev, emailDomain: true }));
+				return; // Don't exit editing mode, let user fix the email
+			}
+
+			if (!response.ok) {
+				const errMsg = await response.text();
+				console.error('Update error: ', errMsg);
+				setIsEditing(false); // Exit editing mode for other errors
+				return;
+			}
+
+			const updateDoctor = await response.json();
+			setDoctorInfo(updateDoctor);
+			setDoctorDetails(updateDoctor);
+			// clear email domain validation error on successful update
+			setValidation((prev) => ({ ...prev, emailDomain: false }));
+			alert('Doctor info updated successfully!');
+			setIsEditing(false); // Exit editing mode on success
+		} catch (error) {
+			console.error('Update error:', error);
+			setIsEditing(false); // Exit editing mode for unexpected errors
+		}
+	};
+
+	const handleConfirmClinicChange = () => {
+		setShowConfirmationModal(false);
+		performUpdate();
 	};
 
 	const handlePasswordToggle = async () => {
@@ -355,6 +377,15 @@ function DoctorDetails({ mcrNo }) {
 					</button>
 				</div>
 			</main>
+
+			<ConfirmationModal
+				isOpen={showConfirmationModal}
+				onClose={() => setShowConfirmationModal(false)}
+				onConfirm={handleConfirmClinicChange}
+				title='Are you sure you want to change your clinic? Changing of clinic will unassign all patients.'
+				confirmText='Yes, change clinic'
+				cancelText='No, cancel'
+			/>
 		</>
 	);
 }
