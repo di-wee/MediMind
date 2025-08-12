@@ -122,28 +122,45 @@ class HomeFragment : Fragment() {
         // Load schedule
         if (patientId != null) {
             val prefs = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-            val hasScheduleKey = "hasScheduleData"
+            val hasScheduleKey = "hasScheduleData_$patientId" // <-- per-user key
 
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     val raw = ApiClient.retrofitService.getDailySchedule(patientId)
                     val grouped = groupScheduleItems(raw)
 
-                    // Persist that this user has have schedule data once code sees any
+                    // Mark that THIS user has had data before (only if non-empty)
                     if (raw.isNotEmpty()) {
                         prefs.edit().putBoolean(hasScheduleKey, true).apply()
                     }
 
                     emptyStateContainer.visibility = if (raw.isEmpty()) View.VISIBLE else View.GONE
                     scheduleRecyclerView.adapter = GroupedScheduleAdapter(grouped)
+
                 } catch (e: Exception) {
-                    // If code has not seen data before, treat as "no meds yet" and don't toast
+                    // Decide whether to toast based on error type/status
                     val hasEverHadData = prefs.getBoolean(hasScheduleKey, false)
 
                     emptyStateContainer.visibility = View.VISIBLE
                     scheduleRecyclerView.adapter = GroupedScheduleAdapter(emptyList())
 
-                    if (hasEverHadData) {
+                    val shouldToast = when (e) {
+                        is retrofit2.HttpException -> {
+                            // 404 or 204 = no schedule yet -> don't toast
+                            val code = e.code()
+                            !(code == 404 || code == 204) && hasEverHadData
+                        }
+                        is java.io.IOException -> {
+                            // network error -> only toast if user previously had data
+                            hasEverHadData
+                        }
+                        else -> {
+                            // unexpected error -> only toast if user previously had data
+                            hasEverHadData
+                        }
+                    }
+
+                    if (shouldToast) {
                         Toast.makeText(
                             requireContext(),
                             "Failed to load schedule. Please try again.",
@@ -153,6 +170,7 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+
 
 
 
