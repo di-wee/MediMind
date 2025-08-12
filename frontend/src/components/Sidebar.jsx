@@ -38,7 +38,10 @@ function Sidebar() {
 				{/* Header */}
 				<div className='px-6 py-8 border-b border-gray-200 bg-gray-50'>
 					<div className='text-center mb-6'>
-						<h2 className='text-4xl font-bold text-gray-800 tracking-tight hover:text-gray-400 transition-colors duration-200 cursor-pointer'>
+						<h2 className='flex text-4xl font-bold text-gray-800 tracking-tight hover:text-gray-400 transition-colors duration-200 items-center cursor-pointer'>
+							<img
+								src='/medimind_app_logo.png'
+								className='size-15'></img>
 							<Link to='/'>MediMind</Link>
 						</h2>
 						<div className='w-12 h-0.5 bg-gray-400 mx-auto mt-2'></div>
