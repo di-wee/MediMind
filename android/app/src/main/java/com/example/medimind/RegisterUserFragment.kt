@@ -19,6 +19,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
+import retrofit2.HttpException // <-- added
 import java.util.GregorianCalendar
 import java.util.Locale
 import java.util.regex.Pattern
@@ -30,22 +31,15 @@ class RegisterUserFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_register_user, container, false)
-    }
+    ): View? = inflater.inflate(R.layout.fragment_register_user, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         // --- Top App Bar (back arrow) ---
         view.findViewById<MaterialToolbar>(R.id.topAppBar)?.apply {
-            // Optional: set/update title if not set in XML
-            // title = "Create New Account"
-            setNavigationOnClickListener {
-                findNavController().navigateUp()
-            }
+            setNavigationOnClickListener { findNavController().navigateUp() }
         }
 
         // 1) Replace Spinner reference
-        // val clinicSpinner = view.findViewById<Spinner>(R.id.spinnerClinic)
         val clinicDropdown =
             view.findViewById<com.google.android.material.textfield.MaterialAutoCompleteTextView>(
                 R.id.autoCompleteClinic
@@ -56,8 +50,11 @@ class RegisterUserFragment : Fragment() {
         val nameToIdMap = mutableMapOf<String, String>()
 
         // 3) Adapter for the dropdown
-        val clinicAdapter = ArrayAdapter(requireContext(),
-            android.R.layout.simple_list_item_1, clinicNames)
+        val clinicAdapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_list_item_1,
+            clinicNames
+        )
         clinicDropdown.setAdapter(clinicAdapter)
 
         // 4) Load clinics (unchanged logic, just notify the new adapter)
@@ -72,7 +69,11 @@ class RegisterUserFragment : Fragment() {
                 }
                 clinicAdapter.notifyDataSetChanged()
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Failed to load clinics: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Failed to load clinics: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
 
@@ -99,6 +100,16 @@ class RegisterUserFragment : Fragment() {
         val firstNameField = view.findViewById<EditText>(R.id.inputFirstName)
         val lastNameField = view.findViewById<EditText>(R.id.inputLastName)
 
+        // Live email validation (format) — clears error as user types
+        emailField.doAfterTextChanged {
+            val raw = it?.toString()?.trim().orEmpty()
+            when {
+                raw.isEmpty() -> emailField.error = null
+                !Patterns.EMAIL_ADDRESS.matcher(raw).matches() -> emailField.error = "Invalid email format"
+                else -> emailField.error = null
+            }
+        }
+
         // DOB inputs (DD/MM/YYYY split)
         val dobDay = view.findViewById<TextInputEditText>(R.id.dobDay)
         val dobMonth = view.findViewById<TextInputEditText>(R.id.dobMonth)
@@ -114,7 +125,10 @@ class RegisterUserFragment : Fragment() {
 
         // --- Register button ---
         view.findViewById<Button>(R.id.registerButton).setOnClickListener {
-            val email = emailField.text.toString().trim()
+            val emailRaw = emailField.text.toString().trim()
+            // normalize to lowercase before sending
+            val email = emailRaw.lowercase(Locale.ROOT)
+
             val password = passwordField.text.toString()
             val confirmPassword = confirmPasswordField.text.toString()
             val nric = nricField.text.toString().trim()
@@ -124,6 +138,7 @@ class RegisterUserFragment : Fragment() {
             val dayStr = dobDay.text?.toString()?.trim() ?: ""
             val monthStr = dobMonth.text?.toString()?.trim() ?: ""
             val yearStr = dobYear.text?.toString()?.trim() ?: ""
+            val selectedClinicName = clinicDropdown.text?.toString()?.trim().orEmpty()
 
             // ---- VALIDATION ----
             if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
@@ -163,11 +178,7 @@ class RegisterUserFragment : Fragment() {
             }
 
             if (dayStr.isEmpty() || monthStr.isEmpty() || yearStr.isEmpty()) {
-                Toast.makeText(
-                    requireContext(),
-                    "Please enter your full date of birth",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(requireContext(), "Please enter your full date of birth", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -176,27 +187,27 @@ class RegisterUserFragment : Fragment() {
             val year = yearStr.toIntOrNull()
 
             if (day == null || month == null || year == null || !isValidDate(year, month, day)) {
-                Toast.makeText(
-                    requireContext(),
-                    "Enter a valid date (DD/MM/YYYY)",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(requireContext(), "Enter a valid date (DD/MM/YYYY)", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (selectedClinicName.isEmpty()) {
+                Toast.makeText(requireContext(), "Please select a clinic", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             // ---- END VALIDATION ----
 
             val dob = String.format(Locale.US, "%04d-%02d-%02d", year, month, day)
 
-            val selectedClinicName = clinicDropdown.text?.toString() ?: ""
             val request = RegisterRequest(
-                email = email,
+                email = email,                  // normalized
                 password = password,
                 nric = nric,
                 firstName = firstName,
                 lastName = lastName,
                 gender = gender,
                 dob = dob,
-                clinicName = selectedClinicName
+                clinicName = selectedClinicName // using name path (your backend supports name or id)
             )
 
             viewLifecycleOwner.lifecycleScope.launch {
@@ -208,12 +219,20 @@ class RegisterUserFragment : Fragment() {
                         Toast.LENGTH_SHORT
                     ).show()
                     findNavController().navigate(R.id.action_registerUserFragment_to_loginFragment)
+
+                } catch (e: HttpException) {
+                    // Precise backend error handling
+                    if (e.code() == 409) {
+                        // duplicate email from backend validation
+                        emailField.error = "Email already in use"
+                    } else if (e.code() == 400) {
+                        Toast.makeText(requireContext(), "Please verify your clinic & inputs", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Registration failed (${e.code()})", Toast.LENGTH_LONG).show()
+                    }
+
                 } catch (e: Exception) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Registration failed: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(requireContext(), "Network error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }

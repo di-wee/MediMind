@@ -3,6 +3,7 @@ package nus.iss.backend.service.Implementation;
 import nus.iss.backend.dao.MissedDoseResponse;
 import nus.iss.backend.dto.IntakeHistoryResponse;
 import nus.iss.backend.exceptions.ItemNotFound;
+import nus.iss.backend.exceptions.DuplicateEmailException;
 import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Locale; // NEW
 import java.util.UUID;
 
 @Service
@@ -75,19 +77,41 @@ public class PatientServiceImpl implements PatientService {
     }
 
     /**
-     * Save a new patient to the database (used for registration).
+     * Save a new patient to the database (used for registration and profile updates).
+     * Added: normalize email (trim + lowercase) and reject duplicates with 409.
+     * Note: When updating an existing record, exclude the current patient id from the duplicate check.
      */
     @Override
     public Patient savePatient(Patient patient) {
+        // Normalize incoming email so checks and storage are consistent
+        if (patient.getEmail() == null || patient.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+        String normalizedEmail = normalizeEmail(patient.getEmail());
+        patient.setEmail(normalizedEmail);
+
+        // If this is an UPDATE (id present), exclude current id from duplicate check.
+        UUID id = patient.getId();
+        boolean emailTaken = (id == null)
+                ? patientRepo.existsEmailIgnoreCase(normalizedEmail)
+                : patientRepo.existsEmailIgnoreCaseExcludingId(normalizedEmail, id);
+
+        if (emailTaken) {
+            logger.info("Duplicate email blocked: {}", LogSanitizer.sanitizeForLog(normalizedEmail));
+            throw new DuplicateEmailException("Email already in use");
+        }
+
         return patientRepo.save(patient);
     }
 
     /**
      * Find a patient by email and password (used for login).
+     * Added: normalize email before lookup to be consistent with storage.
      */
     @Override
     public Optional<Patient> findPatientByEmailAndPassword(String email, String password) {
-        return patientRepo.findByEmailAndPassword(email, password);
+        String normalizedEmail = email == null ? null : email.trim().toLowerCase(Locale.ROOT);
+        return patientRepo.findByEmailAndPassword(normalizedEmail, password);
     }
 
     /**
@@ -137,6 +161,7 @@ public class PatientServiceImpl implements PatientService {
             .sorted(Comparator.comparing(IntakeHistoryResponse::getScheduledTime))
             .toList();
     }
+
     /**
      * Unassign a doctor from a patient.
      */
@@ -147,8 +172,8 @@ public class PatientServiceImpl implements PatientService {
 
         if (patientOpt.isPresent()) {
             Patient patient = patientOpt.get();
-            logger.info("Found patient: {} {}", 
-                LogSanitizer.sanitizeForLog(patient.getFirstName()), 
+            logger.info("Found patient: {} {}",
+                LogSanitizer.sanitizeForLog(patient.getFirstName()),
                 LogSanitizer.sanitizeForLog(patient.getLastName()));
             patient.setDoctor(null);
             patientRepo.saveAndFlush(patient); // ensure immediate DB update
@@ -159,7 +184,6 @@ public class PatientServiceImpl implements PatientService {
             return false;
         }
     }
-
 
     @Override
     public void assignPatientToDoctor(UUID patientId, String doctorMcr) {
@@ -173,7 +197,7 @@ public class PatientServiceImpl implements PatientService {
             if (patient.getClinic().getId().equals(doctor.getClinic().getId())) {
                 patient.setDoctor(doctor);
                 patientRepo.save(patient);
-                logger.info("Assigned doctor {} to patient {}", 
+                logger.info("Assigned doctor {} to patient {}",
                     LogSanitizer.sanitizeForLog(doctorMcr), patientId);
             } else {
                 throw new IllegalArgumentException("Doctor and patient are not from the same clinic.");
@@ -207,10 +231,10 @@ public class PatientServiceImpl implements PatientService {
             patientRepo.save(patient);
         }
         logger.info("Unassigned all patients from doctor {}", LogSanitizer.sanitizeForLog(mcrNo));
-
     }
 
-
+    // --- helpers ---
+    private static String normalizeEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
 }
-
-

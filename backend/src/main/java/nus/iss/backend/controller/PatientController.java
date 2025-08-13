@@ -4,6 +4,7 @@ import nus.iss.backend.dao.MissedDoseResponse;
 import nus.iss.backend.dto.RegisterPatientRequest;
 import nus.iss.backend.dto.AssignPatientRequest;
 import nus.iss.backend.exceptions.ItemNotFound;
+import nus.iss.backend.exceptions.DuplicateEmailException; // NEW
 import nus.iss.backend.model.Clinic;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
@@ -106,10 +107,14 @@ public class PatientController {
             newPatient.setDob(LocalDate.parse(request.dob));
             newPatient.setClinic(clinic);
 
-            // Save patient
+            // Save patient (will normalize + enforce duplicate check in service)
             Patient savedPatient = patientService.savePatient(newPatient);
             return new ResponseEntity<>(savedPatient, HttpStatus.CREATED);
 
+        } catch (DuplicateEmailException e) {
+            // Return a clean 409 instead of generic 500
+            logger.warn("Duplicate email during registration: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (RuntimeException e) {
             logger.error("Error registering patient: {}", LogSanitizer.sanitizeForLog(e.getMessage()), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -165,15 +170,19 @@ public class PatientController {
                 patient.setPassword(updateData.get("password"));
             }
 
-            // Save updated patient
+            // Save updated patient (service handles normalization + duplicate check excluding current id)
             Patient updatedPatient = patientService.savePatient(patient);
             return new ResponseEntity<>(updatedPatient, HttpStatus.OK);
 
+        } catch (DuplicateEmailException e) {
+            logger.warn("Duplicate email during profile update: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (RuntimeException e) {
             logger.error("Error updating patient: {}", LogSanitizer.sanitizeForLog(e.getMessage()), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @GetMapping("/patients/by-doctor/{mcr}")
     public ResponseEntity<List<Patient>> getPatientsByDoctor(@PathVariable String mcr) {
         try {
@@ -184,6 +193,7 @@ public class PatientController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @PutMapping("/patients/{id}/unassign-doctor")
     public ResponseEntity<Void> unassignDoctorFromPatient(@PathVariable UUID id) {
         try {
@@ -200,7 +210,6 @@ public class PatientController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     @GetMapping("/patient/{patientId}/medList")
     public ResponseEntity<List<Medication>> getMedListForPatient(@PathVariable UUID patientId) {
@@ -247,5 +256,4 @@ public class PatientController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }

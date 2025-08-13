@@ -3,7 +3,7 @@ package nus.iss.backend.dto;
 public class ScheduleResponse {
     private String scheduledTime;
     private String medicationName;
-    private String quantity;      // ✅ now mapped from intakeQuantity (String)
+    private String quantity;      //  now mapped from intakeQuantity (String)
     private boolean isActive;
 
     // Getters and setters
