@@ -4,6 +4,7 @@ import nus.iss.backend.dao.*;
 import nus.iss.backend.dto.EditMedicationRequest;
 import nus.iss.backend.dto.newMedicationReq;
 import nus.iss.backend.exceptions.ItemNotFound;
+import nus.iss.backend.exceptions.DuplicationException;
 import nus.iss.backend.model.IntakeHistory;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
@@ -133,26 +134,29 @@ public class MedicationController {
     public ResponseEntity<?> saveMedication(@RequestBody newMedicationReq req) {
         logger.info(">>> /save API hit, request received: {}", LogSanitizer.sanitizeForLog(req.toString()));
         try{
-            logger.info("📦 received notes: {}", LogSanitizer.sanitizeForLog(req.getNotes()));
+            logger.info("received notes: {}", LogSanitizer.sanitizeForLog(req.getNotes()));
 
-            Patient patient =  patientService.findPatientById(req.getPatientId()).orElse(null);
-            if(patient==null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("patient not found");
-            }
             //save new medication
             Medication med = medicationService.createMedication(req);
             logger.info("Note from request: {}", LogSanitizer.sanitizeForLog(med.getNotes()));
+            
             //save new schedules
             List<Schedule> schedules = new ArrayList<>();
             for (String timeStr : req.getTimes()) {
                 LocalTime time = LocalTime.parse(timeStr);
-                Schedule schedule = scheduleService.createSchedule(med, patient, time);
+                Schedule schedule = scheduleService.createSchedule(med, patientService.findPatientById(req.getPatientId()).get(), time);
                 schedules.add(schedule);
             }
             return ResponseEntity.ok("Medication saved");
+        }catch (ItemNotFound e) {
+            logger.error("Error when saving medication: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }catch (DuplicationException e) {
+            logger.error("Error when saving medication: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }catch (RuntimeException e) {
-            logger.error("Exception occurred:", e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.error("Error when saving medication: {}", LogSanitizer.sanitizeForLog(e.getMessage()), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred while saving medication");
         }
     }
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nus.iss.backend.dao.ImageOutput;
 import nus.iss.backend.dto.EditMedicationRequest;
+import nus.iss.backend.exceptions.DuplicationException;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
@@ -180,8 +181,12 @@ public class MedicationImpl implements MedicationService {
     public Medication createMedication(newMedicationReq req) {
         Patient patient = patientRepo.findPatientById(req.getPatientId());
         if (patient == null) {
-            logger.warn("Patient not found!");
-            return null;
+            throw new ItemNotFound("Patient not found!");
+
+        }
+        // Check if medication already exists for the patient
+        if( medicationExistsForPatient(req.getPatientId(), req.getMedicationName())) {
+            throw new DuplicationException("Medication already exists for this patient!");
         }
 
         Medication med = new Medication();
@@ -201,5 +206,12 @@ public class MedicationImpl implements MedicationService {
         patientRepo.save(patient);
 
         return med;
+    }
+
+    @Override
+    public Boolean medicationExistsForPatient(UUID patientId, String medicationName) {
+        List<Medication> medications = medicationRepo.findByPatientIdAndMedicationNameIgnoreCase(patientId, medicationName);
+        //if medications is not empty, means that the medication alrd exists for the patient
+        return !medications.isEmpty();
     }
 }

@@ -29,19 +29,16 @@ function MedicationLog({ medication }) {
 	const filterRef = useRef();
 
 	const filteredFields = ['taken'];
-	const labelMap = useMemo(
-		() => ({
-			taken: { true: 'Taken', false: 'Not Taken' },
-		}),
-		[]
-	);
+	const labelMap = {
+		taken: { true: 'Taken', false: 'Not Taken' },
+	};
 
 	//to create a more dynamic filter for easily scalable filtering later
 	// desired format is [ { label: 'Active', field: 'isActive', value: true },]
 	// provides available filter options for the filter component
 	const dynamicFilterOptions = useMemo(
 		() => getDynamicFilterOptions(logList, filteredFields, labelMap),
-		[logList, filteredFields, labelMap]
+		[logList]
 	);
 
 	const parseDateTime = (date, time) => {

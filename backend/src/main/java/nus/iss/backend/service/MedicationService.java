@@ -27,6 +27,8 @@ public interface MedicationService {
 
     Medication createMedication(newMedicationReq req);
 
+    Boolean medicationExistsForPatient(UUID patientId, String medicationName);
+
     // For OCR + NER integration
     ImageOutput sendToFastAPI(MultipartFile file) throws IOException;
     ResponseEntity<?> processEditMedication(EditMedicationRequest req);
