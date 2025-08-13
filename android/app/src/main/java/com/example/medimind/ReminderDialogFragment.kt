@@ -73,7 +73,7 @@ class ReminderDialogFragment(
         val selected = BooleanArray(meds.size) { false }
         var selectedCount = 0
         var snoozable = true
-        val inflater = LayoutInflater.from(requireContext())
+        val inflater = layoutInflater
 
         fun updateSaveText() {
             saveButton.text = when (selectedCount) {
