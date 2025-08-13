@@ -200,7 +200,7 @@ class MedicationControllerTest {
     void saveMedication_patientNotFound() throws Exception {
         newMedicationReq req = new newMedicationReq();
         req.setPatientId(UUID.randomUUID());
-        Mockito.when(patientService.findPatientById(any())).thenReturn(Optional.empty());
+        Mockito.when(medicationService.createMedication(any())).thenThrow(new ItemNotFound("Patient not found!"));
 
         mockMvc.perform(post("/api/medication/save")
                         .contentType(MediaType.APPLICATION_JSON)
