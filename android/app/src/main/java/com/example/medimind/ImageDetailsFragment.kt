@@ -17,9 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.medimind.ReminderUtils.scheduleAlarm
 import androidx.navigation.fragment.findNavController
-import com.example.medimind.network.ApiClient
 import com.example.medimind.network.MLApiClient
-import com.example.medimind.network.newMedicationRequest
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -30,6 +28,7 @@ import java.util.Calendar
 import androidx.fragment.app.viewModels
 import com.example.medimind.viewmodel.MedicationViewModel
 import com.example.medimind.viewmodel.SaveMedResult
+import java.util.Locale
 
 class ImageDetailsFragment : Fragment() {
 
@@ -215,7 +214,7 @@ class ImageDetailsFragment : Fragment() {
                     val timeInMinutes = 540 + i * freqGap
                     val hour = timeInMinutes / 60
                     val minute = timeInMinutes % 60
-                    val timeStr = String.format("%02d:%02d", hour, minute)  // HH:MM format
+                    val timeStr = String.format(Locale.UK,"%02d:%02d", hour, minute)  // HH:MM format
                     times.add(timeStr)
                 }
             }

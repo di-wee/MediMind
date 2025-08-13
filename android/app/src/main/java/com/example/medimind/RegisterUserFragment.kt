@@ -19,7 +19,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
-import retrofit2.HttpException // <-- added
+import retrofit2.HttpException
 import java.util.GregorianCalendar
 import java.util.Locale
 import java.util.regex.Pattern

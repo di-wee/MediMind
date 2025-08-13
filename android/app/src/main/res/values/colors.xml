@@ -20,9 +20,6 @@
 
     <!-- Common colors -->
     <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
-    <color name="link_blue">#1E88E5</color>
-    <color name="md_grey_500">#9E9E9E</color>
 
     <!-- New app background -->
     <color name="app_background_light">#F3F3F7</color>
@@ -33,7 +30,6 @@
     
     <!-- splash screen colors -->
     <color name="splash_background_color">@color/white</color>
-    <color name="splash_text_color">@color/md_theme_light_primary</color>
     <color name="splash_text_secondary_color">#666666</color>
     <color name="splash_accent_color">@color/md_theme_light_primary</color>
 </resources>

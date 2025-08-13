@@ -56,19 +56,19 @@ dependencies {
 
 
     // Add Dependency for Fragment navigation
-    val nav_version = "2.8.3"
+    val nav_version = "2.9.3"
     implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
     implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
 
-    val room_version = "2.6.1"
+    val room_version = "2.7.2"
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
 
-    val work_version = "2.9.0"
+    val work_version = "2.10.3"
     implementation("androidx.work:work-runtime-ktx:$work_version")
 
-    val lifecycle_version = "2.7.0"
+    val lifecycle_version = "2.9.2"
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
 

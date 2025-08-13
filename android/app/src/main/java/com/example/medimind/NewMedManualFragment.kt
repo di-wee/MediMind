@@ -24,10 +24,11 @@ import com.google.android.material.appbar.MaterialToolbar
 import androidx.fragment.app.viewModels
 import com.example.medimind.viewmodel.MedicationViewModel
 import com.example.medimind.viewmodel.SaveMedResult
+import java.util.Locale
 
 class NewMedManualFragment : Fragment() {
 
-    // ▼ NEW: ViewModel instance (uses ApiClient.retrofitService by default as provided)
+    // ViewModel instance (uses ApiClient.retrofitService by default as provided)
     private val medicationViewModel: MedicationViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,7 +88,7 @@ class NewMedManualFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            // ▼ CHANGED: call ViewModel to save; keep rest of logic (alarms, toasts) the same
+            // call ViewModel to save
             lifecycleScope.launch {
                 try {
                     val result = medicationViewModel.saveMedication(
@@ -163,7 +164,7 @@ class NewMedManualFragment : Fragment() {
                     val timeInMinutes = 540 + i * freqGap
                     val hour = timeInMinutes / 60
                     val minute = timeInMinutes % 60
-                    val timeStr = String.format("%02d:%02d", hour, minute)  // HH:MM format
+                    val timeStr = String.format(Locale.UK,"%02d:%02d", hour, minute)  // HH:MM format
                     times.add(timeStr)
                 }
             }

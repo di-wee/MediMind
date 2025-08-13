@@ -1,14 +1,11 @@
 package com.example.medimind
 
 import android.Manifest
-
 import android.content.Context
 import android.content.pm.PackageManager
-
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
-
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
