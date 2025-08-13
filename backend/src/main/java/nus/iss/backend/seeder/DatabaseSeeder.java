@@ -295,9 +295,27 @@ public class DatabaseSeeder implements CommandLineRunner {
         );
 
         for (Patient patient : patients) {
+            // Create a list of available medications for this patient
+            List<String> availableMeds = new ArrayList<>(commonMeds);
+            Set<String> usedActiveMeds = new HashSet<>(); // Track active medications to avoid duplicates
+            
             for (int i = 0; i < 10; i++) { // 10 meds per patient
                 Medication med = new Medication();
-                String medName = commonMeds.get(random.nextInt(commonMeds.size()));
+                
+                // Select a medication name, ensuring no duplicate active medications
+                String medName;
+                if (availableMeds.isEmpty()) {
+                    // If we've used all medications, reset the list but avoid duplicates with active meds
+                    availableMeds = new ArrayList<>(commonMeds);
+                    availableMeds.removeAll(usedActiveMeds);
+                    if (availableMeds.isEmpty()) {
+                        // If still empty, just use any medication (this shouldn't happen with 10 meds and 10 common meds)
+                        availableMeds = new ArrayList<>(commonMeds);
+                    }
+                }
+                
+                medName = availableMeds.get(random.nextInt(availableMeds.size()));
+                availableMeds.remove(medName); // Remove from available list to avoid duplicates
                 med.setMedicationName(medName);
 
                 int quantity = random.nextInt(2) + 1; // 1-2 tablets
@@ -314,7 +332,19 @@ public class DatabaseSeeder implements CommandLineRunner {
                 // assign realistic instructions and notes from map
                 med.setInstructions(getRandomItem(instructionsMap.getOrDefault(medName, List.of("Follow doctor's advice."))));
                 med.setNotes(getRandomItem(notesMap.getOrDefault(medName, List.of("No special notes."))));
-                med.setActive(random.nextBoolean());
+                
+                // Set medication as active or inactive, ensuring no duplicate active medications
+                boolean isActive = random.nextBoolean();
+                if (isActive && usedActiveMeds.contains(medName)) {
+                    // If this medication is already active for this patient, make it inactive
+                    isActive = false;
+                }
+                med.setActive(isActive);
+                
+                // Track active medications to avoid duplicates
+                if (isActive) {
+                    usedActiveMeds.add(medName);
+                }
 
                 entityManager.persist(med);
                 patient.getMedications().add(med);
