@@ -13,7 +13,7 @@ class IntakeHistoryViewModel : ViewModel() {
     fun fetchHistory(patientId: String) {
         viewModelScope.launch {
             try {
-                val response = ApiClient.retrofitService.getIntakeHistory(patientId) // ✅ fixed
+                val response = ApiClient.retrofitService.getIntakeHistory(patientId)
                 _history.value = response
             } catch (e: Exception) {
                 // Handle error
