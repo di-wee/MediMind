@@ -5,14 +5,10 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-
 import androidx.lifecycle.lifecycleScope
-
 import com.example.medimind.network.ApiClient
-
 import com.example.medimind.network.MedicationIdListRequest
 import com.example.medimind.network.ScheduleListRequest
-
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

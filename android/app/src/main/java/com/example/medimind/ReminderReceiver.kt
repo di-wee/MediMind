@@ -4,16 +4,13 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
-
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.RingtoneManager
-
 import android.util.Log
 import androidx.core.app.NotificationCompat
-
 import com.example.medimind.network.ScheduleListRequest
 import java.time.Instant
 import java.time.LocalDate
@@ -21,7 +18,6 @@ import java.time.ZoneId
 import com.example.medimind.network.ApiClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
 import java.util.Date

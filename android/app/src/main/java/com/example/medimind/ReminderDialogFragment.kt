@@ -6,10 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-
 import android.widget.LinearLayout
 import android.widget.TextView
-
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.example.medimind.network.ApiClient
@@ -18,10 +16,8 @@ import com.example.medimind.network.MedResponse
 import com.example.medimind.network.ScheduleResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
 import java.time.LocalDate
 import java.util.UUID
-
 import android.widget.ScrollView
 import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView

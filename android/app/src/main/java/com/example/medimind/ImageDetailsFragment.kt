@@ -17,9 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.medimind.ReminderUtils.scheduleAlarm
 import androidx.navigation.fragment.findNavController
-import com.example.medimind.network.ApiClient
 import com.example.medimind.network.MLApiClient
-import com.example.medimind.network.newMedicationRequest
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull

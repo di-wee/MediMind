@@ -28,7 +28,7 @@ import java.util.Locale
 
 class NewMedManualFragment : Fragment() {
 
-    // ▼ NEW: ViewModel instance (uses ApiClient.retrofitService by default as provided)
+    // ViewModel instance (uses ApiClient.retrofitService by default as provided)
     private val medicationViewModel: MedicationViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,7 +88,7 @@ class NewMedManualFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            // ▼ CHANGED: call ViewModel to save; keep rest of logic (alarms, toasts) the same
+            // call ViewModel to save
             lifecycleScope.launch {
                 try {
                     val result = medicationViewModel.saveMedication(
