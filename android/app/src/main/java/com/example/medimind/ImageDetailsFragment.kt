@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -18,7 +17,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.medimind.ReminderUtils.scheduleAlarm
 import androidx.navigation.fragment.findNavController
-
 import com.example.medimind.network.ApiClient
 import com.example.medimind.network.MLApiClient
 import com.example.medimind.network.newMedicationRequest
@@ -29,8 +27,14 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.util.Calendar
+import androidx.fragment.app.viewModels
+import com.example.medimind.viewmodel.MedicationViewModel
+import com.example.medimind.viewmodel.SaveMedResult
 
 class ImageDetailsFragment : Fragment() {
+
+    // ▼ NEW: ViewModel instance (uses ApiClient.retrofitService by default)
+    private val medicationViewModel: MedicationViewModel by viewModels()
 
     private fun getRealPathFromURI(uri: Uri): String? {
         val projection = arrayOf(android.provider.MediaStore.Images.Media.DATA)
@@ -117,9 +121,6 @@ class ImageDetailsFragment : Fragment() {
                 }
             }
 
-
-
-
             val saveBtnFromImageDetails = view.findViewById<Button>(R.id.btnSaveFromImageDetails)
             saveBtnFromImageDetails.setOnClickListener {
                 var instruction = instructionInput.text.toString()
@@ -143,29 +144,53 @@ class ImageDetailsFragment : Fragment() {
                     return@setOnClickListener
                 }
 
+                // ▼ CHANGED: use MedicationViewModel to save; keep alarms + UI flow the same
                 lifecycleScope.launch {
                     try {
-                        val service = ApiClient.retrofitService
-
-                        val request = newMedicationRequest(
+                        val result = medicationViewModel.saveMedication(
                             medicationName = medicationName,
                             patientId = patientId,
                             dosage = dosageDisplay,
                             frequency = frequency,
                             instructions = instruction,
                             notes = note,
-                            isActive = true,
-                            times = times
+                            times = times // ViewModel normalizes "HHmm" -> "HH:mm" if needed
                         )
-                        service.saveMedication(request)
 
-                        for (time in times) {
-                            var timeMilli = convertToScheduleList(time)
-                            scheduleAlarm(requireContext(), timeMilli, patientId)
+                        when (result) {
+                            is SaveMedResult.Success -> {
+                                for (time in times) {
+                                    val timeMilli = convertToScheduleList(time)
+                                    scheduleAlarm(requireContext(), timeMilli, patientId)
+                                }
+                                Toast.makeText(requireContext(), result.message.ifBlank { "Medication saved" }, Toast.LENGTH_SHORT).show()
+                                requestNotificationPermissionIfNeeded()
+                                parentFragmentManager.popBackStack()
+                            }
+                            is SaveMedResult.Duplicate -> {
+                                // 409 duplicate from backend — surface inline + toast
+                                nameInput.error = "An active medication with this name already exists."
+                                Toast.makeText(
+                                    requireContext(),
+                                    if (result.message.isNotBlank()) result.message else "Duplicate active medication name.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                            is SaveMedResult.NotFound -> {
+                                Toast.makeText(
+                                    requireContext(),
+                                    if (result.message.isNotBlank()) result.message else "Patient not found. Please re-login.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                            is SaveMedResult.Error -> {
+                                Toast.makeText(
+                                    requireContext(),
+                                    result.message.ifBlank { "Failed to save medication." },
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         }
-                        Toast.makeText(requireContext(), "Medication saved", Toast.LENGTH_SHORT).show()
-                        requestNotificationPermissionIfNeeded()
-                        parentFragmentManager.popBackStack()
                     } catch (e: Exception) {
                         Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                     }

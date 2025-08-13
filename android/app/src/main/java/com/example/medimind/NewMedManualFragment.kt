@@ -21,10 +21,14 @@ import java.util.Calendar
 import androidx.core.content.edit
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.appbar.MaterialToolbar
-
+import androidx.fragment.app.viewModels
+import com.example.medimind.viewmodel.MedicationViewModel
+import com.example.medimind.viewmodel.SaveMedResult
 
 class NewMedManualFragment : Fragment() {
 
+    // ▼ NEW: ViewModel instance (uses ApiClient.retrofitService by default as provided)
+    private val medicationViewModel: MedicationViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,33 +86,59 @@ class NewMedManualFragment : Fragment() {
                 ).show()
                 return@setOnClickListener
             }
+
+            // ▼ CHANGED: call ViewModel to save; keep rest of logic (alarms, toasts) the same
             lifecycleScope.launch {
                 try {
-                    //save to db
-                    val service = ApiClient.retrofitService
+                    val result = medicationViewModel.saveMedication(
+                        medicationName = medicationName,
+                        patientId = patientId,
+                        dosage = dosageDisplay,
+                        frequency = frequency,
+                        instructions = instruction,
+                        notes = note,
+                        times = times // ViewModel accepts "HH:mm" or "HHmm" and normalizes
+                    )
 
-                        val request = newMedicationRequest(
-                            medicationName = medicationName,
-                            patientId = patientId,
-                            dosage = dosageDisplay,
-                            frequency = frequency,
-                            instructions = instruction,
-                            notes = note,
-                            isActive = true,
-                            times = times
-                        )
-                         service.saveMedication(request)
-                        //convert generated times to timeMillis List
-                    for (time in times) {
-                        var timeMilli = convertToScheduleList(time)
-                        //set alarm in alarmManager
-                        //set new alarm
-                        scheduleAlarm(requireContext(), timeMilli, patientId)
+                    when (result) {
+                        is SaveMedResult.Success -> {
+                            //convert generated times to timeMillis List
+                            for (time in times) {
+                                val timeMilli = convertToScheduleList(time)
+                                //set alarm in alarmManager
+                                //set new alarm
+                                scheduleAlarm(requireContext(), timeMilli, patientId)
+                            }
+                            Toast.makeText(requireContext(), result.message.ifBlank { "Medication saved" }, Toast.LENGTH_SHORT)
+                                .show()
+                            requestNotificationPermissionIfNeeded()
+                            parentFragmentManager.popBackStack()
+                        }
+                        is SaveMedResult.Duplicate -> {
+                            // 409 duplicate from backend
+                            // Show inline error near name (TextView supports setError)
+                            medicationNameInput.error = "An active medication with this name already exists."
+                            Toast.makeText(
+                                requireContext(),
+                                if (result.message.isNotBlank()) result.message else "Duplicate active medication name.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        is SaveMedResult.NotFound -> {
+                            Toast.makeText(
+                                requireContext(),
+                                if (result.message.isNotBlank()) result.message else "Patient not found. Please re-login.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        is SaveMedResult.Error -> {
+                            Toast.makeText(
+                                requireContext(),
+                                result.message.ifBlank { "Failed to save medication." },
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
-                    Toast.makeText(requireContext(), "Medication saved", Toast.LENGTH_SHORT)
-                        .show()
-                    requestNotificationPermissionIfNeeded()
-                    parentFragmentManager.popBackStack()
                 } catch (e: Exception) {
                     Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG)
                         .show()
@@ -142,8 +172,8 @@ class NewMedManualFragment : Fragment() {
         }
         return times
     }
-    fun convertToScheduleList(time: String): Long {
 
+    fun convertToScheduleList(time: String): Long {
         val now = Calendar.getInstance()
         val (hour, minute) = time.split(":").map { it.toInt() }
         val cal = Calendar.getInstance().apply {
@@ -152,11 +182,12 @@ class NewMedManualFragment : Fragment() {
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
             if (before(now)) {
-                    add(Calendar.DATE, 1)
+                add(Calendar.DATE, 1)
             }
         }
-            return cal.timeInMillis
+        return cal.timeInMillis
     }
+
     private fun requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val prefs = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
@@ -173,5 +204,4 @@ class NewMedManualFragment : Fragment() {
             }
         }
     }
-
 }
