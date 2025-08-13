@@ -66,25 +66,23 @@ public class DatabaseSeeder implements CommandLineRunner {
             return entityManager.createQuery("SELECT c FROM Clinic c", Clinic.class).getResultList();
         }
 
-        // Define clinics with their email domains
-        Map<String, String> clinicData = Map.of(
-                "Raffles Medical Clinic", "rafflesmedical.com",
-                "Healthway Medical Centre", "healthway.com.sg",
-                "Parkway Shenton Clinic", "parkwayshenton.com",
-                "OneCare Family Clinic", "onecare.com.sg",
-                "Fullerton Health Clinic", "fullertonhealth.com"
+        List<String> clinicNames = Arrays.asList(
+                "Raffles Medical Clinic",
+                "Healthway Medical Centre",
+                "Parkway Shenton Clinic",
+                "OneCare Family Clinic",
+                "Fullerton Health Clinic"
         );
 
         List<Clinic> clinics = new ArrayList<>();
-        for (Map.Entry<String, String> entry : clinicData.entrySet()) {
+        for (String name : clinicNames) {
             Clinic clinic = new Clinic();
-            clinic.setClinicName(entry.getKey());
-            clinic.setEmailDomain(entry.getValue());
-            clinic.setRequireEmailVerification(true);
+            clinic.setClinicName(name);
             //saving to db
             entityManager.persist(clinic);
             clinics.add(clinic);
         }
+
 
         return clinics;
     }
@@ -135,7 +133,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .filter(d -> d.getClinic().equals(clinic))
                     .toList();
 
-            // Generate 100 patients per clinic
             for (int i = 0; i < 100; i++) {
                 Patient patient = new Patient();
                 String firstName = faker.name().firstName();
@@ -161,6 +158,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 patient.setNric("S" + faker.number().numberBetween(1000000, 9999999) + faker.letterify("?").toUpperCase());
                 patient.setGender(random.nextBoolean() ? "Male" : "Female");
 
+
+
                 // convert to LocalDate to remove time
                 LocalDate dob = faker.date().birthday(60, 90)// age 60-90
                         .toInstant()
@@ -180,10 +179,8 @@ public class DatabaseSeeder implements CommandLineRunner {
 
                 entityManager.persist(patient);
                 patients.add(patient);
-            }
             
-            System.out.println("Added 100 patients to clinic: " + clinic.getClinicName() + 
-                              " (50 assigned, 50 unassigned)");
+            }
         }
         return patients;
     }
@@ -193,8 +190,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             System.out.println("Medications already exist, skipping seeding...");
             return;
         }
-
-
 
         LocalDate today = LocalDate.now();
         LocalDate firstDayOfMonth = today.withDayOfMonth(1);
@@ -253,59 +248,55 @@ public class DatabaseSeeder implements CommandLineRunner {
                 )
         );
 
-        Map<String, List<String>> notesMap = new HashMap<>();
-        notesMap.put("Panadol", List.of(
-                "Do not combine with other medications containing paracetamol.",
-                "Seek medical attention if fever persists beyond 3 days."
-        ));
-        notesMap.put("Metformin", List.of(
-                "May cause mild gastrointestinal upset initially.",
-                "Report persistent vomiting or diarrhea to your doctor."
-        ));
-        notesMap.put("Lipitor", List.of(
-                "Report any unusual muscle pain or weakness.",
-                "Routine liver function tests may be required."
-        ));
-        notesMap.put("Amoxicillin", List.of(
-                "May cause mild diarrhea; take probiotics if recommended.",
-                "Inform your doctor if you develop a rash or breathing difficulty."
-        ));
-        notesMap.put("Losartan", List.of(
-                "May cause dizziness; get up slowly from sitting/lying position.",
-                "Monitor blood pressure regularly at home."
-        ));
-        notesMap.put("Omeprazole", List.of(
-                "Prolonged use may affect calcium absorption.",
-                "Inform your doctor if you experience persistent stomach pain."
-        ));
-        notesMap.put("Amlodipine", List.of(
-                "May cause ankle swelling in some patients.",
-                "Avoid sudden discontinuation without medical advice."
-        ));
-        notesMap.put("Ventolin", List.of(
-                "Excessive use may cause rapid heartbeat or tremors.",
-                "Seek medical attention if inhaler use increases suddenly."
-        ));
-        notesMap.put("Atorvastatin", List.of(
-                "Report any signs of liver problems (yellow eyes/skin, dark urine).",
-                "Do not consume large amounts of alcohol while on this medication."
-        ));
-        notesMap.put("Insulin", List.of(
-                "Keep a source of sugar nearby to manage hypoglycemia.",
-                "Store in a refrigerator; do not freeze."
-        ));
-
-
+        Map<String, List<String>> notesMap = Map.of(
+                "Panadol", List.of(
+                        "Do not combine with other medications containing paracetamol.",
+                        "Seek medical attention if fever persists beyond 3 days."
+                ),
+                "Metformin", List.of(
+                        "May cause mild gastrointestinal upset initially.",
+                        "Report persistent vomiting or diarrhea to your doctor."
+                ),
+                "Lipitor", List.of(
+                        "Report any unusual muscle pain or weakness.",
+                        "Routine liver function tests may be required."
+                ),
+                "Amoxicillin", List.of(
+                        "May cause mild diarrhea; take probiotics if recommended.",
+                        "Inform your doctor if you develop a rash or breathing difficulty."
+                ),
+                "Losartan", List.of(
+                        "May cause dizziness; get up slowly from sitting/lying position.",
+                        "Monitor blood pressure regularly at home."
+                ),
+                "Omeprazole", List.of(
+                        "Prolonged use may affect calcium absorption.",
+                        "Inform your doctor if you experience persistent stomach pain."
+                ),
+                "Amlodipine", List.of(
+                        "May cause ankle swelling in some patients.",
+                        "Avoid sudden discontinuation without medical advice."
+                ),
+                "Ventolin", List.of(
+                        "Excessive use may cause rapid heartbeat or tremors.",
+                        "Seek medical attention if inhaler use increases suddenly."
+                ),
+                "Atorvastatin", List.of(
+                        "Report any signs of liver problems (yellow eyes/skin, dark urine).",
+                        "Do not consume large amounts of alcohol while on this medication."
+                ),
+                "Insulin", List.of(
+                        "Keep a source of sugar nearby to manage hypoglycemia.",
+                        "Store in a refrigerator; do not freeze."
+                )
+        );
 
         for (Patient patient : patients) {
             // Create a list of available medications for this patient
             List<String> availableMeds = new ArrayList<>(commonMeds);
             Set<String> usedActiveMeds = new HashSet<>(); // Track active medications to avoid duplicates
             
-            // 5-8 medications per patient for demo
-            int numMedications = random.nextInt(4) + 5; // 5-8 medications
-            
-            for (int i = 0; i < numMedications; i++) {
+            for (int i = 0; i < 10; i++) { // 10 meds per patient
                 Medication med = new Medication();
                 
                 // Select a medication name, ensuring no duplicate active medications
@@ -338,7 +329,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                 // assign realistic instructions and notes from map
                 med.setInstructions(getRandomItem(instructionsMap.getOrDefault(medName, List.of("Follow doctor's advice."))));
                 med.setNotes(getRandomItem(notesMap.getOrDefault(medName, List.of("No special notes."))));
-                
                 // Set medication as active or inactive, ensuring no duplicate active medications
                 boolean isActive = random.nextBoolean();
                 if (isActive && usedActiveMeds.contains(medName)) {
@@ -390,10 +380,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                             log.setPatient(patient);
                             log.setSchedule(schedule);
                             log.setLoggedDate(logDate);
-                            
-                            // Simple random adherence for demo - variety of missed and taken doses
-                            boolean isTaken = random.nextInt(100) < 75; // 75% adherence for demo
-                            log.setTaken(isTaken);
+                            log.setTaken(random.nextInt(100) < 80); // 80% adherence
                             log.setDoctorNote(null);
 
                             entityManager.persist(log);
@@ -413,5 +400,3 @@ public class DatabaseSeeder implements CommandLineRunner {
 
 
 }
-
-
