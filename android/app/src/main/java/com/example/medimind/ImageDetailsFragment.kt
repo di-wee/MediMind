@@ -30,6 +30,7 @@ import java.util.Calendar
 import androidx.fragment.app.viewModels
 import com.example.medimind.viewmodel.MedicationViewModel
 import com.example.medimind.viewmodel.SaveMedResult
+import java.util.Locale
 
 class ImageDetailsFragment : Fragment() {
 
@@ -215,7 +216,7 @@ class ImageDetailsFragment : Fragment() {
                     val timeInMinutes = 540 + i * freqGap
                     val hour = timeInMinutes / 60
                     val minute = timeInMinutes % 60
-                    val timeStr = String.format("%02d:%02d", hour, minute)  // HH:MM format
+                    val timeStr = String.format(Locale.UK,"%02d:%02d", hour, minute)  // HH:MM format
                     times.add(timeStr)
                 }
             }
