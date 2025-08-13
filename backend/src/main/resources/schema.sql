@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS SPRING_SESSION (
     CONSTRAINT SPRING_SESSION_PK PRIMARY KEY (PRIMARY_ID)
 );
 
--- Create indexes safely (will fail silently if they already exist)
+-- Create indexes with error handling for MySQL
+-- These statements will fail silently if indexes already exist
 CREATE UNIQUE INDEX SPRING_SESSION_IX1 ON SPRING_SESSION (SESSION_ID);
 CREATE INDEX SPRING_SESSION_IX2 ON SPRING_SESSION (EXPIRY_TIME);
 CREATE INDEX SPRING_SESSION_IX3 ON SPRING_SESSION (PRINCIPAL_NAME);
