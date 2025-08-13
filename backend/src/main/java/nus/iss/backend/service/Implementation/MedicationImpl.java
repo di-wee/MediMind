@@ -33,14 +33,12 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpHeaders;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -184,13 +182,20 @@ public class MedicationImpl implements MedicationService {
             throw new ItemNotFound("Patient not found!");
 
         }
-        // Check if medication already exists for the patient
+        // check if medication already exists for the patient
         if( medicationExistsForPatient(req.getPatientId(), req.getMedicationName())) {
             throw new DuplicationException("Medication already exists for this patient!");
         }
 
+        // capitalize the first letter of each word in medication name to ensure consistency
+        String medicationName = req.getMedicationName().toLowerCase();
+        medicationName = Arrays.stream(medicationName.split(" "))
+                .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
+                .collect(Collectors.joining(" "));
+
+
         Medication med = new Medication();
-        med.setMedicationName(req.getMedicationName());
+        med.setMedicationName(medicationName);
         med.setActive(true);
         med.setIntakeQuantity(req.getDosage());
         med.setFrequency(req.getFrequency());
