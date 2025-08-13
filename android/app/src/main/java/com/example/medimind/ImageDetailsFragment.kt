@@ -70,33 +70,36 @@ class ImageDetailsFragment : Fragment() {
         val instructionInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.instructionInput)
         val noteInput = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.noteInput)
 
-//        val nameInput = view.findViewById<EditText>(R.id.medicationNameInput)
-//        val intakeQuantityInput = view.findViewById<EditText>(R.id.intakeQuantityInput)
-//        val frequencyInput = view.findViewById<EditText>(R.id.frequencyInput)
-//        val instructionInput = view.findViewById<EditText>(R.id.instructionInput)
-//        val noteInput = view.findViewById<EditText>(R.id.noteInput)
-
         if (imageUri != null) {
             imagePreview.setImageURI(imageUri)
 
             //Lewis: Instead of using getRealPathFromURI (which may crash on Android 10+), copy content URI to temp file
+            //prediction 404. came here to fix image related problem
             lifecycleScope.launch {
                 try {
-                    //Lewis: Open input stream from the content URI
-                    val inputStream = requireContext().contentResolver.openInputStream(imageUri)
-                    //Lewis: Create a temporary file in cache directory
-                    val tempFile = File.createTempFile("upload", ".jpg", requireContext().cacheDir)
-                    //Lewis: Copy the image content into the temp file
-                    tempFile.outputStream().use { outputStream ->
-                        inputStream?.copyTo(outputStream)
+                    val resolver = requireContext().contentResolver
+                    val rawMime = resolver.getType(imageUri)?.lowercase() ?: "image/jpeg"
+                    val mime = when {
+                        rawMime == "image/jpg" -> "image/jpeg"
+                        rawMime in setOf("image/jpeg", "image/png", "image/webp") -> rawMime
+                        else -> "image/jpeg"
                     }
 
-                    //Lewis: Create the multipart request body for Retrofit
-                    val reqFile = tempFile.asRequestBody("image/*".toMediaTypeOrNull())
-                    val body = MultipartBody.Part.createFormData("file", tempFile.name, reqFile)
+                    val suffix = when (mime) {
+                        "image/png"  -> ".png"
+                        "image/webp" -> ".webp"
+                        else         -> ".jpg"
+                    }
+                    val tempFile = File.createTempFile("upload_", suffix, requireContext().cacheDir)
+                    resolver.openInputStream(imageUri)!!.use { input ->
+                        tempFile.outputStream().use { output -> input.copyTo(output) }
+                    }
 
-                    //Lewis: Call the ML API and populate UI with the extracted fields
-                    val response = MLApiClient.mlApiService.predictImage(body)
+                    val reqFile = tempFile.asRequestBody(mime.toMediaTypeOrNull())
+                    val part = MultipartBody.Part.createFormData("file", tempFile.name, reqFile)
+
+                    // Call API
+                    val response = MLApiClient.mlApiService.predictImage(part)
                     if (response.isSuccessful) {
                         val prediction = response.body()
                         if (prediction != null) {
@@ -109,15 +112,12 @@ class ImageDetailsFragment : Fragment() {
                     } else {
                         Toast.makeText(requireContext(), "Prediction failed: ${response.code()}", Toast.LENGTH_SHORT).show()
                     }
-
                 } catch (e: Exception) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Prediction failed: ${e.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(requireContext(), "Prediction failed: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
+
+
 
 
             val saveBtnFromImageDetails = view.findViewById<Button>(R.id.btnSaveFromImageDetails)
