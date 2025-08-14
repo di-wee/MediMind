@@ -2,6 +2,8 @@ package com.example.medimind
 
 import android.Manifest
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -19,11 +21,15 @@ import com.example.medimind.ReminderUtils.scheduleAlarm
 import androidx.navigation.fragment.findNavController
 import com.example.medimind.network.MLApiClient
 import com.google.android.material.appbar.MaterialToolbar
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.util.Calendar
 import androidx.fragment.app.viewModels
 import com.example.medimind.viewmodel.MedicationViewModel
@@ -35,6 +41,12 @@ class ImageDetailsFragment : Fragment() {
     // ▼ NEW: ViewModel instance (uses ApiClient.retrofitService by default)
     private val medicationViewModel: MedicationViewModel by viewModels()
 
+    companion object {
+        private const val MAX_IMAGE_SIZE = 1024 // Max width/height in pixels
+        private const val COMPRESSION_QUALITY = 80 // JPEG compression quality (0-100)
+        private const val MAX_FILE_SIZE_KB = 500 // Max file size in KB
+    }
+
     private fun getRealPathFromURI(uri: Uri): String? {
         val projection = arrayOf(android.provider.MediaStore.Images.Media.DATA)
         val cursor = requireActivity().contentResolver.query(uri, projection, null, null, null)
@@ -43,6 +55,69 @@ class ImageDetailsFragment : Fragment() {
         val path = columnIndex?.let { cursor.getString(it) }
         cursor?.close()
         return path
+    }
+
+    //Compresses an image to reduce file size for ML server upload
+    private suspend fun compressImage(uri: Uri): File = withContext(Dispatchers.IO) {
+        try {
+            // Load the original bitmap
+            val inputStream = requireContext().contentResolver.openInputStream(uri)
+            val originalBitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+
+            if (originalBitmap == null) {
+                throw Exception("Failed to decode image")
+            }
+
+            // Calculate new dimensions while maintaining aspect ratio
+            val originalWidth = originalBitmap.width
+            val originalHeight = originalBitmap.height
+            
+            val scaleFactor = when {
+                originalWidth > originalHeight -> MAX_IMAGE_SIZE.toFloat() / originalWidth
+                else -> MAX_IMAGE_SIZE.toFloat() / originalHeight
+            }
+
+            val newWidth = (originalWidth * scaleFactor).toInt()
+            val newHeight = (originalHeight * scaleFactor).toInt()
+
+            // Create scaled bitmap
+            val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true)
+            originalBitmap.recycle() // Free memory
+
+            // Compress to JPEG with quality setting
+            val compressedFile = File.createTempFile("compressed_", ".jpg", requireContext().cacheDir)
+            val outputStream = FileOutputStream(compressedFile)
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            
+            scaledBitmap.compress(Bitmap.CompressFormat.JPEG, COMPRESSION_QUALITY, byteArrayOutputStream)
+            val compressedBytes = byteArrayOutputStream.toByteArray()
+            
+            // Check if file size is still too large and compress further if needed
+            var finalBytes = compressedBytes
+            var currentQuality = COMPRESSION_QUALITY
+            
+            while (finalBytes.size > MAX_FILE_SIZE_KB * 1024 && currentQuality > 10) {
+                currentQuality -= 10
+                byteArrayOutputStream.reset()
+                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, currentQuality, byteArrayOutputStream)
+                finalBytes = byteArrayOutputStream.toByteArray()
+            }
+            
+            outputStream.write(finalBytes)
+            outputStream.close()
+            byteArrayOutputStream.close()
+            scaledBitmap.recycle() // Free memory
+
+            // Log compression results
+            val originalSizeKB = (requireContext().contentResolver.openInputStream(uri)?.available() ?: 0) / 1024
+            val compressedSizeKB = finalBytes.size / 1024
+            println("Image compression: ${originalSizeKB}KB -> ${compressedSizeKB}KB (${(compressedSizeKB.toFloat() / originalSizeKB * 100).toInt()}% reduction)")
+
+            compressedFile
+        } catch (e: Exception) {
+            throw Exception("Failed to compress image: ${e.message}")
+        }
     }
 
     override fun onCreateView(
@@ -80,6 +155,9 @@ class ImageDetailsFragment : Fragment() {
             //prediction 404. came here to fix image related problem
             lifecycleScope.launch {
                 try {
+                    // Show loading indicator
+                    Toast.makeText(requireContext(), "Processing image...", Toast.LENGTH_SHORT).show()
+                    
                     val resolver = requireContext().contentResolver
                     val rawMime = resolver.getType(imageUri)?.lowercase() ?: "image/jpeg"
                     val mime = when {
@@ -93,13 +171,13 @@ class ImageDetailsFragment : Fragment() {
                         "image/webp" -> ".webp"
                         else         -> ".jpg"
                     }
-                    val tempFile = File.createTempFile("upload_", suffix, requireContext().cacheDir)
-                    resolver.openInputStream(imageUri)!!.use { input ->
-                        tempFile.outputStream().use { output -> input.copyTo(output) }
-                    }
-
-                    val reqFile = tempFile.asRequestBody(mime.toMediaTypeOrNull())
-                    val part = MultipartBody.Part.createFormData("file", tempFile.name, reqFile)
+                    
+                    // Compress the image before uploading
+                    val compressedFile = compressImage(imageUri)
+                    
+                    // Create multipart request with compressed image
+                    val reqFile = compressedFile.asRequestBody(mime.toMediaTypeOrNull())
+                    val part = MultipartBody.Part.createFormData("file", compressedFile.name, reqFile)
 
                     // Call API
                     val response = MLApiClient.mlApiService.predictImage(part)
@@ -111,10 +189,14 @@ class ImageDetailsFragment : Fragment() {
                             frequencyInput.setText(prediction.frequency.toString())
                             instructionInput.setText(prediction.instructions ?: "")
                             noteInput.setText(prediction.notes ?: "")
+                            Toast.makeText(requireContext(), "Prediction successful!", Toast.LENGTH_SHORT).show()
                         }
                     } else {
                         Toast.makeText(requireContext(), "Prediction failed: ${response.code()}", Toast.LENGTH_SHORT).show()
                     }
+                    
+                    // Clean up compressed file
+                    compressedFile.delete()
                 } catch (e: Exception) {
                     Toast.makeText(requireContext(), "Prediction failed: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
