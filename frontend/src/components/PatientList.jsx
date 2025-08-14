@@ -11,6 +11,7 @@ import PatientListView from '../components/PatientListView';
 import { useNavigate } from 'react-router-dom';
 import MediMindContext from '../context/MediMindContext';
 import { API_BASE_URL } from '../utils/config';
+import LoadingSpinner from './LoadingSpinner';
 
 function PatientList() {
 	const [patients, setPatients] = useState([]);
@@ -183,11 +184,8 @@ function PatientList() {
 
 	if (loading) {
 		return (
-			<main className='flex-1 p-8 px-15 bg-gray-50 min-h-screen w-full pt-10 flex items-center justify-center'>
-				<div className='text-center'>
-					<div className='animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4'></div>
-					<p className='text-gray-600'>Loading patients...</p>
-				</div>
+			<main className='flex-1 p-8 px-15 bg-gray-50 min-h-screen w-full pt-10'>
+				<LoadingSpinner message='Loading patients...' />
 			</main>
 		);
 	}

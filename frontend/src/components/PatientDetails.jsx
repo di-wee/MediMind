@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import MedicationList from './MedicationList';
 import { API_BASE_URL } from '../utils/config';
+import LoadingSpinner from './LoadingSpinner';
 
 function PatientDetails({ patientId }) {
 	const [patientInfo, setPatientInfo] = useState({});
 	const [medicationList, setMedicationList] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [medicationLoading, setMedicationLoading] = useState(true);
 
 	//call GET API to retrieve patient's information
 	useEffect(() => {
 		const fetchPatientDetails = async () => {
 			try {
+				setLoading(true);
 				console.log('PatientDetails mounted with patientId:', patientId);
 				const response = await fetch(
 					API_BASE_URL + `api/patient/${patientId}`,
@@ -48,11 +52,14 @@ function PatientDetails({ patientId }) {
 				}
 			} catch (err) {
 				console.error('Error fetching patient details: ', err);
+			} finally {
+				setLoading(false);
 			}
 		};
 
 		const fetchPatientMedicationList = async () => {
 			try {
+				setMedicationLoading(true);
 				const response = await fetch(
 					API_BASE_URL + `api/patient/${patientId}/medications`,
 					{
@@ -69,11 +76,21 @@ function PatientDetails({ patientId }) {
 				}
 			} catch (err) {
 				console.error('Error in retrieving medication list of patient: ', err);
+			} finally {
+				setMedicationLoading(false);
 			}
 		};
 		fetchPatientDetails();
 		fetchPatientMedicationList();
 	}, [patientId]);
+
+	if (loading) {
+		return (
+			<main className='w-full flex-1 bg-gray-50 min-h-screen'>
+				<LoadingSpinner message='Loading patient details...' />
+			</main>
+		);
+	}
 
 	return (
 		<>
@@ -126,11 +143,20 @@ function PatientDetails({ patientId }) {
 					</div>
 				</div>
 				<div className='mt-8'>
-					<MedicationList
-						patientId={patientId}
-						medicationList={medicationList}
-						setMedicationList={setMedicationList}
-					/>
+					{medicationLoading ? (
+						<div className='shadow-xl bg-white py-8 m-5 rounded-xl'>
+							<LoadingSpinner
+								message='Loading medications...'
+								size='small'
+							/>
+						</div>
+					) : (
+						<MedicationList
+							patientId={patientId}
+							medicationList={medicationList}
+							setMedicationList={setMedicationList}
+						/>
+					)}
 				</div>
 			</main>
 		</>
