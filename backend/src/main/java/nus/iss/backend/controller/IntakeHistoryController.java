@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import nus.iss.backend.exceptions.*;
 
 import java.util.List;                                       // for List<>
 import java.util.UUID;                                      // for UUID
@@ -73,14 +74,26 @@ public class IntakeHistoryController {
     }
 
     @PostMapping("/intakeHistory/create")
-    public ResponseEntity<?> createMedicationLog(@RequestBody IntakeReqMobile medLogReqMobile) {
-        logger.info("Received log: {}", medLogReqMobile);
-        try{
-            intakeHistoryService.createIntakeHistory(medLogReqMobile);
-            return new ResponseEntity<>(HttpStatus.OK);
-        }catch (RuntimeException e){
-            logger.error("Error: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<?> createMedicationLog(@RequestBody IntakeReqMobile req) {
+        logger.info("Received log: {}", LogSanitizer.sanitizeForLog(String.valueOf(req)));
+        try {
+            if (req == null) throw new BadRequestException("Request body cannot be null");
+            if (req.getPatientId()==null) throw new BadRequestException("patientId is required");
+            if (req.getMedicationId()==null) throw new BadRequestException("medicationId is required");
+            if (req.getIsTaken() == null) throw new BadRequestException("isTaken is required");
+
+            intakeHistoryService.createIntakeHistory(req);
+            return ResponseEntity.ok().build();
+
+        } catch (ItemNotFound e) {
+            logger.warn("Intake not found: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (BadRequestException e) {
+            logger.warn("Intake bad request: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            logger.error("Intake unexpected error: {}", LogSanitizer.sanitizeForLog(e.getMessage()), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }
