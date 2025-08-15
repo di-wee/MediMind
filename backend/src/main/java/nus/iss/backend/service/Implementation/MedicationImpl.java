@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nus.iss.backend.dao.ImageOutput;
 import nus.iss.backend.dto.EditMedicationRequest;
 import nus.iss.backend.exceptions.DuplicationException;
+import nus.iss.backend.exceptions.InvalidTimeFormatException;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
@@ -136,12 +137,12 @@ public class MedicationImpl implements MedicationService {
     public ResponseEntity<?> processEditMedication(EditMedicationRequest req) {
         Medication med = this.findMedicineById(req.getMedicationId());
         if (med == null) {
-            return ResponseEntity.status(404).body("Medication not found");
+            throw new ItemNotFound("Medication not found");
         }
 
         Optional<Patient> patientOpt = patientService.findPatientById(req.getPatientId());
         if (patientOpt.isEmpty()) {
-            return ResponseEntity.status(404).body("Patient not found");
+            throw new ItemNotFound("Patient not found");
         }
         Patient patient = patientOpt.get();
 
@@ -160,6 +161,10 @@ public class MedicationImpl implements MedicationService {
         //then create new schedules
         //the formatters are for HHMM and HH:MM
         for (String timeStr : req.getTimes()) {
+            if (!timeStr.matches("^\\d{4}$") && !timeStr.matches("^\\d{2}:\\d{2}$")) {
+                throw new InvalidTimeFormatException("Invalid time format: " + timeStr);
+            }
+
             LocalTime time;
             try {
                 if (timeStr.contains(":")){
@@ -168,7 +173,7 @@ public class MedicationImpl implements MedicationService {
                     time = LocalTime.parse(timeStr, formatterNoColon);
                 }
             } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid time format: " + timeStr);
+                throw new InvalidTimeFormatException("Invalid time format: " + timeStr);
             }
             scheduleService.createSchedule(med, patient, time);
         }
