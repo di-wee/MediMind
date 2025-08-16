@@ -151,8 +151,6 @@ class ImageDetailsFragment : Fragment() {
         if (imageUri != null) {
             imagePreview.setImageURI(imageUri)
 
-            //Lewis: Instead of using getRealPathFromURI (which may crash on Android 10+), copy content URI to temp file
-            //prediction 404. came here to fix image related problem
             lifecycleScope.launch {
                 try {
                     // Show loading indicator
