@@ -3,6 +3,7 @@ package nus.iss.backend.controller;
 import nus.iss.backend.dao.*;
 import nus.iss.backend.dto.EditMedicationRequest;
 import nus.iss.backend.dto.newMedicationReq;
+import nus.iss.backend.exceptions.InvalidTimeFormatException;
 import nus.iss.backend.exceptions.ItemNotFound;
 import nus.iss.backend.exceptions.DuplicationException;
 import nus.iss.backend.model.IntakeHistory;
@@ -93,36 +94,39 @@ public class MedicationController {
     //for my edit  med detail page to show frequency and timer
     @GetMapping("{medicationId}/edit")
     public ResponseEntity<?> getMedicationEditDetails(@PathVariable UUID medicationId) {
-        Medication med = medicationService.findMedicineById(medicationId);
-        if (med == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Medication not found");
+        try {
+            Medication med = medicationService.findMedicineById(medicationId);
+            if (med == null) {
+                throw new ItemNotFound("Medication not found");
+            }
+
+            List<Schedule> activeSchedules = scheduleService.findActiveSchedulesByMedication(med);
+            List<String> times = activeSchedules.stream()
+                    .map(s -> s.getScheduledTime().toString())
+                    .map(t -> t.length() > 5 ? t.substring(0,5) : t)
+                    .toList();
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("frequency", med.getFrequency());
+            result.put("activeSchedulesTimes", times);
+
+            return ResponseEntity.ok(result);
+        } catch (ItemNotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unexpected error: {}", LogSanitizer.sanitizeForLog(e.getMessage()), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving medication details");
         }
-
-        List<Schedule> activeSchedules = scheduleService.findActiveSchedulesByMedication(med);
-        List<String> times = activeSchedules.stream()
-                .map(s -> s.getScheduledTime().toString())
-                .map(t -> t.length() > 5 ? t.substring(0,5) : t)
-                .toList();
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("frequency", med.getFrequency());
-        result.put("activeSchedulesTimes", times);
-
-        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/edit/save")
     public ResponseEntity<?> saveEditMedication(@RequestBody EditMedicationRequest req) {
-        // time format validation
-        for (String timeStr : req.getTimes()) {
-            if (!timeStr.matches("^\\d{4}$") && !timeStr.matches("^\\d{2}:\\d{2}$")) {
-                return ResponseEntity.badRequest().body("Invalid time format: " + timeStr);
-            }
-        }
         try {
             return medicationService.processEditMedication(req);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (InvalidTimeFormatException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (ItemNotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Failed to save medication details");
         }
@@ -191,19 +195,26 @@ public class MedicationController {
     // LST: to deactivate the medication and all related schedules
     @PutMapping("/{medicationId}/deactivate")
     public ResponseEntity<String> deactivateMedication(@PathVariable UUID medicationId) {
-        Medication med = medicationService.findMedicineById(medicationId);
-        if (med == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Medication not found");
+        try {
+            Medication med = medicationService.findMedicineById(medicationId);
+            if (med == null) {
+                throw new ItemNotFound("Medication not found");
+            }
+
+            med.setActive(false);
+            medicationService.saveMedication(med);
+
+            List<Schedule> schedules = scheduleService.findActiveSchedulesByMedication(med);
+
+            scheduleService.deactivateSchedules(schedules);
+
+            return ResponseEntity.ok("Medication and related schedules deactivated successfully");
+        } catch (ItemNotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unexpected error: {}", LogSanitizer.sanitizeForLog(e.getMessage()), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deactivating medication");
         }
-
-        med.setActive(false);
-        medicationService.saveMedication(med);
-
-        List<Schedule> schedules = scheduleService.findActiveSchedulesByMedication(med);
-
-        scheduleService.deactivateSchedules(schedules);
-
-        return ResponseEntity.ok("Medication and related schedules deactivated successfully");
     }
 
     // Pris: prediction from the ML model
