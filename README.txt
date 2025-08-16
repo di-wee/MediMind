@@ -10,7 +10,7 @@ MediMind is a comprehensive medication management system with the following comp
 ## Prerequisites
 - Java 21 (for backend)
 - Node.js 18+ (for frontend)
-- Python 3.8+ (for ML server)
+- Python 3.1+ (for ML server)
 - MySQL 8.0+
 - Android Studio (for Android app)
 - Git
@@ -117,7 +117,7 @@ sdk.dir=/path/to/your/Android/Sdk
 
 # API Configuration
 API_BASE_URL=http://10.0.2.2:8080/
-ML_API_BASE_URL=http://10.0.2.2:5000/
+ML_API_BASE_URL=http://10.0.2.2:8000/
 ```
 
 ### Network Security Configuration
@@ -167,7 +167,7 @@ docker run -p 5173:5173 --env-file .env medimind-frontend
 ### Testing the Setup
 1. **Backend**: Visit http://localhost:8080/api/doctor/test
 2. **Frontend**: Visit http://localhost:5173
-3. **ML Server**: Visit http://localhost:5000/health
+3. **ML Server**: Visit http://localhost:8000/health
 4. **Android**: Use camera to take medication photo
 
 ## 7. Common Issues & Solutions
@@ -189,7 +189,7 @@ docker run -p 5173:5173 --env-file .env medimind-frontend
 ### ML Server Issues
 - Ensure all Python dependencies are installed
 - Check model files exist in specified path
-- Verify port 5000 is not in use
+- Verify port 8000 is not in use
 
 ### Image Upload Issues
 - Check ML server is running and accessible
