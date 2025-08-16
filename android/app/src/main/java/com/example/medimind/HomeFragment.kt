@@ -37,7 +37,7 @@ import java.util.*
 
 class HomeFragment : Fragment() {
 
-    // --- Views (late init) ---
+    //Views
     private lateinit var emptyStateContainer: LinearLayout
     private lateinit var scheduleRecyclerView: RecyclerView
 
@@ -82,7 +82,6 @@ class HomeFragment : Fragment() {
     ): View? = inflater.inflate(R.layout.fragment_home, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // ---- Toolbar (left: Hello {user}, right: date) ----
         val toolbar = view.findViewById<MaterialToolbar>(R.id.topAppBar)
         toolbar.navigationIcon = null
 
@@ -111,7 +110,7 @@ class HomeFragment : Fragment() {
                 text = today.format(fmt)
             }
 
-        // ---- Content views ----
+        //Content views
         emptyStateContainer = view.findViewById(R.id.emptyStateContainer)
         scheduleRecyclerView = view.findViewById(R.id.scheduleRecyclerView)
         scheduleRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -119,7 +118,7 @@ class HomeFragment : Fragment() {
         // Load schedule
         if (patientId != null) {
             val prefs = requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-            val hasScheduleKey = "hasScheduleData_$patientId" // <-- per-user key
+            val hasScheduleKey = "hasScheduleData_$patientId"
 
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
@@ -168,10 +167,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-
-
-
-        // ---- FAB Speed Dial ----
+        // FAB Speed Dial
         fabMain = view.findViewById(R.id.fabMain)
         fabCluster = view.findViewById(R.id.fabCluster)
         fabScrim = view.findViewById(R.id.fabScrim)
@@ -199,7 +195,7 @@ class HomeFragment : Fragment() {
                 }
 
                 // 2) Push the mini‑FAB cluster high enough so the lowest item clears the bar
-                //    We add the mainFab height because your lowest mini‑FAB aligns near the main FAB.
+                // We add the mainFab height because your lowest mini‑FAB aligns near the main FAB.
                 val clusterClearance = bottomNavH + mainFabH + extraCushion
                 fabCluster.setPadding(
                     fabCluster.paddingLeft,
@@ -256,8 +252,6 @@ class HomeFragment : Fragment() {
             findNavController().navigate(R.id.action_homeFragment_to_newMedManualFragment)
         }
     }
-
-    // -------- Helpers --------
 
     private fun groupScheduleItems(scheduleList: List<ScheduleItem>): List<ScheduleListItem> {
         val grouped = mutableListOf<ScheduleListItem>()
