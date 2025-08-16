@@ -140,7 +140,7 @@ class ReminderDialogFragment(
                         clearSnoozeCount(requireContext(), schedule.scheduleId)
                     } else {
                         val count = getSnoozeCount(requireContext(), schedule.scheduleId)
-                        if (count < 1) {
+                        if (count < 2) {
                             increaseSnoozeCount(requireContext(), schedule.scheduleId)
                         } else {
                             snoozable = false
