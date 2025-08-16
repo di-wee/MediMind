@@ -29,7 +29,7 @@ public interface MedicationService {
 
     Boolean medicationExistsForPatient(UUID patientId, String medicationName);
 
-    // For OCR + NER integration
+    // For ML model integration
     ImageOutput sendToFastAPI(MultipartFile file) throws IOException;
     ResponseEntity<?> processEditMedication(EditMedicationRequest req);
 }

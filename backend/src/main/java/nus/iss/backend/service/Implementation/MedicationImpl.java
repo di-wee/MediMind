@@ -101,7 +101,7 @@ public class MedicationImpl implements MedicationService {
         return medicationRepo.save(medication);
     }
 
-
+    //ML model
     @Override
     public ImageOutput sendToFastAPI(MultipartFile file) throws IOException {
         HttpHeaders headers = new HttpHeaders();
@@ -113,7 +113,7 @@ public class MedicationImpl implements MedicationService {
         body.add("file", fileResource);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-        String fastapiUrl = "http://localhost:8000/api/medication/predict_image"; // Replace if needed
+        String fastapiUrl = "http://localhost:8000/api/medication/predict_image";
 
         ResponseEntity<String> response = restTemplate.postForEntity(fastapiUrl, requestEntity, String.class);
 
@@ -121,9 +121,9 @@ public class MedicationImpl implements MedicationService {
         JsonNode root = mapper.readTree(response.getBody());
 
         ImageOutput result = new ImageOutput();
-        result.setMedicationName(root.path("medicationName").asText(""));  // camelCase for consistency
+        result.setMedicationName(root.path("medicationName").asText(""));
         result.setIntakeQuantity(root.path("intakeQuantity").asText(""));
-        result.setFrequency(root.path("frequency").asInt());  // assuming Android expects int
+        result.setFrequency(root.path("frequency").asInt());
         result.setInstructions(root.path("instructions").asText(""));
         result.setNotes(root.path("notes").asText(""));
 
