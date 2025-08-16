@@ -6,5 +6,9 @@
         <domain includeSubdomains="true">172.20.10.2</domain>
         <domain includeSubdomains="true">54.255.65.62</domain>
         <domain includeSubdomains="true">47.130.114.135</domain>
+        <domain includeSubdomains="true">210.10.7.28</domain>
+        <domain includeSubdomains="true">3.0.180.110</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <domain includeSubdomains="true">172.20.10.3</domain>
     </domain-config>
 </network-security-config>

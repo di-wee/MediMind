@@ -212,16 +212,16 @@ public class PatientController {
     }
 
     @GetMapping("/patient/{patientId}/medList")
-    public ResponseEntity<List<Medication>> getMedListForPatient(@PathVariable UUID patientId) {
+    public ResponseEntity<?> getMedListForPatient(@PathVariable UUID patientId) {
         try {
             List<Medication> medicationList = patientService.getPatientMedications(patientId);
-            return new ResponseEntity<>(medicationList, HttpStatus.OK);
+            return ResponseEntity.ok(medicationList);
         } catch (ItemNotFound e) {
             logger.error("Patient not found: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
             logger.error("Error retrieving patient medication: {}", LogSanitizer.sanitizeForLog(e.getMessage()));
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error");
         }
     }
 

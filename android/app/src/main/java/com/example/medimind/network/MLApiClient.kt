@@ -7,12 +7,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object MLApiClient {
     // FastAPI endpoints for ML service
-    // For running locally
-    private const val EMULATOR_URL = "http://10.0.2.2:8000"
-    private const val DEVICE_URL = "http://192.168.1.3:8000"  // if using physical android device change to laptop IP on WiFi
-
-    // Change to this for running on EC2. Instance
-    //private const val EMULATOR_URL = "http://47.130.114.135:8000" // Works for both emulator and physical device
+    private const val EMULATOR_URL = "http://47.130.114.135:8000"
+    private const val DEVICE_URL = "http://192.168.1.3:8000" // Update this to your local IP address
+    
+    // For production/EC2 (commented out)
+    // private const val PRODUCTION_URL = "http://54.255.65.62:8000"
 
     private fun isEmulator(): Boolean {
         val fingerprint = android.os.Build.FINGERPRINT

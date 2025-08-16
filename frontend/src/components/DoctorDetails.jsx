@@ -4,6 +4,7 @@ import MediMindContext from '../context/MediMindContext.jsx';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid';
 import { API_BASE_URL } from '../utils/config';
 import ConfirmationModal from './ConfirmationModal.jsx';
+import LoadingSpinner from './LoadingSpinner.jsx';
 
 function DoctorDetails({ mcrNo }) {
 	const mediMindCtx = useContext(MediMindContext);
@@ -25,6 +26,7 @@ function DoctorDetails({ mcrNo }) {
 
 	const [newPassword, setNewPassword] = useState('');
 	const [clinicOptions, setClinicOptions] = useState([]);
+	const [clinicLoading, setClinicLoading] = useState(true);
 	const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 	const [originalClinic, setOriginalClinic] = useState(null);
 
@@ -169,6 +171,7 @@ function DoctorDetails({ mcrNo }) {
 	useEffect(() => {
 		const fetchAllClinic = async () => {
 			try {
+				setClinicLoading(true);
 				const response = await fetch(API_BASE_URL + 'api/web/all-clinics', {
 					method: 'GET',
 					headers: {
@@ -183,6 +186,8 @@ function DoctorDetails({ mcrNo }) {
 				setClinicOptions(clinicList);
 			} catch (error) {
 				console.error('Error loading clinics:', error);
+			} finally {
+				setClinicLoading(false);
 			}
 		};
 		fetchAllClinic();
@@ -247,34 +252,43 @@ function DoctorDetails({ mcrNo }) {
 						<div className='w-xl'>
 							<label className='form-label'>Practicing Clinic</label>
 							{isEditing ? (
-								<select
-									className='form-input'
-									name='clinicName'
-									value={doctorInfo.clinic?.id}
-									onChange={(e) => {
-										const selectedClinic = clinicOptions.find(
-											(c) => c.id === e.target.value
-										);
-										if (selectedClinic) {
-											setDoctorInfo((prev) => ({
-												...prev,
-												clinic: selectedClinic,
-											}));
-										}
-									}}>
-									<option
-										value=''
-										disabled>
-										-- Select Clinic --
-									</option>
-									{clinicOptions.map((clinic) => (
+								clinicLoading ? (
+									<div className='flex items-center justify-center h-10 bg-gray-100 rounded border'>
+										<LoadingSpinner
+											message='Loading clinics...'
+											size='small'
+										/>
+									</div>
+								) : (
+									<select
+										className='form-input'
+										name='clinicName'
+										value={doctorInfo.clinic?.id}
+										onChange={(e) => {
+											const selectedClinic = clinicOptions.find(
+												(c) => c.id === e.target.value
+											);
+											if (selectedClinic) {
+												setDoctorInfo((prev) => ({
+													...prev,
+													clinic: selectedClinic,
+												}));
+											}
+										}}>
 										<option
-											key={clinic.id}
-											value={clinic.id}>
-											{clinic.clinicName}
+											value=''
+											disabled>
+											-- Select Clinic --
 										</option>
-									))}
-								</select>
+										{clinicOptions.map((clinic) => (
+											<option
+												key={clinic.id}
+												value={clinic.id}>
+												{clinic.clinicName}
+											</option>
+										))}
+									</select>
+								)
 							) : (
 								<input
 									className={`form-editable ${!isEditing ? 'bg-gray-200' : ''}`}

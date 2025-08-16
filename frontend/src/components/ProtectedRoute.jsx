@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import MediMindContext from '../context/MediMindContext';
 import { API_BASE_URL } from '../utils/config';
+import LoadingSpinner from './LoadingSpinner';
 
 //wrapper component that will check if login is still valid before showing page
 function ProtectedRoute({ children }) {
@@ -40,7 +41,11 @@ function ProtectedRoute({ children }) {
 		console.log('Doctor details updated:', doctorDetails);
 	}, [doctorDetails]);
 	if (isChecking) {
-		return <div>Loading...</div>;
+		return (
+			<div className='h-screen w-full flex items-center justify-center bg-gray-50'>
+				<LoadingSpinner message='Loading Page...' />
+			</div>
+		);
 	}
 
 	if (!isLoggedIn) {

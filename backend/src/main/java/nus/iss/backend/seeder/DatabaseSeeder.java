@@ -66,12 +66,12 @@ public class DatabaseSeeder implements CommandLineRunner {
             return entityManager.createQuery("SELECT c FROM Clinic c", Clinic.class).getResultList();
         }
 
-        // Define clinics with their email domains
+        // Define clinic names and their corresponding email domains
         Map<String, String> clinicData = Map.of(
                 "Raffles Medical Clinic", "rafflesmedical.com",
-                "Healthway Medical Centre", "healthway.com.sg",
+                "Healthway Medical Centre", "healthway.com",
                 "Parkway Shenton Clinic", "parkwayshenton.com",
-                "OneCare Family Clinic", "onecare.com.sg",
+                "OneCare Family Clinic", "onecare.com",
                 "Fullerton Health Clinic", "fullertonhealth.com"
         );
 
@@ -135,7 +135,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .filter(d -> d.getClinic().equals(clinic))
                     .toList();
 
-            // Generate 100 patients per clinic
             for (int i = 0; i < 100; i++) {
                 Patient patient = new Patient();
                 String firstName = faker.name().firstName();
@@ -161,6 +160,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 patient.setNric("S" + faker.number().numberBetween(1000000, 9999999) + faker.letterify("?").toUpperCase());
                 patient.setGender(random.nextBoolean() ? "Male" : "Female");
 
+
+
                 // convert to LocalDate to remove time
                 LocalDate dob = faker.date().birthday(60, 90)// age 60-90
                         .toInstant()
@@ -180,10 +181,8 @@ public class DatabaseSeeder implements CommandLineRunner {
 
                 entityManager.persist(patient);
                 patients.add(patient);
-            }
             
-            System.out.println("Added 100 patients to clinic: " + clinic.getClinicName() + 
-                              " (50 assigned, 50 unassigned)");
+            }
         }
         return patients;
     }
@@ -295,62 +294,48 @@ public class DatabaseSeeder implements CommandLineRunner {
         );
 
         for (Patient patient : patients) {
-            // Create a list of available medications for this patient
+            // Collect all intake logs for this patient; mark taken=true first
+            List<IntakeHistory> patientLogs = new ArrayList<>();
+
+            // Per-patient meds
             List<String> availableMeds = new ArrayList<>(commonMeds);
-            Set<String> usedActiveMeds = new HashSet<>(); // Track active medications to avoid duplicates
-            
+            Set<String> usedActiveMeds = new HashSet<>();
+
             for (int i = 0; i < 10; i++) { // 10 meds per patient
                 Medication med = new Medication();
-                
-                // Select a medication name, ensuring no duplicate active medications
-                String medName;
+
+                // Pick a medication name (avoid duplicate active meds by name)
                 if (availableMeds.isEmpty()) {
-                    // If we've used all medications, reset the list but avoid duplicates with active meds
                     availableMeds = new ArrayList<>(commonMeds);
                     availableMeds.removeAll(usedActiveMeds);
-                    if (availableMeds.isEmpty()) {
-                        // If still empty, just use any medication (this shouldn't happen with 10 meds and 10 common meds)
-                        availableMeds = new ArrayList<>(commonMeds);
-                    }
+                    if (availableMeds.isEmpty()) availableMeds = new ArrayList<>(commonMeds);
                 }
-                
-                medName = availableMeds.get(random.nextInt(availableMeds.size()));
-                availableMeds.remove(medName); // Remove from available list to avoid duplicates
+                String medName = availableMeds.remove(random.nextInt(availableMeds.size()));
                 med.setMedicationName(medName);
 
-                int quantity = random.nextInt(2) + 1; // 1-2 tablets
+                int quantity = random.nextInt(2) + 1; // 1–2 tablets
                 med.setIntakeQuantity(quantity + " tablet" + (quantity > 1 ? "s" : ""));
 
-                int frequency = random.nextInt(3) + 1;
+                int frequency = random.nextInt(3) + 1; // 1–3 times/day
                 med.setFrequency(frequency);
 
-                //  optional timing
-                med.setTiming(random.nextInt(100) < 70 ?
-                        (random.nextBoolean() ? "Every morning" : "Every night")
+                med.setTiming(random.nextInt(100) < 70
+                        ? (random.nextBoolean() ? "Every morning" : "Every night")
                         : null);
 
-                // assign realistic instructions and notes from map
                 med.setInstructions(getRandomItem(instructionsMap.getOrDefault(medName, List.of("Follow doctor's advice."))));
                 med.setNotes(getRandomItem(notesMap.getOrDefault(medName, List.of("No special notes."))));
-                
-                // Set medication as active or inactive, ensuring no duplicate active medications
+
                 boolean isActive = random.nextBoolean();
-                if (isActive && usedActiveMeds.contains(medName)) {
-                    // If this medication is already active for this patient, make it inactive
-                    isActive = false;
-                }
+                if (isActive && usedActiveMeds.contains(medName)) isActive = false;
                 med.setActive(isActive);
-                
-                // Track active medications to avoid duplicates
-                if (isActive) {
-                    usedActiveMeds.add(medName);
-                }
+                if (isActive) usedActiveMeds.add(medName);
 
                 entityManager.persist(med);
                 patient.getMedications().add(med);
                 med.getPatients().add(patient);
 
-                // generate realistic schedule times
+                // Build medTimes based on frequency
                 List<LocalTime> medTimes = new ArrayList<>();
                 if (frequency == 1) {
                     medTimes.add(possibleTimes.get(random.nextInt(possibleTimes.size())));
@@ -358,24 +343,25 @@ public class DatabaseSeeder implements CommandLineRunner {
                     medTimes.add(morningTime);
                     medTimes.add(eveningTime);
                 } else {
-                    medTimes.addAll(possibleTimes);
+                    medTimes.addAll(possibleTimes); // 3/day
                 }
 
+                // Track schedules for this med to ensure at least one active
+                List<Schedule> schedulesForMed = new ArrayList<>();
+                boolean producedLogsForMed = false;
 
                 for (LocalTime time : medTimes) {
-                    // schedule
                     Schedule schedule = new Schedule();
                     schedule.setPatient(patient);
                     schedule.setMedication(med);
                     schedule.setScheduledTime(time);
-
                     schedule.setIsActive(random.nextInt(100) < 80); // 80% active, 20% inactive
-                    schedule.setCreationDate(LocalDateTime.now().minusDays(random.nextInt(30))); // created within last 30 days
-
+                    schedule.setCreationDate(LocalDateTime.now().minusDays(random.nextInt(30)));
                     entityManager.persist(schedule);
+                    schedulesForMed.add(schedule);
 
-                    // intake logs for first 20 days of current month
-                    if (med.isActive()) {
+                    // Create logs (mark taken=true first; we'll flip to missed later)
+                    if (med.isActive() && Boolean.TRUE.equals(schedule.getIsActive())) {
                         for (int day = 0; day < 20; day++) {
                             LocalDate logDate = firstDayOfMonth.plusDays(day);
                             if (logDate.isAfter(today)) break;
@@ -384,17 +370,74 @@ public class DatabaseSeeder implements CommandLineRunner {
                             log.setPatient(patient);
                             log.setSchedule(schedule);
                             log.setLoggedDate(logDate);
-                            log.setTaken(random.nextInt(100) < 80); // 80% adherence
+                            log.setTaken(true);
                             log.setDoctorNote(null);
 
                             entityManager.persist(log);
+                            patientLogs.add(log);
+                            producedLogsForMed = true;
                         }
                     }
                 }
+
+                // ---- Guarantee: active medication must have some logs ----
+                if (med.isActive() && !producedLogsForMed) {
+                    // Ensure at least one active schedule exists
+                    Schedule chosen;
+                    if (schedulesForMed.isEmpty()) {
+                        // Safety net: create a schedule if somehow none exist
+                        chosen = new Schedule();
+                        chosen.setPatient(patient);
+                        chosen.setMedication(med);
+                        chosen.setScheduledTime(morningTime);
+                        chosen.setIsActive(true);
+                        chosen.setCreationDate(LocalDateTime.now().minusDays(random.nextInt(30)));
+                        entityManager.persist(chosen);
+                        schedulesForMed.add(chosen);
+                    } else {
+                        // Pick first schedule and force it active
+                        chosen = schedulesForMed.get(0);
+                        if (Boolean.FALSE.equals(chosen.getIsActive())) {
+                            chosen.setIsActive(true);
+                            entityManager.merge(chosen);
+                        }
+                    }
+
+                    // Create logs for that forced-active schedule
+                    for (int day = 0; day < 20; day++) {
+                        LocalDate logDate = firstDayOfMonth.plusDays(day);
+                        if (logDate.isAfter(today)) break;
+
+                        IntakeHistory log = new IntakeHistory();
+                        log.setPatient(patient);
+                        log.setSchedule(chosen);
+                        log.setLoggedDate(logDate);
+                        log.setTaken(true);
+                        log.setDoctorNote(null);
+
+                        entityManager.persist(log);
+                        patientLogs.add(log);
+                    }
+                }
+            } // end meds loop
+
+            // ---- Enforce per-patient adherence target (70%–100%) ----
+            int totalLogs = patientLogs.size();
+            if (totalLogs > 0) {
+                float target = 0.7f + random.nextFloat() * 0.3f; // 70–100%
+                int misses = Math.round(totalLogs * (1.0f - target));
+
+                Collections.shuffle(patientLogs, random);
+                for (int i = 0; i < misses; i++) {
+                    patientLogs.get(i).setTaken(false);
+                    // entityManager.merge(patientLogs.get(i)); // only if needed
+                }
             }
+
             entityManager.merge(patient);
         }
     }
+
 
     // helper generic function to select a random item from a list
     private <T> T getRandomItem(List<T> list) {
@@ -404,5 +447,3 @@ public class DatabaseSeeder implements CommandLineRunner {
 
 
 }
-
-
