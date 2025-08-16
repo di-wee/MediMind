@@ -95,16 +95,17 @@ The frontend will be available at: http://localhost:5173
 ### Python Dependencies
 ```bash
 cd ml
+py -3.10 -m venv 310venv
+310venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
 ### Running the ML Server
 ```bash
-cd ml
-python app.py
+python -m uvicorn app:app --reload
 ```
 
-The ML server will be available at: http://localhost:5000
+The ML server will be available at: http://localhost:8000
 
 ## 4. Android App Setup
 

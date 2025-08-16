@@ -1,6 +1,7 @@
 {
-    "medicationName": "loratadine",
+    "medicationName": "adezio",
     "intakeQuantity": 1,
-    "frequency": 1,
-    "instructions": "every morning when needed with or without food"
+    "frequency": 0,
+    "instructions": "use",
+    "notes": "itch sneezing"
 }
