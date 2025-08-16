@@ -89,7 +89,7 @@ object ReminderUtils {
         )
 
         val request = OneTimeWorkRequestBuilder<ReminderWorker>()
-            .setInitialDelay(10, TimeUnit.SECONDS)
+            .setInitialDelay(5, TimeUnit.MINUTES)
             .setInputData(inputData)
             .build()
 
