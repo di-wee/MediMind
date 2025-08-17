@@ -32,6 +32,22 @@ jobs:
         uses: actions/checkout@v4
 
       # ---------------------
+      # Set up Java 21 for backend build
+      # ---------------------
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Verify Java setup
+        run: |
+          echo "Java version: $(java -version 2>&1)"
+          echo "JAVA_HOME: $JAVA_HOME"
+          echo "Maven version: $(mvn -version 2>&1)"
+
+      # ---------------------
       # CodeQL Analysis
       # ---------------------
       - name: Init CodeQL
@@ -45,7 +61,18 @@ jobs:
         working-directory: ./backend
         run: |
           if [ -f "pom.xml" ]; then
-            mvn clean compile -DskipTests
+            echo "Java version: $(java -version 2>&1 | head -n 1)"
+            echo "Maven version: $(mvn -version 2>&1 | head -n 1)"
+            echo "Current directory: $(pwd)"
+            echo "Files in current directory:"
+            ls -la
+            echo "Attempting Maven build..."
+            mvn clean compile -DskipTests || {
+              echo "❌ Maven build failed"
+              echo "Trying with verbose output..."
+              mvn clean compile -DskipTests -X
+              exit 1
+            }
             echo "✅ Java build completed"
           else
             echo "⚠️  No pom.xml found in backend directory"

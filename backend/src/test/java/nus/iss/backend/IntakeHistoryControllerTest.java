@@ -127,7 +127,7 @@ class IntakeHistoryControllerTest {
     void createMedicationLog_success() throws Exception {
         IntakeReqMobile req = new IntakeReqMobile();
         req.setPatientId(UUID.randomUUID());
-        req.setScheduleId(UUID.randomUUID());
+        req.setMedicationId(UUID.randomUUID());
         req.setLoggedDate("2024-06-01");
         req.setIsTaken(true);
 
@@ -141,7 +141,7 @@ class IntakeHistoryControllerTest {
     void createMedicationLog_serverError() throws Exception {
         IntakeReqMobile req = new IntakeReqMobile();
         req.setPatientId(UUID.randomUUID());
-        req.setScheduleId(UUID.randomUUID());
+        req.setMedicationId(UUID.randomUUID());
         req.setLoggedDate("2024-06-01");
         req.setIsTaken(true);
 

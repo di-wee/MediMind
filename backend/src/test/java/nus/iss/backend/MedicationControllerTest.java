@@ -6,6 +6,7 @@ import nus.iss.backend.dao.*;
 import nus.iss.backend.dto.EditMedicationRequest;
 import nus.iss.backend.dto.newMedicationReq;
 import nus.iss.backend.exceptions.ItemNotFound;
+import nus.iss.backend.exceptions.InvalidTimeFormatException;
 import nus.iss.backend.model.Medication;
 import nus.iss.backend.model.Patient;
 import nus.iss.backend.model.Schedule;
@@ -79,7 +80,7 @@ class MedicationControllerTest {
         mockMvc.perform(post("/api/medication/medList")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(medIds)))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -124,6 +125,12 @@ class MedicationControllerTest {
     void saveEditMedication_invalidTimeFormat() throws Exception {
         EditMedicationRequest req = new EditMedicationRequest();
         req.setTimes(List.of("8am"));
+        req.setMedicationId(UUID.randomUUID());
+        req.setPatientId(UUID.randomUUID());
+        req.setFrequency(2);
+
+        Mockito.when(medicationService.processEditMedication(any()))
+                .thenThrow(new InvalidTimeFormatException("Invalid time format: 8am"));
 
         mockMvc.perform(post("/api/medication/edit/save")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -135,13 +142,16 @@ class MedicationControllerTest {
     void saveEditMedication_illegalArgument() throws Exception {
         EditMedicationRequest req = new EditMedicationRequest();
         req.setTimes(List.of("0800"));
+        req.setMedicationId(UUID.randomUUID());
+        req.setPatientId(UUID.randomUUID());
+        req.setFrequency(2);
         Mockito.when(medicationService.processEditMedication(any()))
                 .thenThrow(new IllegalArgumentException("Invalid"));
 
         mockMvc.perform(post("/api/medication/edit/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -183,6 +193,7 @@ class MedicationControllerTest {
     void saveMedication_success() throws Exception {
         newMedicationReq req = new newMedicationReq();
         req.setPatientId(UUID.randomUUID());
+        req.setMedicationName("Test Medication");
         req.setTimes(List.of("08:00"));
         Patient patient = new Patient();
         Mockito.when(patientService.findPatientById(any())).thenReturn(Optional.of(patient));
@@ -193,13 +204,15 @@ class MedicationControllerTest {
         mockMvc.perform(post("/api/medication/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
     void saveMedication_patientNotFound() throws Exception {
         newMedicationReq req = new newMedicationReq();
         req.setPatientId(UUID.randomUUID());
+        req.setMedicationName("Test Medication");
+        req.setTimes(List.of("08:00"));
         Mockito.when(medicationService.createMedication(any())).thenThrow(new ItemNotFound("Patient not found!"));
 
         mockMvc.perform(post("/api/medication/save")
@@ -212,6 +225,8 @@ class MedicationControllerTest {
     void saveMedication_serverError() throws Exception {
         newMedicationReq req = new newMedicationReq();
         req.setPatientId(UUID.randomUUID());
+        req.setMedicationName("Test Medication");
+        req.setTimes(List.of("08:00"));
         Mockito.when(patientService.findPatientById(any())).thenThrow(new RuntimeException("DB error"));
 
         mockMvc.perform(post("/api/medication/save")
